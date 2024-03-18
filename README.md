@@ -24,6 +24,7 @@ Output -  I am generating a dataframe with question, answer of LLM ( paper name)
 
  I'm taking responses from Step 2: Model with basic instruction prompt and evaluating the LLM model using the [ragas](https://github.com/explodinggradients/ragas) evaluation tool. Uses `gpt-3.5` ad default model for evaluation.
 
-# Evaluation Technique 2: # Evaluation Technique 2: RAG using Phoenix  https://docs.arize.com/phoenix/evaluation/running-pre-tested-evals/retrieval-rag-relevance
+# Evaluation Technique 2: # Evaluation Technique 2: RAG using Phoenix 
+https://docs.arize.com/phoenix/evaluation/running-pre-tested-evals/retrieval-rag-relevance
 
 
