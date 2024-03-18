@@ -1,0 +1,1791 @@
+Kernelized Reinforcement Learning with Order
+Optimal Regret Bounds
+Sattar Vakili
+MediaTek Research
+Cambridge, UK
+sattar.vakili@mtkresearch.comJulia Olkhovskaya
+TU Delft∗
+Delft, Netherlands
+julia.olkhovskaya@gmail.com
+Abstract
+Reinforcement learning (RL) has shown empirical success in various real world
+settings with complex models and large state-action spaces. The existing analytical
+results, however, typically focus on settings with a small number of state-actions or
+simple models such as linearly modeled state-action value functions. To derive RL
+policies that efficiently handle large state-action spaces with more general value
+functions, some recent works have considered nonlinear function approximation
+using kernel ridge regression. We propose π-KRVI, an optimistic modification of
+least-squares value iteration, when the state-action value function is represented by
+a reproducing kernel Hilbert space (RKHS). We prove the first order-optimal regret
+guarantees under a general setting. Our results show a significant polynomial in
+the number of episodes improvement over the state of the art. In particular, with
+highly non-smooth kernels (such as Neural Tangent kernel or some Matérn kernels)
+the existing results lead to trivial (superlinear in the number of episodes) regret
+bounds. We show a sublinear regret bound that is order optimal in the case of
+Matérn kernels where a lower bound on regret is known.
+1 Introduction
+Reinforcement learning (RL) in real world often has to deal with large state action spaces and complex
+unknown models. While RL policies using complex function approximations have been empirically
+effective in various fields including gaming (Silver et al., 2016; Lee et al., 2018; Vinyals et al., 2019),
+autonomous driving (Kahn et al., 2017), microchip design (Mirhoseini et al., 2021), robot control
+(Kalashnikov et al., 2018), and algorithm search (Fawzi et al., 2022), little is known about theoretical
+performance guarantees in such settings. The analysis of RL algorithms has predominantly focused
+on simpler cases such as tabular or linear Markov decision processes (MDPs). In a tabular setting,
+a regret bound of ˜O(p
+H3|S × A| T)has been shown for optimistic state-action value learning
+algorithms (e.g., see, Jin et al., 2018), where His the length of episodes, Tis the number of episodes,
+andSandAare finite state and action spaces. This bound does not scale well when the size of
+state-action space grows large. Furthermore, when the model (the state-action value function or the
+transitions) admits a d-dimensional linear representation in some state-action features, a regret bound
+of˜O(√
+H3d3T)is established (Jin et al., 2020), that scales with the dimension of the linear model
+rather than the cardinality of the state-action space.
+Several recent studies have explored the utilization of complex models with large state-action spaces.
+A very general model entails representing the state-action value function using a reproducing kernel
+Hilbert space (RKHS). This approach allows using kernel ridge regression to obtain confidence
+intervals, which facilitate the design and analysis of RL algorithms. The most significant contribution
+∗Work was done when the author was affiliated with Vrije Universiteit Amsterdam.
+37th Conference on Neural Information Processing Systems (NeurIPS 2023).arXiv:2306.07745v3  [cs.LG]  14 Mar 2024to this general RL problem is Yang et al. (2020a),2that provides regret guarantees for an optimistic
+least-squares value iteration (LSVI) algorithm, referred to as kernel optimistic least-squares value
+iteration (KOVI). The main assumption is that the state-action value function can be represented
+using the RKHS of a known kernel k. The regret bounds reported in Yang et al. (2020a) scale as
+˜O
+H2p
+(Γ(T) + log N(ϵ)) Γ(T)T
+, with ϵ=H
+T, where Γ(T)andN(ϵ)are two kernel related
+complexity terms, respectively, referred to as maximum information gain and ϵ-covering number of
+the class of state-action value functions. The definitions are given in Section 4. Both complexity
+terms are determined using the spectrum of the kernel. While for smooth kernels, characterized by
+exponentially decaying Mercer eigenvalues, such as Squared Exponential kernel, Γ(T)andlogN(H
+T)
+are logarithmic in T, for more general kernels with greater representation capacity, these terms may
+grow polynomially in T, possibly making the regret bound trivial (superlinear).
+To have a better understanding of the existing result, let {σm>0}∞
+m=1denote the Mercer eigenvalues
+of the kernel kin a decreasing order. Also, let {ϕm}∞
+m=1denote the corresponding eigenfeatures.
+Refer to Section 2.2 for details. The kernel kis said to have a polynomial eigendecay when σmdecay
+at least as fast as m−pfor some p >1. The polynomial eigendecay profile satisfies for many kernels
+of practical and theoretical interest such as Matérn family of kernels (Borovitskiy et al., 2020) and
+the Neural Tangent (NT) kernel (Arora et al., 2019). For a Matérn kernel with smoothness parameter
+νon ad-dimensional domain, p=2ν+d
+d(e.g., see, Janz et al., 2020). For a NT kernel with s−1
+times differentiable activations, p=2s−1+d
+d(Vakili et al., 2021b). In Yang et al. (2020a), the regret
+bound is specialized for the class of kernels with polynomially decaying eigenvalues, by bounding
+the complexity terms based on the kernel spectrum. However, the reported regret bound is sublinear
+inTonly when the kernel eigenvalues decay very fast. In particular, let ˜p=p(1−2η), where for
+η≥0,ση
+mϕmis uniformly bounded. Then, Yang et al. (2020a), Corollary 4.4reports a regret bound
+of˜O(Tξ∗+κ∗+1
+2), with
+κ∗= max {ξ∗,2d+p+ 1
+(d+p)(˜p−1),2
+˜p−3}, ξ∗=d+ 1
+2(p+d). (1)
+The regret bound ˜O(Tξ∗+κ∗+1
+2)is sublinear only when pand˜pare sufficiently large. That, at least,
+requires 2ξ∗<1
+2, implying p > d + 2, when ˜pis also sufficiently large. For instance, for Matérn
+kernels, this requirement can be expressed as ν >d(d+1)
+2, when(2ν+d)(1−2η)
+dis sufficiently large.
+Special case of bandits. A similar issue existed in the simpler problem of kernelized bandits,
+corresponding to the special case where H= 1,|S|= 1. Specifically, the ˜O(Γ(T)√
+T)regret
+bounds reported for optimistic sampling (Srinivas et al., 2010a, GP-UCB), as well as for Thompson
+sampling (Chowdhury and Gopalan, 2017, GP-TS) are also trivial (superlinear) when Γ(T)grows
+faster than√
+T. It remains an open problem whether the suboptimal performance guarantees for
+these two algorithms is a fundamental shortcoming or an artifact of the proof. This observation is
+formalized as an open problem on the online confidence intervals for RKHS elements in Vakili et al.
+(2021d). For the kernelized bandits problem, Scarlett et al. (2017) proved lower bounds on regret in
+the case of Matérn family of kernels. In particular, they proved an Ω(Tν+d
+2ν+d)lower bound on regret
+of any bandit algorithm. Several recent algorithms, different from GP-UCB and GP-TS, have been
+developed to alleviate the suboptimal and superlinear regret bounds in kernelized bandits and obtain
+an˜O(p
+Γ(T)T)regret bound (Li and Scarlett, 2022; Salgia et al., 2021), that matches the lower
+bound in the case of the Matérn family of kernels, up to logarithmic factors. The Supvariations of
+the UCB algorithms also obtain the optimal regret bound in the contextual kernel bandit setting with
+finite actions (Valko et al., 2013).
+Main contribution. The RL setting presents a greater level of complexity compared to the bandit
+setting due to the Markovian dynamics. None of the solutions in Li and Scarlett (2022); Salgia et al.
+(2021); Valko et al. (2013) seem appropriate in the presence of MDP dynamics, thereby leaving the
+question of order optimal regret bounds largely open. In this work, we leverage the scaling of the
+kernel spectrum with the size of the domain to improve the regret bounds. We consider kernels with
+polynomial eigendecay on a hypercubical domain with side length ρ, where eigenvalues scale with
+ραfor some α >0. See Definition 1. This encompasses a large class of common kernels, including
+the Matérn family, for which, α= 2ν. The hypercube domain assumption is a technical formality
+2Also, see the extended version on arXiv (Yang et al., 2020b).
+2that can be relaxed to other regular compact subsets of Rd. In Section 3, we propose a domain
+partitioning kernel ridge regression based least-squares value iteration policy ( π-KRVI) that achieves
+sublinear regret of ˜O(H2Td+α/2
+d+α)for kernels introduced in Definition 1. This is the first sublinear
+regret bound under such a general stetting. Moreover, with Matérn kernels, our regret bound matches
+theΩ(Tν+d
+2ν+d)lower bound reported in in Scarlett et al. (2017) for the special case of kernelized
+bandits, up to a logarithmic factor.
+Our proposed policy, π-KRVI, is based on least-squares value iteration (similar to KOVI, Yang et al.
+(2020a)). However, in order to effectively utilize the confidence intervals from kernel ridge regression,
+π-KRVI creates a partitioning of the state-action domain and builds the confidence intervals only
+based on the observations within the same partition element. The domain partitioning allows us to
+leverage the scaling of the kernel eigenvalues with respect to the domain size. The inspiration for
+this idea is drawn from π-GP-UCB algorithm introduced in Janz et al. (2020) for kernelized bandits.
+In comparison to Janz et al. (2020), π-KRVI and its analysis present greater complexity due to the
+Markovian dynamics in the MDP setting. Furthermore, we provide a finer analysis that significantly
+improves the results compared to Janz et al. (2020). Although Janz et al. (2020) obtained sublinear
+regret guarantees of ˜O(T2ν+d(2d+3)
+4ν+d(2d+4))in the kernelized bandit setting with Matérn kernel, there still
+remained a polynomial in Tgap between their regret bounds and the lower bound reported in Scarlett
+et al. (2017). As a consequence of our results, we also close this gap.
+There are several novel contributions in our analysis that lead to the improved and order optimal
+regret bounds. We establish confidence intervals for kernel ridge regression that apply uniformly to all
+functions in the state-action value function class (Theorem 1). A similar confidence interval was given
+in Yang et al. (2020a). We however provide flexibility with respect to setting the parameters of the
+confidence interval, that eventually contributes to the improved regret bounds, with a proper choice
+of parameters. We also derive bounds on the maximum information gain (Lemma 2) and the function
+class covering number (Lemma 3), taking into consideration the size of the state-action domain.
+These bounds are important for the analysis of our domain partitioning policy which effectively
+controls the number of observations utilized in kernel ridge regression by partitioning the domain
+into subdomains of diminishing size. These intermediate results may also be of general interest in
+similar problems.
+Theπ-KRVI policy enjoys an efficient runtime, polynomial in T, and linear in |A|, similar to the
+runtime of KOVI (Yang et al., 2020a). The dependency of the runtime on |A|limits the scope of the
+policy to finite A, while allowing a continuous S(with|S|infinite). The assumption of finite Acan
+be relaxed, provided there is an efficient optimizer of a certain state-action value function. See the
+details in Section 3.2.
+Other related work. There is an extensive literature on the analysis of RL policies which do not
+rely on a generative model or an exploratory behavioral policy. The literature has primarily focused
+on the tabular setting (Jin et al., 2018; Auer et al., 2008; Bartlett and Tewari, 2012). The domain of
+potential applications for this setting is very limited, as in many real world problems, the state-action
+space is very large or even infinite. In response to this, recent literature has placed a notable emphasis
+on employing function approximation in RL, particularly within the context of generalized linear
+settings. This approach involves representing the value function or transition model through a linear
+transformation to a well-defined feature mapping. Important contributions include the work of
+Jin et al. (2020); Yao et al. (2014), as well as subsequent studies by Russo (2019); Zanette et al.
+(2020a,b); Neu and Pike-Burke (2020); Yang and Wang (2020). Furthermore, there have been several
+efforts to extend these techniques to a kernelized setting, as explored in Yang et al. (2020a); Yang
+and Wang (2020); Chowdhury and Gopalan (2019); Yang et al. (2020c); Domingues et al. (2021).
+These works are also inspired by methods originally designed for linear bandits (Abbasi-Yadkori
+et al., 2011; Agrawal and Goyal, 2013), as well as kernelized bandits (Srinivas et al., 2010b; Valko
+et al., 2013; Chowdhury and Gopalan, 2017). However, all known regret bounds in the RL setting
+(Yang et al., 2020a; Yang and Wang, 2020; Chowdhury and Gopalan, 2019; Yang et al., 2020c;
+Domingues et al., 2021) are not order optimal. We compare our regret bounds with the state of the
+art reported in Yang et al. (2020a). A similar issue existed for classic kernelized bandit algorithms.
+A detailed discussion can be found in Vakili et al. (2021d). The authors in Yang and Wang (2020)
+considered finite state-actions under a kernelized MDP model where the transition model can be
+directly estimated. That is different from the setting considered in our work and Yang et al. (2020a).
+32 Preliminaries and Problem Formulation
+In this section, we overview the background on episodic MDPs and kernel ridge regression.
+2.1 Episodic Markov Decision Processes
+An episodic MDP can be described by the tuple M= (S,A, H, P, r ), where Sis the state space, A
+is the action space, the integer His the length of each episode, r={rh}H
+h=1are the reward functions
+andP={Ph}H
+h=1are the transition probability distributions.2We use the notation Z=S × A to
+denote the state-action space. For each h∈[H], the reward rh:Z → [0,1]is the reward function at
+steph, which is supposed to be deterministic for simplicity, and Ph(·|s, a)is the transition probability
+distribution on Sfor the next state from state-action pair (s, a). The choice of deterministic rewards
+allows us to concentrate on the core complexities of the problem, and should not be regarded as a
+limitation. Both the framework and results can be readily extended to a setting with random rewards.
+A policy π={πh}H
+h=1, at each step h, determines the (possibly random) action πh:S → A taken
+by the agent at state s. At the beginning of each episode t= 1,2,···, the environment picks an
+arbitrary state st
+1. The agent determines a policy πt={πt
+h}H
+h=1. Then, at each step h∈[H], the
+agent observes the state st
+h∈ S, picks an action at
+h=πt
+h(st
+h)and observes the reward rh(st
+h, at
+h).
+The new state st
+h+1then is drawn from the transition distribution Ph(·|st
+h, at
+h). The episode ends
+when the agent receives the final reward rH(st
+H, at
+H).
+The goal is to find a policy πthat maximizes the expected total reward in the episode, starting at step
+h, i.e., the value function defined as
+Vπ
+h(s) =E"HX
+h′=hrh′(sh′, ah′)sh=s#
+,∀s∈ S, h∈[H], (2)
+where the expectation is taken with respect to the randomness in the trajectory {(sh, ah)}H
+h=1
+obtained by the policy π. It can be shown that under mild assumptions (e.g., continuity of Ph,
+compactness of Z, and boundedness of r) there exists an optimal policy π⋆which attains the
+maximum possible value of Vπ
+h(s)at every step and at every state (e.g., see, Puterman, 2014). We
+use the notation V⋆
+h(s) = max πVπ
+h(s),∀s∈ S, h∈[H]. By definition Vπ⋆
+h=V⋆
+h. For a value
+function V:S → [0, H], we define the following notation
+[PhV](s, a) :=Es′∼Ph(·|s,a)[V(s′)]. (3)
+We also define the state-action value function Qπ
+h:Z → [0, H]as follows.
+Qπ
+h(s, a) =Eπ"HX
+h′=hrh′(sh′, ah′)sh=s, ah=a#
+, (4)
+where the expectation is taken with respect to the randomness in the trajectory {(sh, ah)}H
+h=1obtained
+by the policy π. The Bellman equation associated with a policy πthen is represented as
+Qπ
+h(s, a) =rh(s, a) + [PhVπ
+h+1](s, a), Vπ
+h(s) =Eπ[Qπ
+h(s, πh(s))], Vπ
+H+1:= 0, (5)
+where the expectation is taken with respect to the randomness in the policy π. The Bellman op-
+timality equation is also given as Q⋆
+h(s, a) =rh(s, a) + [PhV⋆
+h+1](s, a), V⋆
+h(s) = max aQ⋆
+h(s, a),
+V⋆
+H+1:= 0 . The performance of a policy πtis measured in terms of the loss in the value function,
+referred to as regret , denoted by R(T)in the following definition
+R(T) =TX
+t=1(V⋆
+1(st
+1)−Vπt
+1(st
+1)). (6)
+Recall that πtis the policy executed by the agent at episode t, where st
+1is the initial state in that
+episode determined by the environment.
+2We intentionally do note use the standard term transition kernel for Ph, to avoid confusion with the term
+kernel in kernel-based learning.
+42.2 Kernel Ridge Regression
+We assume that the state-action value functions belong to a known reproducing kernel Hilbert
+space (RKHS). See Assumption 1 and Lemma 1 for the formal statement. This is a very general
+assumption, considering that the RKHS of common kernels can approximate almost all continuous
+functions on the compact subsets of Rd(Srinivas et al., 2010a). Consider a positive definite kernel
+k:Z × Z → R. LetHkbe the RKHS induced by k, where Hkcontains a family of functions
+defined on Z. Let⟨·,·⟩Hk:Hk× H k→Rand∥ · ∥Hk:Hk→Rdenote the inner product and
+the norm of Hk, respectively. The reproducing property implies that for all f∈ H k, and z∈ Z,
+⟨f, K(·, z)⟩Hk=f(z). Without loss of generality, we assume k(z, z)≤1for all z. Mercer theorem
+implies, under certain mild conditions, kcan be represented using an infinite dimensional feature
+map:
+k(z, z′) =∞X
+m=1σmϕm(z)ϕm(z′), (7)
+where σm>0, and√σmϕm∈ H kform an orthonormal basis of Hk. In particular, any f∈ H kcan
+be represented using this basis and wights wm∈Ras
+f=∞X
+m=1wm√σmϕm, (8)
+where ∥f∥2
+Hk=P∞
+m=1w2
+m. A formal statement and the details are provided in Appendix A. We
+refer to σmandϕmas (Mercer) eigenvalues and eigenfeatures of k, respectively.
+Kernel-based models provide powerful predictors and uncertainty estimators which can be leveraged
+to guide the RL algorithm. In particular, consider a fixed unknown function f∈ H k. Consider a set
+Zt={zi}t
+i=1⊂ Z oftinputs. Assume tnoisy observations {Y(zi) =f(zi) +εi}t
+i=1are provided,
+where εiare independent zero mean noise terms. Kernel ridge regression provides the following
+predictor and uncertainty estimate, respectively (see, e.g., Schölkopf et al., 2002),
+µt,f(z) = k⊤
+Zt(z)(KZt+λ2It)−1YZt,
+(bt(z))2=k(z, z)−k⊤
+Zt(z)(KZt+λ2I)−1kZt(z), (9)
+where kZt(z) = [ k(z, z1), . . . , k (z, zt)]⊤is at×1vector of the kernel values between zand
+observations, KZt= [k(zi, zj)]t
+i,j=1is the t×tkernel matrix, YZt= [Y(z1), . . . , Y (Zt)]⊤is the
+t×1observation vector, Iis the identity matrix of dimensions t, and λ >0is a free regularization
+parameter. The predictor and uncertainty estimate could be interpreted as posterior mean and variance
+of a surrogate centered Gaussian process (GP) model with covariance k, and zero mean Gaussian
+noise with variance λ2(e.g., see, Williams and Rasmussen, 2006).
+2.3 Technical Assumption
+We assume that the reward functions {rh}H
+h=1and the transition probability distributions Ph(s′|·,·)
+belong to the 1-ball of the RKHS. We use the notation Bk,R={f:∥f∥Hk≤R}to denote the
+R-ball of the RKHS.
+Assumption 1 We assume
+rh(·,·), Ph(s′|·,·)∈ Bk,1,∀h∈[H],∀s′∈ S. (10)
+This is a mild assumption considering the generality of RKHSs, that is also supposed to hold
+in Yang et al. (2020a). Similar assumptions are made in linear MDPs which are significantly more
+restrictive (e.g., see, Jin et al., 2020).
+An immediate consequence of Assumption 1 is that for any integrable V:S → [0, H],rh+
+[PhVh+1]∈ Bk,H+1. This is formalized in the following lemma.
+Lemma 1 Consider any integrable V:S → [0, H]. Under Assumption 1, we have
+rh+ [PhV]∈ Bk,H+1. (11)
+See (Yeh et al., 2023, Lemma 3) for a proof.
+53 Domain Partitioning Least-Squares Value Iteration Policy
+A standard policy in episodic MDPs is the least-squares value iteration (LSVI), which computes
+an estimate bQt
+hforQ⋆
+hat each step hof episode t, by recursively applying Bellman equation as
+discussed in the previous section. In addition, an exploration bonus term bt
+h:Z →Ris typically
+added leading to
+Qt
+h= min {bQt
+h+βbt
+h, H−h+ 1}. (12)
+The term bQt
+h+βbt
+his an upper confidence bound on the state-action value function, that is inspired
+by the principle of optimism in the face of uncertainty . Since the rewards are assumed to be at most 1,
+the state-action value function at step his also bounded by H−h+ 1. In episode t, then πtis the
+greedy policy with respect to Qt={Qt
+h}H
+h=1. Under Assumption 1, the estimate bQt
+h, the parameter
+βand the exploration bonus bt
+hcan all be designed using kernel ridge regression. Specifically, having
+the Bellman equation in mind, bQt
+his the (kernel ridge) predictor for rh+ [PhVt
+h+1]using (possibly
+some of) the past t−1observations {rh(zτ
+h) +Vt
+h+1(sτ
+h+1)}t−1
+τ=1at points {zτ
+h}t−1
+τ=1. Recall that
+E
+rh(zτ
+h) +Vt
+h+1(sτ
+h+1)
+=rh(zτ
+h) + [PhVt
+h+1](zτ
+h),where the expectation is taken with respect
+toPh(·|zτ
+h). The observation noise Vt
+h+1(sτ
+h+1)−[PhVt
+h+1](zτ
+h)is due to random transitions and is
+bounded by H−h≤H.
+3.1 Domain Partitioning
+To overcome the suboptimal performance guarantees rooted in the online confidence intervals in
+kernel ridge regression, we introduce domain partitioning kernel ridge regression based least-squares
+value iteration ( π-KRVI). The proposed policy partitions the state-action space Zinto subdomains
+and builds kernel ridge regression only based on the observations within each subdomain. By doing
+so, we obtain tighter confidence intervals, ultimately resulting in a tighter regret bound. To formalize
+this procedure, we consider the state-action space Z ⊂ [0,1]d. LetSt
+h,h∈[H], t∈[T]be sets of
+hypercubes overlapping only at edges, covering the entire [0,1]d. For any hypercube Z′∈ St
+h, we
+useρZ′to denote the length of any of its sides, and Nt
+h(Z′)to denote the number of observations at
+stephinZ′up to episode t:
+Nt
+h(Z′) =tX
+τ=11{(sτ
+h, aτ
+h)∈ Z′}. (13)
+For all h∈[H], we initialize S1
+h={[0,1]d}. At each episode t, for each step h, after observing
+a sample from rh+ [PhVt
+h+1]at(st
+h, at
+h), we construct a new cover St
+has follows. We divide
+every element Z′∈ St−1
+hthat satisfies ρ−α
+Z′<|Nt
+h(Z′)|+ 1, into two equal halves along each
+side, generating 2dhypercubes. The parameter α >0in the splitting rule is a constant specified in
+Definition 1. Subsequently, we define St
+has the set of newly created hypercubes and the elements of
+St−1
+hthat were not split.
+The construction of the cover sets described above ensures the number Nt
+h(Z′)of observations within
+each cover element Z′remains relatively small with respect to the size of Z′, while also controlling
+the total number |St
+h|of cover elements. The key parameter managing this tradeoff is α, which is
+carefully chosen to achieve an appropriate width for the confidence interval, as shown in Section 4.
+3.2 π-KRVI
+Our proposed policy, π-KRVI, is derived by adopting the precise structure of an optimistic LSVI, as
+described previously, where the predictor and the exploration bonus are designed based on kernel
+ridge regression only on cover elements. In particular, for z∈ Z, letZt
+h(z)∈ St
+hbe the cover
+element at step hof episode tcontaining z. Define Zt
+h(z) ={(sτ
+h, aτ
+h)∈ Zt
+h(z), τ < t }to be the set
+of past observations belonging to the same cover element as z. We then set
+bQt
+h(z) =k⊤
+Zt
+h(z)(z)(KZt
+h(z)+λ2I)−1YZt
+h(z), (14)
+where kZt
+h(z)= [k(z, z′)]⊤
+z′∈Zt
+h(z)is the kernel values between zand all observations z′inZt
+h(z),
+KZt
+h(z)= [k(z′, z′′)]z′,z′′∈Zt
+h(z)is the kernel matrix for observations in Zt
+h(z), and YZt
+h(z)=
+6[rh(z′)+Vt
+h+1(s′
+h+1)]⊤
+z′∈Zt
+h(z), where s′
+h+1is drawn from the transition distribution Ph(·|z′), denotes
+the observation values for the observation points z′∈Zt
+h(z). The vectors kZt
+h(z)andYZt
+h(z)are
+Nt−1
+h(Zt
+h(z))dimensional column vectors, and KZt
+h(z)andIareNt−1
+h(Zt
+h(z))×Nt−1
+h(Zt
+h(z))
+dimensional matrices.
+The exploration bonus is determined based on the uncertainty estimate of the kernel ridge regression
+model on cover elements defined as
+bt
+h(z) =
+k(z, z)−k⊤
+Zt
+h(z)(z)(KZt
+h(z)+λ2I)−1kZt
+h(z)(z)1
+2. (15)
+The policy π-KRVI then is the greedy policy with respect to
+Qt
+h(z) = min {bQt
+h(z) +βT(δ)bt
+h(z), H−h+ 1}. (16)
+Specifically, at step hof episode t, the following action is chosen, after observing st
+h,
+at
+h=arg max
+a∈AQt
+h(st
+h, a). (17)
+A pseudocode is provided in Algorithm 1.
+Algorithm 1 Theπ-KRVI Policy.
+1:Input: λ,βT(δ),k,M= (S,A, H, P, r ).
+2:For all h∈[H], letS1
+h={[0,1]d}.
+3:forEpisode t= 1,2, . . . , T ,do
+4: Receive the initial state st
+1.
+5: SetVt
+H+1(s) = 0 , for all s.
+6: forsteph=H, . . . , 1do
+7: Obtain value functions Qt
+h(z)as in (16).
+8: end for
+9: forsteph= 1,2, . . . , H do
+10: Take action at
+h←arg maxa∈AQt
+h(st
+h, a).
+11: Observe the reward rh(st
+h, at
+h)and the next state st
+h+1.
+12: Split any element Z′∈ St−1
+h, for which ρ−α
+Z′<|Nt
+h(Z′)|+ 1along the middle of each
+side, and obtain St
+h.
+13: end for
+14:end for
+The predictor bQt
+h, the confidence interval width multiplier βT(δ)and the exploration bonus bt
+hare
+all designed using kernel ridge regression limited to the observations within cover elements given
+above. The parameter βT(δ), in particular, is designed in a way that Qt
+his a1−δupper confidence
+bound on rh+ [PhVt
+h+1]. Using Theorem 1 on the confidence intervals, we show that a choice of
+βT(δ) = Θ( Hq
+log(TH
+δ))satisfies this requirement.
+Figure 1 demonstrates the domain partitioning used in π-KRVI on a 2-dimensional domain. The
+colors represent the value of the target function. The observation points are expected to concentrate
+around the areas where the target function has a high value. As a result the domain is partitioned to
+smaller squares in that region.
+Runtime complexity. Theπ-KRVI policy is also runtime efficient with a polynomial runtime
+complexity. In particular, an upper bound on the runtime of π-KRVI is O(HT4+H|A|T3), that
+is similar to KOVI (Yang et al., 2020a). However, analogous to (Janz et al., 2020), we expect an
+improved runtime for π-KRVI in practice. In addition, the runtime can further improve in terms of T,
+utilizing sparse approximations of kernel ridge predictor and uncertainty estimate (e.g., see, Vakili
+et al., 2022). The dependency of the runtime on |A|is due to the step given in Equation (17). If this
+optimization can be done efficiently over continuous domains, π-KRVI (also KOVI) could handle
+infinite number of actions. The assumption that the upper confidence bound index can be efficiently
+optimized over continuous domains is often made in the kernelized bandits (e.g., see, Srinivas et al.,
+2010a).
+7Figure 1: A 2-dimensional domain partitioned into smaller squares.
+4 Main Results and Regret Analysis
+In this section, we present our main results. In Theorem 2, we establish an ˜O(H2Td+α/2
+d+α)regret
+bound for π-KRVI, for the class of kernels with polynomial eigendecay. We first prove bounds
+on maximum information gain and covering number of state-action value function class. Those
+enable us to present our uniform confidence interval for state-action value functions (Theorem 1),
+and subsequently the regret bound (Theorem 2).
+Definition 1 (Polynomial Eigendecay) Consider the Mercer eigenvalues {σm}∞
+m=1ofk:Z×Z →
+R, given in Equation (7), in a decreasing order, as well as the corresponding eigenfeatures {ϕm}∞
+m=1.
+Assume Zis ad-dimensional hypercube with side length ρZ. For some Cp, α > 0, p > 1, the kernel k
+is said to have a polynomial eigendecay, if for all m∈N,σm≤Cpm−pρα
+Z. In addition, for some
+η≥0,m−pηϕm(z)is uniformly bounded over all mandz. We use the notation ˜p=p(1−2η).
+The polynomial eigendecay profile encompasses a large class of common kernels, e.g., the Matérn
+family of kernels. For a Matérn kernel with smoothness parameter ν,p=2ν+d
+dandα= 2ν(e.g.,
+see, Janz et al., 2020). Another example is the NT kernel (Arora et al., 2019). It has been shown
+that the RKHS of the NT kernel, when the activations are s−1times differentiable, is equivalent
+to the RKHS of a Matérn kernel with smoothness ν=s−1
+2(Vakili et al., 2021b). For instance,
+the RKHS of an NT kernel with ReLU activations is equivalent to the RKHS of a Matérn kernel
+withν=1
+2(also known as the Laplace kernel). In this case, p= 1 +1
+dandα= 1. The hypercube
+domain assumption is a technical formality that can be relaxed to other regular compact subsets of Rd.
+The uniform boundedness of m−pηϕm(z)for some η >0, also holds for a broad class of kernels,
+including the Matérn family, as discussed in (Yang et al., 2020a). Several works including (Vakili
+et al., 2021b; Kassraie and Krause, 2022), have employed an averaging technique over subsets of
+eigenfeatures, demonstrating that, for the bounds on information gain, the effective value of ηcan be
+considered as 0in the case of Matérn and NT kernels.
+4.1 Confidence Intervals for State-Action Value Functions
+Confidence intervals are an important building block in the design and analysis of bandit and RL
+algorithms. For a fixed function fin the RKHS of a known kernel, 1−δconfidence intervals of the
+form|f(z)−µt,f(z)| ≤β(δ)bt(z)are established in several works (Srinivas et al., 2010a; Chowdhury
+and Gopalan, 2017; Abbasi-Yadkori, 2013; Vakili et al., 2021a) under various assumptions. In our
+setting of interest, however, these confidence intervals cannot be directly applied. This is due to the
+randomness of the target function itself. Specifically, in our case, the target function is rh+[PhVt
+h+1],
+which is not a fixed function due to the temporal dependence within an episode. An argument based
+on the covering number of the state-action value function class was used in Yang et al. (2020a)
+to establish uniform confidence intervals over all z∈ Z and all fin a specific function class. In
+Theorem 1, we prove a different confidence interval that offers flexibility with respect to setting the
+parameters of the confidence interval. Our approach leads to a more refined confidence interval,
+8which, with a proper choice of parameters, contributes to the improved regret bound achieved by our
+policy.
+We first give a formal definition of the two complexity terms: maximum information gain and the
+covering number of the state-action value function class, which appear in our confidence intervals.
+Definition 2 (Maximum Information Gain) In the kernel ridge regression setting described in
+Section 2.2, the following quantity is referred to as maximum information gain: Γk,λ(t) =
+max Zt⊂Z1
+2logdet(I+1
+λ2KZt).
+Upper bounds on maximum information gain based on the spectrum of the kernel are established
+in Janz et al. (2020); Srinivas et al. (2010a); Vakili et al. (2021c). Maximum information gain is closely
+related to the effective dimension of the kernel. While the feature representation of common kernels
+is infinite dimensional, with a finite observation set, only a finite number of features have a significant
+impact on kernel ridge regression, that is referred to as the effective dimension. It has been shown
+that information gain and effective dimension are the same up to logarithmic factors (Calandriello
+et al., 2019). This observation offers an intuitive understanding of information gain.
+State-action value function class: Let us use Qk,h(R, B)to denote the class of state-action value
+functions. In particular for a set of observations Z, letbh(z)be the uncertainty estimate obtained
+from kernel ridge regression as given in (9). We define
+Qk,h(R, B) =
+Q:Q(z) = min {Q0(z) +βbh(z), H−h+ 1},∥Q0∥Hk≤R, β≤B,|Z| ≤T	
+.
+(18)
+Definition 3 (Covering Set and Number) Consider a function class F. For ϵ >0, we define the
+minimum ϵ-covering set C(ϵ)as the smallest subset of Fthat covers it up to an ϵerror in l∞norm.
+That is to say, for all f∈ F, there exists a g∈ C(ϵ), such that ∥f−g∥l∞≤ϵ. We refer to the size of
+C(ϵ)as the ϵ-covering number.
+We use the notation Nk,h(ϵ;R, B)to denote the ϵ-covering number of Qk,h(R, B), that appears in
+the confidence interval.
+In Lemmas 2 and 3, we establish bounds on Γk,λ(t)andNk,h(ϵ;R, B), respectively.
+Lemma 2 (Maximum information gain) Consider a positive definite kernel k:Z × Z → R, with
+polynomial eigendecay on a hypercube with side length ρZ. The maximum information gain given in
+Definition 2 satisfies
+Γk,λ(T) =O
+T1
+˜p(log(T))1−1
+˜pρα
+˜p
+Z
+.
+Lemma 3 (Covering Number of Qk,h(R, B))Recall the class of state-action value functions
+Qk,h(R, B), where k:Z × Z → Rsatisfies the polynomial eigendecay on a hypercube with
+side length ρZ. We have
+logNk,h(ϵ;R, B) =O R2ρα
+Z
+ϵ21
+˜p−1
+1 + logR
+ϵ
++B2ρα
+Z
+ϵ22
+˜p−1
+1 + logB
+ϵ!
+.
+Our bound on maximum information gain is stronger than the ones presented in Yang et al. (2020a);
+Janz et al. (2020); Srinivas et al. (2010a) and is similar to the one given in Vakili et al. (2021c), in
+terms of dependency on T. Our bound on function class covering number is similar to the one given
+in Yang et al. (2020a), in terms of dependency on T. Both Lemmas 2 and 3 given in this work are,
+however, novel in terms of dependency on the domain size ρZ, and are required for the analysis of
+our domain partitioning algorithm.
+We next present the confidence interval. Proofs are given in the appendix.
+Theorem 1 (Confidence Interval) LetbQt
+handbt
+hdenote the kernel ridge predictor and uncertainty
+estimate of rh+ [PhVt
+h+1], using tobservations {Vt
+h+1(sτ
+h+1)}t
+τ=1atZt
+h={zτ
+h}t
+τ=1⊂ Z, where
+sτ
+h+1is the next state drawn from Ph(·|zτ
+h). LetRT=H+ 1 +H
+2λq
+2(Γk,λ(T) + 1 + log(2
+δ)). For
+ϵ, δ∈(0,1), with probability, at least 1−δ, we have, ∀z∈ Z, h∈[H]andt∈[T],
+|rh(z) + [PhVt
+h+1](z)−bQt
+h(z)| ≤βt
+h(δ, ϵ)bt
+h(z) +ϵ,
+9where βt
+h(δ, ϵ)is set to any value satisfying
+βt
+h(δ, ϵ)≥H+ 1 +H√
+2s
+Γk,λ(t) + log Nk,h(ϵ;RT, βt
+h(δ, ϵ)) + 1 + log2TH
+δ
++3√
+tϵ
+λ.(19)
+4.2 Regret of π-KRVI
+A key step in the analysis of π-KRVI is to apply the confidence interval in Theorem 1 to a subdomain
+Z′∈ St
+h. By design of the splitting rule, we can prove that the maximum information gain
+corresponding to Z′satisfies Γk,λ(NT
+h(Z′)) =O(log(T)). In addition, we choose ϵ=H√
+log(TH
+δ)√
+Nt
+h(Z′),
+when applying the confidence interval at step hof episode ton this subdomain. That ensures
+logNk,h(ϵ;RNT
+h(Z′), βt
+h(δ, ϵ)) =O(log(T)). From these, and by applying a probability union
+bound over all subdomains Z′created in π-KRVI, we can deduce that the choice of βT(δ) =
+Θ(Hq
+log(TH
+δ))with a sufficiently large constant, satisfies the requirements for confidence interval
+widths based on Theorem 1. The details are provided in the proof of Theorem 2 in Appendix D.
+Then, using standard tools from the analysis of optimistic LSVI algorithms, we arrive at the following
+regret bound.
+Theorem 2 (Regret of π-KRVI) Consider the π-KRVI policy described in Section 3.2, with
+βT(δ) = Θ( Hq
+log(TH
+δ))with a sufficiently large constant implied in the Θnotation. Under
+Assumption 1, for kernels given in Definition 1, with probability at least 1−δ, the regret of π-KRVI
+satisfies
+R(T) =O 
+H2Td+α/2
+d+αlog(T)s
+logH
+δ!
+. (20)
+The regret bound of π-KRVI presented in Theorem 2 is sublinear in Twhen α >0, in contrast to
+the state of the art regret bound in Yang et al. (2020a). The Onotation used in the expression above
+hides constants that depend on p, αandd. See Appendix D for more details. When specialized to the
+Matérn family of kernels, replacing p=2ν+d
+dandα= 2ν, the regret bound becomes
+R(T) =O 
+H2Tν+d
+2ν+dlog(T)s
+logH
+δ!
+. (21)
+In terms of Tscaling, this matches the lower bound for the special case of kernelized bandits (Scarlett
+et al., 2017), up to a log(T)factor.
+5 Conclusion
+The analysis of RL algorithms has predominantly focused on simple settings such as tabular or
+linear MDPs. Several recent studies have considered more general models, including representing
+the state-action value functions using RKHSs. Notably, the work in Yang et al. (2020a) derives
+regret bounds for an optimistic LSVI policy. However, the regret bounds in Yang et al. (2020a) are
+sublinear only when the eigenvalues of the kernel decay rapidly. In this work, we leveraged a domain
+partitioning technique, a uniform confidence interval for state-action value functions, and bounds
+on complexity terms based on the domain size to propose π-KRVI, which attains a sublinear regret
+bound for a general class of kernels. Moreover, our regret bounds match the lower bound derived for
+Matérn kernels in the special case of kernelized bandits, up to logarithmic factors. It remains an open
+problem whether the suboptimal regret bounds in the case of standard optimistic LSVI policies (such
+as KOVI, Yang et al., 2020a) represent a fundamental shortcoming or an artifact of the proof.
+Funding Disclosure
+This work was funded by MediaTek Research.
+10References
+Abbasi-Yadkori, Y . (2013). Online learning for linearly parametrized control problems. PhD Thesis,
+University of Alberta .
+Abbasi-Yadkori, Y ., Pál, D., and Szepesvári, C. (2011). Improved algorithms for linear stochastic
+bandits. Advances in Neural Information Processing Systems , 24.
+Agrawal, S. and Goyal, N. (2013). Thompson sampling for contextual bandits with linear payoffs. In
+International conference on machine learning , pages 127–135. PMLR.
+Arora, S., Du, S. S., Hu, W., Li, Z., Salakhutdinov, R. R., and Wang, R. (2019). On exact computation
+with an infinitely wide neural net. Advances in neural information processing systems , 32.
+Auer, P., Jaksch, T., and Ortner, R. (2008). Near-optimal regret bounds for reinforcement learning. In
+Koller, D., Schuurmans, D., Bengio, Y ., and Bottou, L., editors, Advances in Neural Information
+Processing Systems , volume 21. Curran Associates, Inc.
+Bartlett, P. L. and Tewari, A. (2012). REGAL: A regularization based algorithm for reinforcement
+learning in weakly communicating mdps. CoRR , abs/1205.2661.
+Borovitskiy, V ., Terenin, A., Mostowsky, P., et al. (2020). Matérn Gaussian processes on Riemannian
+manifolds. In Advances in Neural Information Processing Systems , volume 33, pages 12426–
+12437.
+Calandriello, D., Carratino, L., Lazaric, A., Valko, M., and Rosasco, L. (2019). Gaussian process
+optimization with adaptive sketching: scalable and no regret. In Proceedings of the Thirty-Second
+Conference on Learning Theory , volume 99 of Proceedings of Machine Learning Research ,
+Phoenix, USA. PMLR.
+Chowdhury, S. R. and Gopalan, A. (2017). On kernelized multi-armed bandits. In International
+Conference on Machine Learning , pages 844–853. PMLR.
+Chowdhury, S. R. and Gopalan, A. (2019). Online learning in kernelized Markov decision processes.
+InThe 22nd International Conference on Artificial Intelligence and Statistics , pages 3197–3205.
+PMLR.
+Christmann, A. and Steinwart, I. (2008). Support Vector Machines . Springer New York, NY .
+Domingues, O. D., Ménard, P., Pirotta, M., Kaufmann, E., and Valko, M. (2021). Kernel-based
+reinforcement learning: A finite-time analysis. In International Conference on Machine Learning ,
+pages 2783–2792. PMLR.
+Fawzi, A., Balog, M., Huang, A., Hubert, T., Romera-Paredes, B., Barekatain, M., Novikov, A.,
+R Ruiz, F. J., Schrittwieser, J., Swirszcz, G., et al. (2022). Discovering faster matrix multiplication
+algorithms with reinforcement learning. Nature , 610(7930):47–53.
+Hoeffding, W. (1994). Probability inequalities for sums of bounded random variables. The collected
+works of Wassily Hoeffding , pages 409–426.
+Janz, D., Burt, D., and González, J. (2020). Bandit optimisation of functions in the Matérn kernel
+RKHS. In International Conference on Artificial Intelligence and Statistics , pages 2486–2495.
+PMLR.
+Jin, C., Allen-Zhu, Z., Bubeck, S., and Jordan, M. I. (2018). Is Q-learning provably efficient?
+Advances in neural information processing systems , 31.
+Jin, C., Yang, Z., Wang, Z., and Jordan, M. I. (2020). Provably efficient reinforcement learning with
+linear function approximation. In Conference on Learning Theory , pages 2137–2143. PMLR.
+Kahn, G., Villaflor, A., Pong, V ., Abbeel, P., and Levine, S. (2017). Uncertainty-aware reinforcement
+learning for collision avoidance. arXiv preprint arXiv:1702.01182 .
+Kalashnikov, D., Irpan, A., Pastor, P., Ibarz, J., Herzog, A., Jang, E., Quillen, D., Holly, E., Kalakr-
+ishnan, M., Vanhoucke, V ., et al. (2018). Scalable deep reinforcement learning for vision-based
+robotic manipulation. In Conference on Robot Learning , pages 651–673. PMLR.
+11Kassraie, P. and Krause, A. (2022). Neural contextual bandits without regret. In International
+Conference on Artificial Intelligence and Statistics , pages 240–278. PMLR.
+Lee, K., Kim, S.-A., Choi, J., and Lee, S.-W. (2018). Deep reinforcement learning in continuous
+action spaces: a case study in the game of simulated curling. In International Conference on
+Machine Learning, , pages 2937–2946. PMLR.
+Li, Z. and Scarlett, J. (2022). Gaussian process bandit optimization with few batches. In International
+Conference on Artificial Intelligence and Statistics .
+Mercer, J. (1909). Functions of positive and negative type, and their connection with the theory of
+integral equations. Philosophical Transactions of the Royal Society of London. Series A, Containing
+Papers of a Mathematical or Physical Character , 209:415–446.
+Mirhoseini, A., Goldie, A., Yazgan, M., Jiang, J. W., Songhori, E., Wang, S., Lee, Y .-J., Johnson, E.,
+Pathak, O., Nazi, A., et al. (2021). A graph placement methodology for fast chip design. Nature ,
+594(7862):207–212.
+Neu, G. and Pike-Burke, C. (2020). A unifying view of optimism in episodic reinforcement learning.
+Advances in Neural Information Processing Systems , 33:1392–1403.
+Pozrikidis, C. (2014). An introduction to grids, graphs, and networks . Oxford University Press.
+Puterman, M. L. (2014). Markov decision processes: discrete stochastic dynamic programming . John
+Wiley & Sons.
+Russo, D. (2019). Worst-case regret bounds for exploration via randomized value functions. Advances
+in Neural Information Processing Systems , 32.
+Salgia, S., Vakili, S., and Zhao, Q. (2021). A domain-shrinking based Bayesian optimization
+algorithm with order-optimal regret performance. Conference on Neural Information Processing
+Systems , 34.
+Scarlett, J., Bogunovic, I., and Cevher, V . (2017). Lower bounds on regret for noisy Gaussian process
+bandit optimization. In Conference on Learning Theory , pages 1723–1742. PMLR.
+Schölkopf, B., Smola, A. J., Bach, F., et al. (2002). Learning with kernels: support vector machines,
+regularization, optimization, and beyond . MIT press.
+Silver, D., Huang, A., Maddison, C. J., Guez, A., Sifre, L., Van Den Driessche, G., Schrittwieser, J.,
+Antonoglou, I., Panneershelvam, V ., Lanctot, M., et al. (2016). Mastering the game of Go with
+deep neural networks and tree search. Nature , 529(7587):484–489.
+Srinivas, N., Krause, A., Kakade, S., and Seeger, M. (2010a). Gaussian process optimization in the
+bandit setting: No regret and experimental design. In ICML 2010 - Proceedings, 27th International
+Conference on Machine Learning , pages 1015–1022.
+Srinivas, N., Krause, A., Kakade, S., and Seeger, M. (2010b). Gaussian process optimization in
+the bandit setting: no regret and experimental design. In Proceedings of the 27th International
+Conference on International Conference on Machine Learning , pages 1015–1022.
+Vakili, S., Bouziani, N., Jalali, S., Bernacchia, A., and Shiu, D.-s. (2021a). Optimal order simple
+regret for Gaussian process bandits. Advances in Neural Information Processing Systems , 34:21202–
+21215.
+Vakili, S., Bromberg, M., Garcia, J., Shiu, D.-s., and Bernacchia, A. (2021b). Uniform generalization
+bounds for overparameterized neural networks. arXiv preprint arXiv:2109.06099 .
+Vakili, S., Khezeli, K., and Picheny, V . (2021c). On information gain and regret bounds in Gaussian
+process bandits. In International Conference on Artificial Intelligence and Statistics , pages 82–90.
+PMLR.
+Vakili, S., Scarlett, J., and Javidi, T. (2021d). Open problem: Tight online confidence intervals for
+RKHS elements. In Conference on Learning Theory , pages 4647–4652. PMLR.
+12Vakili, S., Scarlett, J., Shiu, D.-s., and Bernacchia, A. (2022). Improved convergence rates for
+sparse approximation methods in kernel-based learning. In International Conference on Machine
+Learning , pages 21960–21983. PMLR.
+Valko, M., Korda, N., Munos, R., Flaounas, I., and Cristianini, N. (2013). Finite-time analysis of
+kernelised contextual bandits. In Uncertainty in Artificial Intelligence .
+Vinyals, O., Babuschkin, I., Czarnecki, W. M., Mathieu, M., Dudzik, A., Chung, J., Choi, D. H.,
+Powell, R., Ewalds, T., Georgiev, P., et al. (2019). Grandmaster level in starcraft II using multi-agent
+reinforcement learning. Nature , 575(7782):350–354.
+Williams, C. K. and Rasmussen, C. E. (2006). Gaussian processes for machine learning . MIT press
+Cambridge, MA.
+Yang, L. and Wang, M. (2020). Reinforcement learning in feature space: Matrix bandit, kernels, and
+regret bound. In International Conference on Machine Learning , pages 10746–10756. PMLR.
+Yang, Z., Jin, C., Wang, Z., Wang, M., and Jordan, M. (2020a). Provably efficient reinforcement learn-
+ing with kernel and neural function approximations. Advances in Neural Information Processing
+Systems , 33:13903–13916.
+Yang, Z., Jin, C., Wang, Z., Wang, M., and Jordan, M. I. (2020b). On function approximation in rein-
+forcement learning: Optimism in the face of large state spaces. arXiv preprint arXiv:2011.04622 .
+Yang, Z., Jin, C., Wang, Z., Wang, M., and Jordan, M. I. (2020c). On function approximation in rein-
+forcement learning: Optimism in the face of large state spaces. arXiv preprint arXiv:2011.04622 .
+Yao, H., Szepesvári, C., Pires, B. A., and Zhang, X. (2014). Pseudo-MDPs and factored linear
+action models. In 2014 IEEE Symposium on Adaptive Dynamic Programming and Reinforcement
+Learning (ADPRL) , pages 1–9. IEEE.
+Yeh, S.-Y ., Chang, F.-C., Yueh, C.-W., Wu, P.-Y ., Bernacchia, A., and Vakili, S. (2023). Sample
+complexity of kernel-based q-learning. In International Conference on Artificial Intelligence and
+Statistics , pages 453–469. PMLR.
+Zanette, A., Brandfonbrener, D., Brunskill, E., Pirotta, M., and Lazaric, A. (2020a). Frequentist regret
+bounds for randomized least-squares value iteration. In International Conference on Artificial
+Intelligence and Statistics , pages 1954–1964. PMLR.
+Zanette, A., Lazaric, A., Kochenderfer, M., and Brunskill, E. (2020b). Learning near optimal policies
+with low inherent Bellman error. In III, H. D. and Singh, A., editors, Proceedings of the 37th
+International Conference on Machine Learning , volume 119 of Proceedings of Machine Learning
+Research , pages 10978–10989. PMLR.
+13A Mercer Theorem and the RKHSs
+Mercer theorem (Mercer, 1909) provides a representation of the kernel in terms of an infinite
+dimensional feature map (e.g., see, Christmann and Steinwart, 2008, Theorem 4.49). Let Zbe a
+compact metric space and µbe a finite Borel measure on Z(we consider Lebesgue measure in a
+Euclidean space). Let L2
+µ(Z)be the set of square-integrable functions on Zwith respect to µ. We
+further say a kernel is square-integrable ifZ
+ZZ
+Zk2(z, z′)dµ(z)dµ(z′)<∞.
+Theorem 3 (Mercer Theorem) Let Zbe a compact metric space and µbe a finite Borel measure
+onZ. Let kbe a continuous and square-integrable kernel, inducing an integral operator Tk:
+L2
+µ(Z)→L2
+µ(Z)defined by
+(Tkf) (·) =Z
+Zk(·, z′)f(z′)dµ(z′),
+where f∈L2
+µ(Z). Then, there exists a sequence of eigenvalue-eigenfeature pairs {(σm, ϕm)}∞
+m=1
+such that σm>0, andTkϕm=σmϕm, form≥1. Moreover, the kernel function can be represented
+as
+k(z, z′) =∞X
+m=1σmϕm(z)ϕm(z′),
+where the convergence of the series holds uniformly on Z × Z .
+According to the Mercer representation theorem (e.g., see, Christmann and Steinwart, 2008, Theorem
+4.51), the RKHS induced by kcan consequently be represented in terms of {(σm, ϕm)}∞
+m=1.
+Theorem 4 (Mercer Representation Theorem) Let {(σm, ϕm)}∞
+i=1be the Mercer eigenvalue eigen-
+feature pairs. Then, the RKHS of kis given by
+Hk=(
+f(·) =∞X
+m=1wmσ1
+2mϕm(·) :wm∈R,∥f∥2
+Hk:=∞X
+m=1w2
+m<∞)
+.
+Mercer representation theorem indicates that the scaled eigenfeatures {√σmϕm}∞
+m=1form an or-
+thonormal basis for Hk.
+B Proof of Theorem 1 (Confidence Interval)
+Confidence bounds of the form given in Theorem 1 have been established for a fixed function fwith
+bounded RKHS norm and sub-Gaussian observation noise in several works including Abbasi-Yadkori
+(2013); Chowdhury and Gopalan (2017); Vakili et al. (2021a). In the RL setting, however, we apply
+the confidence interval to f=rh+ [PhVt
+h+1]. Although the RKHS norm of this target function is
+bounded by H+ 1, this is not a fixed function as it depends on Vt
+h+1. In addition the observation
+noise terms Vh+1(st
+h+1)−[PhVt
+h+1](st
+h, at
+h)also depend on Vt
+h+1. To handle this setting, we prove
+a confidence interval that holds for all possible Vt
+h+1:S → [0, H]. For this purpose, we use a
+probability union bound and a covering set argument over the function class of Vt
+h+1.
+We first recall the confidence interval for a fixed function and noise sequence given in (Chowdhury
+and Gopalan, 2017, Theorem 2). See also (Abbasi-Yadkori, 2013, Corollary 3.15).
+Lemma 4 Let{zt∈ Z}T
+t=1be a stochastic process predictable with respect to the filtration {Ft}T
+t=0.
+Let{εt}T
+t=1be a real valued Ftmeasurable stochastic process with a σsub-Gaussian distribution
+conditioned on Ft−1. Let µt,fandbtbe the kernel ridge predictor and uncertainty estimate of f
+using tnoisy observations of the form {f(zτ) +ετ}t
+τ=1. Assume f∈ Bk,R.Then with probability at
+least1−δ, for all z∈ Z andt≥1,
+|f(z)−µt,f(z)| ≤β1bt(z), (22)
+where β1=R+σq
+2(Γk,λ(t) + 1 + log(1
+δ)).
+14As discussed above, we cannot directly use this confidence interval on rh+ [PhVt
+h+1]in the RL
+setting. Instead, we need to prove a new confidence interval that holds true for all possible Vt
+h+1. We
+thus define Vto be the function class of Vt
+h+1as follows.
+Vk,h(R, B) ={V:V(s) = max
+a∈AQ(s, a),for some Q∈ Qk,h(R, B)}. (23)
+For simplicity of presentation, we specify the parameters RandBlater.
+LetCV
+k,h(ϵ;R, B)be the smallest ϵ-covering set of Vk,h(R, B)in terms of l∞norm. That is to
+say for all V∈ V k,h(R, B), there exists some V∈ CV
+k,h(ϵ;R, B)such that ∥V−V∥l∞≤ϵ.
+LetNV
+k,h(ϵ;R, B)denote the ϵcovering number of Vk,h(R, B). By definition NV
+k,h(ϵ;R, B) =
+|CV
+k,h(ϵ;R, B)|.
+We can create a confidence bound for all V∈ CV
+k,h(ϵ;R, B), using Lemma 4 and a probability union
+bound over CV
+k,h(ϵ;R, B). Fixh∈[H]andt∈[T]. Let us use the notationbQt
+for the kernel ridge
+predictor with V. That isbQt
+(z) =k⊤
+Zt(z)(KZt+λ2I)−1Y, where Y⊤= [V(sτ
+h+1)]t
+τ=1, andsτ
+h+1
+is the next state drawn randomly from probability distribution Ph(·|zτ
+h). In addition, to simplify
+the notation, we use g=rh+ [PhV]andµt,g=bQt
+. Also, let bt(z) = ( k(z, z)−k⊤
+Zt(z)(KZt+
+λ2I)−1kZt(z))1
+2. Then, we have, with probability at least 1−δ, for all V∈ CV
+k,h(ϵ;R, B)and for
+allz∈ Z,
+|g(z)−µt,g(z)| ≤β2bt(z), (24)
+where β2=H+ 1 +H√
+2q
+Γk,λ(t) + log NV
+k,h(ϵ;R, B) + 1 + log(1
+δ).
+Confidence interval (24) is a direct application of Lemma 4 and using a probability union bound over
+allV∈ CV
+k,h(ϵ;R, B). Note that, ∥rh+PhV∥Hk≤H+ 1(Lemma 1). In addition, V(sτ
+h+1)−
+[PhV](zτ
+h)∈[0, H]for all handτ. A bounded random variable in [0, H]is aH/2sub-Gaussian
+random variable based on Hoeffding inequality (Hoeffding, 1994).
+Now, we extend the uniform confidence interval over all V∈ CV
+k,h(ϵ;R, B)to a uniform confidence
+interval over all V∈ Vk,h(R, B). For some V∈ Vk,h(R, B), define f=rh+[PhV]andµt,f=bQt,
+similar to gandµt,g. By definition of CV
+k,h(ϵ;R, B), there exists V∈ CV
+k,h(ϵ;R, B), such that
+∥V−V∥l∞≤ϵ. Thus, for all z∈ Z,
+f(z)−g(z) = [PV](z)−[PV](z)≤sup
+s∈S|V(s)−V(s)| ≤ϵ. (25)
+Therefore, with probability at least 1−δ,
+|f(z)−µt,f(z)| ≤ | f(z)−g(z)|+|g(z)−µt,g(z)|+|µt,g(z)−µt,f(z)|
+≤β2bt(z) +ϵ+|µt,g(z)−µt,f(z)|. (26)
+Next, we prove that |µt,f(z)−µt,g(z)| ≤3ϵ√
+tbt(z)
+λ.
+Let us further simplify the notation by introducing αt(z) = (KZt+λ2I)−1kZt(z),F⊤
+t= [f(zτ
+h)]t
+τ=1,
+E⊤
+t= [ετ=V(sτ
+h+1)−[PhV](zτ
+h)]t
+τ=1,G⊤
+t= [g(zτ
+h)]t
+τ=1,E⊤
+t= [¯ετ=V(sτ
+h+1)−[PhV](zτ
+h)]t
+τ=1
+so that µt,f(z) =α⊤(z)(Ft+Et)andµt,g(z) =α⊤(z)(Gt+Et).
+As discussed earlier, the observation noise terms εtalso depend on V. We have, for all t≥1,
+|εt−¯εt|=V(sτ
+h+1)−V(sτ
+h+1)−([PhV](zτ
+h)−[PhV](zτ
+h)
+≤2ϵ.
+15Using the difference between fandg, as well as the difference between noise terms, we have
+|µt,f(z)−µt,g(z)|=|α⊤
+t(z)(Ft+Et)−α⊤(z)(Gt+Et)|
+≤ ∥ αt(z)∥∥Ft−Gt+Et−Et∥
+≤3ϵ√
+t∥αt(z)∥
+≤3ϵ√
+tbt(z)
+λ,
+where the last inequality follows from ∥αt(z)∥ ≤bt(z)
+λ(e.g., see, Vakili et al., 2021a, Proposition 1).
+The bound on |µt,f(z)−µt,g(z)|combined with (26) proves that for a fixed t∈[T], fixed h∈[H],
+for all z∈ Z and for all V∈ Vk,h(R, B),
+|f(z)−µt,f(z)| ≤β3bt(z) +ϵ,
+where
+β3=H+ 1 +H√
+2r
+Γk,λ(t) + log NV
+k,h(ϵ;R, B) + 1 + log(1
+δ) +3√
+tϵ
+λ. (27)
+The confidence interval holds uniformly for all h∈[H]andt∈[T]using a probability union bound,
+when β3is replaced with the following
+β4=H+ 1 +H√
+2r
+Γk,λ(t) + log NV
+k,h(ϵ;R, B) + 1 + log(HT
+δ) +3ϵ√
+t
+λ. (28)
+To complete the proof, we bound NV
+k,h(ϵ;R, B)in terms of the specific parameters of the problem.
+Firstly, the ϵ-covering number of Vk,h(R, B)is bounded by that of Qk,h(R, B)(Yang et al., 2020a,
+proof of Lemma D.1). Recall the definition of Qk,h(R, B)in(18). In Lemma 5, we prove that, with
+probability at least 1−δ,∥bQt
+h∥Hk≤H+ 1 +H
+2λq
+2(Γk,λ(t) + 1 + log(1
+δ)). Thus, the theorem
+follows with βt
+h(δ, ϵ), where βt
+h(δ, ϵ)is set to some value satisfying
+βt
+h(δ, ϵ)≥H+ 1 +H√
+2r
+Γk,λ(t) + log Nk,h(ϵ;Rt, βt
+h(δ, ϵ)) + 1 + log(2HT
+δ) +3ϵ√
+t
+λ,(29)
+withRt=H+ 1 +H
+2λq
+2(Γk,λ(t) + 1 + log(2
+δ)). That completes the proof of Theorem 1.
+Lemma 5 (Bound on RKHS Norm of the Kernel Ridge Predictor) Letµt,fbe the kernel ridge
+predictor of ffrom a set {Y(zi) =f(zi) +εi}t
+i=1oftnoisy observations with σ-sub-Gaussian
+noise, as given in Equation (9). We then have, for δ >0, with probability at least 1−δ,
+∥µt,f∥Hk≤ ∥f∥Hk+σ
+λr
+2(Γk,λ(t) + 1 + log(1
+δ)).
+Proof 1 We write µt,fas the sum of two terms where the first term is the predictor from noise-free
+observations and the second term is noise-dependent. Let fZt= [f(zi)]t
+i=1andEt= [εi]t
+i=1be the
+vectors of function evaluations and noise terms, respectively.
+µt,f=k⊤
+Zt(KZt+λ2I)−1YZt
+=k⊤
+Zt(KZt+λ2I)−1(fZt+Et)
+=k⊤
+Zt(KZt+λ2I)−1fZt+k⊤
+Zt(KZt+λ2I)−1Et. (30)
+We bound the RKHS norm of the two terms on the right separately. For the first term, we have
+∥k⊤
+Zt(KZt+λ2I)−1fZt∥Hk≤ ∥f∥Hk.
+16The inequality indicates that the RKHS norm of the predictor from noise-free observations is bounded
+by the RKHS norm of the target function. See, e.g., Lemmas 3and4in Vakili et al. (2021a).
+For the second term, we have
+k⊤
+Zt(KZt+λ2I)−1Et
+Hk=q
+(Et)⊤(KZt+λ2I)−1KZt(KZt+λ2I)−1Et
+≤1
+λq
+(Et)⊤KZt(KZt+λ2I)−1Et (31)
+The first line follows from the reproducing property of the RKHS. For the second line, note that
+1
+λ2is an upper bound on the eigenvalues of (KZt+λ2I)−1, and both KZtand(KZt+λI)−1
+are symmetric and positive semi-definite. An upper bound onp
+(Et)⊤KZt(KZt+λI)−1Etis
+established in Appendix C of Chowdhury and Gopalan (2017). Specifically, it is shown that with
+probability at least 1−δ,
+q
+(Et)⊤KZt(KZt+λ2I)−1Et≤σr
+2(Γk,λ(t) + 1 + log(1
+δ)).
+Putting these together, we obtain that with probability at least 1−δ,
+∥µt,f∥Hk≤ ∥f∥Hk+σ
+λr
+2(Γk,λ(t) + 1 + log(1
+δ)).
+C Proof of Lemmas 2 (Maximum Information Gain) and 3 (Covering
+Number).
+We first introduce the projection of the RKHS on a lower dimensional RKHS that is used in the
+proof of both lemmas. We then present the proofs. Recall the Mercer theorem and the representation
+of kernel using Mercer eigenvalues and eigenfeatures. Using Mercer representation theorem, any
+f∈ BRcan be written as
+f=∞X
+m=1wm√σmϕm, (32)
+withP∞
+m=1w2
+m≤R2. For some D∈N, letΠD[f]denote the projection of fonto the D-
+dimensional RKHS corresponding to the first Dfeatures with the largest eigenvalues
+ΠD[f] =DX
+m=1wm√σmϕm. (33)
+Let us use the notations wD= [w1, w2,···, wD]⊤for the D-dimensional column vector of weights,
+ϕD(z) = [ϕ1(z), ϕ2(z),···, ϕD(z)]⊤for the D-dimensional column vector of eigenfeatures, and
+ΣD=diag([σ1, σ2,···, σD])for the diagonal matrix of eigenvalues with [σ1, σ2,···, σD]as the
+diagonal entries. We also use the notations
+kD(z, z′) =ϕ⊤
+D(z)ΣDϕD(z), (34)
+to denote the kernel corresponding to the D-dimensional RKHS, as well as k0(z, z′) =k(z, z′)−
+kD(z, z′).
+C.1 Proof of Lemma 2 on Maximum Information Gain
+Recall the definition of Γk,λ(t). We have
+1
+2logdet
+I+1
+λ2KZt
+=1
+2logdet
+I+1
+λ2(KD
+Zt+K0
+Zt)
+=1
+2logdet
+I+1
+λ2KD
+Zt
+| {z }
+Term (i)+1
+2logdet
+I+1
+λ2(I+1
+λ2KD
+Zt)−1K0
+Zt
+| {z }
+Term (ii).
+17We next bound the two terms on the right hand side.
+Term (i):Note that for kDcorresponding to the D-dimensional RKHS, we have KD
+Zt=ΦtΣDΦ⊤
+t,
+where Φt= [ϕD(z)]⊤
+z∈Ztis at×Dmatrix that stacks the feature vectors ϕD(zτ),τ= 1,···, t, as
+it rows. By Weinstein–Aronszajn identity (Pozrikidis, 2014) (a special case of matrix determinant
+lemma),
+logdet
+It+1
+λ2KD
+Zt
+= log det
+It+1
+λ2ΦtΣDΦ⊤
+t
+(35)
+= log det
+ID+1
+λ2Σ1
+2
+DΦtΦ⊤
+tΣ1
+2
+D
+≤Dlog(tr(ID+1
+λ2Σ1
+2
+DΦtΦ⊤
+tΣ1
+2
+D)
+D)
+≤Dlog(1 +t
+λ2D).
+The first inequality follows from the inequality of arithmetic and geometric means on eigenvalues of
+the argument, and the second inequality follows from kD≤1. For clarity, we used the notations It
+andIDfor identity matrices of dimension tandD, respectively. Otherwise, we drop the superscript.
+Term (ii):Similarly using the inequality of arithmetic and geometric means on eigenvalues, we
+bound the logdetby the logof the trace of the argument. Let us use ϵDto denote an upper bound on
+k0.
+logdet
+I+1
+λ2(I+1
+λ2KD
+Zt)−1K0
+Zt
+≤tlogtr(I+1
+λ2(I+1
+λ2KD
+Zt)−1K0
+Zt)
+t
+(36)
+≤tlog(1 +ϵD
+λ2)
+≤tϵD
+λ2.
+The last inequality uses log(1 + x)≤xwhich holds for all x∈R.
+Combining the bounds on Term (i)and Term (ii), we have
+Γk,λ(t)≤D
+2log(1 +t
+λ2D) +tϵD
+2λ2. (37)
+Now, using the polynomial eigendecay profile given in Definition 2,
+k0(z, z′) =∞X
+m=D+1σmϕm(z)ϕm(z′) (38)
+≤C2
+1Cpρα
+Z∞X
+m=D+1m−p(1−2η)
+≤C2
+1Cpρα
+ZZ∞
+Dx−˜pdx
+≤C2
+1Cpρα
+Z
+˜p−1D−˜p+1. (39)
+The constant C1is the uniform bound on m−pηϕm, and Cpis the parameter in Definition 1.
+Choosing D=Ct1
+˜pρα
+˜p
+Z(log(t))−1
+˜p, with constant C= (C2
+1Cp
+(˜p−1)λ2)1
+˜pwe obtain
+Γk,λ(t)≤C
+2t1
+˜pρα
+˜p
+Z
+log(t)−1
+˜plog(1 +t
+λ2D) + (log( t))1−1
+˜p
+, (40)
+that completes the proof.
+18C.2 Proof of Lemma 3 on Covering Number of State-Action Value Function Class
+Recall the definition of the state-action value function class,
+Qk,h(R, B) =
+Q:Q(z) = min {Q0(z) +βb(z), H−h+ 1},∥Q0∥Hk≤R, β≤B,|Z| ≤T	
+.
+and the notation Nk,h(ϵ;R, B)for its ϵ-covering number. Let us use the notation Nk,R(ϵ)for the
+ϵ-covering number of RKHS ball Bk,R={f:∥f∥Hk≤R},N[0,B](ϵ)for the ϵ-covering number of
+interval [0, B]with respect to Euclidean distance, and Nk,b(ϵ)for the ϵ-covering number of class of
+uncertainty functions bk={b(z) = 
+k(z, z)−k⊤
+Z(z)(KZ+λ2I)−1kZ(z)1
+2,|Z| ≤T}.
+Consider Q,Q∈ Q k,h(R, B)where Q(z) = min {Q0(z) +βb(z), H−h+ 1}andQ(z) =
+min
+Q0(z) +¯β¯b(z), H−h+ 1	
+. We have
+|Q(z)−Q(z)| ≤ |Q0(z)−Q0(z)|+|β−¯β|+B|b(z)−¯b(z)|. (41)
+That implies
+Nk,h(ϵ;R, B)≤ N k,R(ϵ
+3)N[0,B](ϵ
+3)Nk,b(ϵ
+3B). (42)
+For the ϵ-covering number of the [0, B]interval, we simply have N[0,B](ϵ/3)≤1+3B/ϵ. In the next
+lemmas, we bound the ϵ-covering number of the RKHS ball and the class of uncertainty functions.
+Lemma 6 (RKHS Covering Number) Consider a positive definite kernel k:Z × Z → R, with
+polynomial eigendecay on a hypercube with side length ρZ. The ϵ-covering number of R-ball in the
+RKHS satisfies
+logNk,R(ϵ) =O R2ρα
+Z
+ϵ21
+˜p−1
+log(1 +R
+ϵ)!
+. (43)
+Lemma 7 (Uncertainty Class Covering Number) Consider a positive definite kernel k:Z×Z →
+R, with polynomial eigendecay on a hypercube with side length ρZ. The ϵ-covering number of the
+class of uncertainty functions satisfies
+logNk,b(ϵ) =O
+(ρα
+Z
+ϵ2)2
+˜p−1(1 + log(1
+ϵ))
+(44)
+Combining (42) with Lemmas 6 and 7, we obtain
+logNk,h(ϵ;R, B) =O
+(R2ρα
+Z
+ϵ2)1
+˜p−1(1 + log(R
+ϵ)) + (B2ρα
+Z
+ϵ2)2
+˜p−1(1 + log(B
+ϵ))
+, (45)
+that completes the proof of Lemma 3. Next, we provide the proof of two lemmas above on the
+covering numbers of the RKHS ball and the uncertainty function class.
+Proof 2 (Proof of Lemma 6) Forfin the RKHS, recall the following representation
+f=∞X
+m=1wm√σmϕm, (46)
+as well as its projection on the D-dimensional RKHS
+ΠD[f] =DX
+m=1wm√σmϕm. (47)
+19We note that
+∥f−ΠD[f]∥∞=∞X
+m=D+1wm√σmϕm
+≤C1C1
+2pρα/2
+Z∞X
+m=D+1|wm|m−p(1
+2−η)
+≤C1C1
+2pρα/2
+Z ∞X
+m=D+1|wm|2!1
+2 ∞X
+m=D+1m−p(1−2η)!1
+2
+≤C1C1
+2pρα/2
+ZRZ∞
+Dx−˜pdx1
+2
+=C1C1
+2pρα/2
+ZR√˜p−1D−˜p+1
+2.
+In the expressions above, C1is the uniform bound on m−pηϕm, and Cpis the constant specified in
+Definition 1. The third inequality follows form Cauchy–Schwarz inequality.
+Now, let D0be the smallest Dsuch that the right hand side is bounded byϵ
+2. There exists a constant
+C2>0, only depending on constants C1,Cp,ηand˜p, such that
+D0≤C2R2ρα
+Z
+ϵ21
+˜p−1
+. (48)
+For a D-dimensional linear model, where the norm of the weights is bounded by R, theϵ-covering
+is at most C3D(1 + log(R
+ϵ), for some constant C3(e.g., see, Yang et al., 2020a). Using an ϵ/2
+covering number for the space of ΠD[f]and using the minimum number of dimensions that ensures
+|f−ΠD[f]| ≤ϵ/2, we conclude that
+logNk,R(ϵ)≤C3D0(1 + log(R
+ϵ))
+≤C2C3R2ρα
+Z
+ϵ21
+˜p−1
+(1 + log(R
+ϵ)),
+that completes the proof of the lemma.
+Proof 3 (Proof of Lemma 7) Let us define b2
+k={b2:b∈bk}andNk,b2(ϵ)to be its ϵ-covering
+number. We note that, for b,¯b∈b,
+|b(z)−¯b(z)| ≤q
+|(b(z))2−(¯b(z))2|. (49)
+Thus, an ϵ-covering number of bis bounded by an ϵ2-covering of b2:
+Nk,b(ϵ)≤ N k,b2(ϵ2). (50)
+We next bound Nk,b2(ϵ2).
+Using the feature space representation of the kernel, we obtain
+(b(z))2=∞X
+m=1γmσmϕ2
+m(z), (51)
+for some γm∈[0,1]. Based on the GP interpretation of the model, γmcan be understood as the
+posterior variances of the weights. Let D0be the smallest Dsuch thatP∞
+m=D+1σmϕ2
+m(z)≤ϵ2/2.
+From Equation (39), we can see that, for some constant C4, only depending on constants C1, Cp,η
+and˜p,
+D0≤C4ρα
+Z
+ϵ21
+˜p−1
+. (52)
+20ForPD0
+m=1γmσmϕ2
+m(z)on a finite D0-dimensional spectrum, as shown in Lemma D.3of Yang et al.
+(2020a), an ϵ2/2covering number scales with D2
+0. Specifically, an ϵ2/2covering number of the
+space ofPD0
+m=1γmσmϕ2
+m(z)is bounded by
+C5D2
+0(1 + log(1
+ϵ)). (53)
+Combining Equations (52) and(53), we obtain
+Nk,b2(ϵ2)≤C5D2
+0(1 + log(1
+ϵ))
+≤C5C2
+4ρα
+Z
+ϵ22
+˜p−1
+,
+that completes the proof of the lemma.
+D Proof of Theorem 2 (Regret of π-KRVI).
+Following the standard analysis of optimisitc LSVI policies, for any h∈[H],t∈[T], we define
+temporal difference error δt
+h:Z →Ras
+δt
+h(z) =rh(z) + [PhVt
+h+1](z)−Qt
+h(z),∀z∈ Z. (54)
+Roughly speaking, {δt
+h(z)}H
+h=1quantify how far the {Qt
+h}H
+h=1are from satisfying the Bellman
+optimality equation.
+For any h∈[H],t∈[T], we also define
+ξt
+h=
+Vt
+h(st
+h)−Vπt
+h(st
+h)
+−
+Qt
+h(zt
+h)−Qπt
+h(zt
+h)
+,
+ζt
+h=
+[PhVt
+h+1](zt
+h)−[PhVπt
+h+1](zt
+h)
+−
+Vt
+h+1(st
+h+1)−Vπt
+h+1(st
+h+1)
+. (55)
+Using the notation defined above, we then have the following regret decomposition into three parts.
+Lemma 8 (Lemma 5.1in Yang et al. (2020a) on regret decomposition) We have
+R(T) =TX
+t=1HX
+h=1Eπ⋆[δt
+h(zh)|s1=st
+1]−δt
+h(zt
+h)
+| {z }
+(i)+TX
+t=1HX
+h=1(ξt
+h+ζt
+h)
+| {z }
+(ii)
++TX
+t=1HX
+h=1Eπ⋆[Qt
+h(sh, π⋆
+h(sh))−Qt
+h(sh, πt
+h(sh))|s1=st
+1]
+| {z }
+(iii). (56)
+The third term is negative, by definition of πt
+hthat is the greedy policy with respect to Qt
+h:
+Qt
+h(sh, π⋆
+h(sh))−Qt
+h(sh, πt
+h(sh)) =Qt
+h(sh, π⋆
+h(sh))−max
+a∈AQt
+h(sh, a)≤0,
+for all sh∈ S. The second term is bounded using the following lemma.
+Lemma 9 (Lemma 5.3in Yang et al. (2020a)) For any δ∈(0,1), with probability at least 1−δ,
+we have
+TX
+t=1HX
+h=1(ξt
+h+ζt
+h)≤4s
+TH3log2
+δ
+. (57)
+21Term (i):It turns out that the dominant term and the challenging term to bound is the first term in
+Lemma 8. We next provide an upper bound on this term.
+For step h, letUT
+h=ST
+t=1St
+hbe the union of all cover elements used by π-KRVI over all episodes.
+The size of UT
+his bounded in the following lemma and is useful in the analysis of Term (i).
+Lemma 10 (Lemma 2in Janz et al. (2020)) The size of UT
+hsatisfies
+|UT
+h| ≤C6Td
+d+α, (58)
+for some constant C6.
+The size of UT
+hdepends on the dimension of the domain and the parameter αused in the splitting
+rule in Section 3.1.
+Now, consider a cover element Z′∈ UT
+h. Using Theorem 1, we have, with probability at least 1−δ,
+for all h∈[H], t∈[T], z∈ Z′, for some ϵt
+h∈(0,1),
+rh(z) + [PhVh+1](z)−bQt
+h(z)≤βt
+h(δ, ϵt
+h)bt
+h(z) +ϵt
+h, (59)
+where βt
+h(δ, ϵt
+h)is the smallest value satisfying
+βt
+h(δ, ϵt
+h)≥H+ 1 +H√
+2s
+Γk,λ(N) + log Nk,h(ϵt
+h;RN, βt
+h(δ, ϵt
+h)) + 1 + log2NH
+δ
++3√
+Nϵt
+h
+λ,
+withN=NT
+h,Z′andϵt
+h=H√
+log(TH
+δ)q
+NT
+h,Z′.
+We also note that
+Γk,λ(NT
+h,Z′) = O
+(NT
+h,Z′)1
+˜p(log(NT
+h,Z′))1−1
+˜pρα
+˜p
+Z′
+=O
+(ρZ′)−α
+˜p(log(NT
+h,Z′))1−1
+˜pρα
+˜p
+Z′
+=O
+(log(NT
+h,Z′))1−1
+˜p
+=O(log(T)), (60)
+where the first line is based on Lemma 2, and the second line is by the design of partitioning in
+π-KRVI. Recall that each hypercube is partitioned when ρ−α
+Z′< Nt
+h,Z′+ 1, ensuring that Nt
+h,Z′
+remains at most ρ−α
+Z′.
+For the covering number, with the choice of ϵt
+h=H√
+log(TH
+δ)q
+Nt
+h,Z′, we have
+logNk,h(ϵt
+h;RN, βt
+h(δ, ϵt
+h))
+=O R2
+Nρα
+Z′
+(ϵt
+h)21
+˜p−1
+(1 + log(RN
+ϵt
+h)) +(βt
+h(δ, ϵt
+h))2ρα
+Z′
+(ϵt
+h)22
+˜p−1
+(1 + log(βt
+h(δ, ϵt
+h)
+ϵt
+h))!
+=O
+ 
+R2
+N
+H2log(HT
+δ)!1
+˜p−1
+(1 + log(RN
+ϵt
+h)) + 
+(βt
+h(δ, ϵt
+h))2
+H2log(HT
+δ)!2
+˜p−1
+(1 + log(βt
+h(δ, ϵt
+h)
+ϵt
+h))
+.
+We thus see that the choice of βt
+h(δ, ϵt
+h) = Θ( Hq
+log(TH
+δ))satisfies the requirement for confidence
+interval width on Z′based on Theorem 1. We now use probability union bound over all Z′∈ UT
+hto
+obtain
+βT(δ) = Θ( Hr
+log(TH|HUT
+h|
+δ)) = Θ( Hr
+log(TH
+δ). (61)
+22For this value of βT(δ), we have with probability at least 1−δ, for all h∈[H], t∈[T], z∈ Z,rh(z) + [PhVh+1](z)−bQt
+h(z)≤βT(δ)bt
+h(z) +ϵt
+h, (62)
+where in the above expression ϵt
+his the parameter of the covering number corresponding to Z′when
+z∈ Z′.
+Therefore, we have, with probability at least 1−δ
+Term (i)≤TX
+t=1HX
+h=1−δt
+h(zt
+h)≤2βT(δ) TX
+t=1HX
+h=1bt
+h(zt
+h)!
++ 2ϵt
+h, (63)
+with
+ϵt
+h=Hq
+log(TH
+δ)
+q
+Nt
+h,Z(zt
+h). (64)
+We bound the total uncertainty in the kernel ridge regression measured byPT
+t=1(bt
+h(zt
+h))2
+TX
+t=1 
+bt
+h(zt
+h)2=X
+Z′∈UT
+hX
+zt
+h∈Z′ 
+bt
+h(zt
+h)2
+≤X
+Z′∈UT
+h2
+log(1 + 1 /λ2)Γk,λ(NT
+h,Z′)
+=O
+X
+Z′∈UT
+hlog(T)
+
+=O 
+|UT
+h|log(T)
+=O
+Td
+d+αlog(T)
+.
+The first inequality is commonly used in kernelized bandits. For example see (Srinivas et al., 2010a,
+Lemma 5.4). The third and fifth lines follow from Equation (60) and Lemma 10, respectively. Also,
+we have
+TX
+t=1(ϵt
+h)2=TX
+t=1H2log(TH
+δ)
+Nt
+h,Z(zt
+h)(65)
+≤X
+Z′∈UT
+hX
+zt
+h∈Z′H2log(TH
+δ)
+Nt
+h,Z′
+≤ |UT
+h|H2log(TH
+δ)(log( T) + 1)
+≤ O
+H2Td
+d+αlog(TH
+δ) log( T)
+.
+We are now ready to bound the
+Term (i)≤2βT(δ) TX
+t=1HX
+h=1bt
+h(zt
+h)!
++ 2TX
+t=1HX
+h=1ϵt
+h (66)
+≤2βT(δ)√
+THX
+h=1vuutTX
+t=1(bt
+h(zt
+h))2+ 2√
+THX
+h=1vuutTX
+t=1(ϵt
+h)2
+=O 
+H2Td+α/2
+d+αr
+log(T) log(TH
+δ)!
+.
+The proof is completed.
+23

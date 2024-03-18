@@ -1,0 +1,644 @@
+arXiv:2403.09580v1  [cs.AI]  14 Mar 2024Algorithmic syntactic causal identiﬁcation
+Dhurim Cakiqi⋆, Max A. Little⋆
+March 15, 2024
+⋆School of Computer Science, University of Birmingham, UK
+Causal identiﬁcation in causal Bayes nets (CBNs) is an importa nt tool in causal infer-
+ence allowing the derivation of interventional distributi ons from observational distributions
+where this is possible in principle. However, most existing formulations of causal iden-
+tiﬁcation using techniques such as d-separation and do-cal culus are expressed within the
+mathematical language of classical probability theory on C BNs. However, there are many
+causal settings where probability theory and hence current causal identiﬁcation techniques
+are inapplicable such as relational databases, dataﬂow pro grams such as hardware descrip-
+tion languages, distributed systems and most modern machin e learning algorithms. We
+show that this restriction can be lifted by replacing the use of classical probability theory
+with the alternative axiomatic foundation of symmetric mon oidal categories. In this alter-
+native axiomatization, we show how an unambiguous and clean distinction can be drawn
+between the general syntax of causal models and any speciﬁc semantic implementation of
+that causal model. This allows a purely syntactic algorithmic description of general causal
+identiﬁcation by a translation of recent formulations of th e general ID algorithm through
+ﬁxing. Our description is given entirely in terms of the non-param etric ADMG structure
+specifying a causal model and the algebraic signature of the corresponding monoidal cat-
+egory, to which a sequence of manipulations is then applied s o as to arrive at a modiﬁed
+monoidal category in which the desired, purely syntactic in terventional causal model, is
+obtained. We use this idea to derive purely syntactic analog ues of classical back-door and
+front-door causal adjustment, and illustrate an applicati on to a more complex causal model.
+1 Introduction
+Causal Bayes nets (CBNs) are probabilistic models in which causal inﬂuences between random vari-
+ables are expressed via the use of graphs withnodes in these graphs being the random variables and
+directed edges indicating the direction of causality between them [ Pearl,2009,Bareinboim et al. ,2020].
+Every such directed acyclic graph (DAG) with latent (unobserved ) nodes has a corresponding acyclic
+directed mixed graph (ADMG) which is obtained from the DAG through latent projection which sim-
+pliﬁes the DAG whilst preserving its causal d-separation properties [ Richardson et al. ,2012,Pearl,
+2009].
+The ADMGG=/parenleftbig
+VG,EG/parenrightbig
+with variables VGand edges EGhas bidirected edges indicating unmea-
+sured confounding [Richardson et al. ,2012]. Excluding the bidirected edges, the topological propert ies
+of these graphs are given by their set-valued parentpaGandchild functions chG.Ancestors anGand
+descendents deGare determined recursively from these. The subgraphGYforY⊂VGis obtained by
+deleting from VGall nodes not in Yand edges which connect to those removed variables. A sequen ce
+of the subset of the nodes in VGsuch that every node in that sequence occurs before its child ren
+1(or after its parents) in Gthrough unidirectional edges, is called a topological ordering of the ADMG
+[Bareinboim et al. ,2020]. For such an ordering the function preG(V)gives the set of all the nodes
+beforeVin the sequence, and succG(V)gives all the nodes after it in the sequence. In the ADMG,
+sets of variables which are connected through a sequence of b idirected edges are called districts disG
+[Richardson et al. ,2012]. Nodes V∈VGwhich have the property that disG(V)∩deG(V) ={V}are
+called ﬁxable nodes [ Richardson et al. ,2012].
+For an ADMG with no bidirected edges (thus, no latent variabl es, equivalent to a CBN over a
+DAG), it is always possible to derive any interventional dis tribution from the joint distribution over
+the variables in the DAG using the truncated factorization [Pearl,2009]. However, more generally, in
+the presence of unobserved confounding (e.g. models having bidirected edges in the ADMG) this is
+no longer true and only certain interventional distributio ns can be derived from the observed variables
+[Shpitser ,2008,Bareinboim et al. ,2020]. Pearl’s do-calculus [Pearl,2009] is a set of three algebraic
+distribution transformations which it has been shown are ne cessary and suﬃcient for deriving the in-
+terventional distribution where this is possible [ Shpitser ,2008]. These algebraic transformations can
+be applied ad-hoc or, more systematically, using Shpitser’ sID algorithm to derive a desired interven-
+tional distribution [ Shpitser ,2008]. More recently, the speciﬁc conditions under which any par ticular
+interventional distribution can be determined from the obs erved variables using do-calculus or some
+other systematic algorithm, has been simpliﬁed in terms of ﬁxing operations andreachable subgraphs
+in causal ADMGs [ Richardson et al. ,2012]. Exploiting the same reasoning, Richardson et al. [2012]
+show how ﬁxing operations can be combined in a simple algorit hm which achieves the same result.
+This algorithm, as with most algorithms for causal inferenc e, is expressed in terms of CBNs using
+random variables and classical probabilities where probab ilistic conditioning indicates the direction of
+causal inference in an ADMG. Such causal identiﬁcation algo rithms rely on simultaneous manipulation
+of the ADMG, tracking the consequence of such manipulations on the corresponding (joint) distribution
+over that graph. As long as the appropriate Markov property holds [ Bareinboim et al. ,2020], which
+guarantees the consistency of the distribution with the CBN, then this is a valid procedure for deriving
+the desired interventional distribution. Nonetheless, th ere are many practical settings where proba-
+bilistic modelling is inappropriate, such as relational da tabases [ Patterson ,2017], hardware description
+languages, distributed systems modelled by Petri nets and m ost modern machine learning algorithms
+[Little,2019]. In these settings there is no such Markov property therefo re it appears that the existing
+causal identiﬁcation algorithms are inapplicable in these wider, non-probabilistic applications.
+A diﬀerent and more recently explored direction which might circumvent this limitation is to change
+the fundamental axiomatic basis of the modelling language t o use ( monoidal )category theory instead.
+This amounts to a fundamental reformulation of CBNs that, rat her than organizing causal models
+around sets, measure theory and graph topology which requir es the additional complexity of Markov
+properties to bind these together, instead views CBNs from th e simpler and more abstract vantage
+point of structured compositional processes . Causal modelling and inference in terms of string dia-
+grams representing such processes has shown considerable promis e. Building on work by Fong[2013],
+Cho and Jacobs [2019] formulated the essential concepts of Bayesian reasoning as strings, following
+which Jacobs et al. [2021] provided an exposition of causal identiﬁcation under a sli ghtly extended form
+of the front-door causal scenario for aﬃne Markov categories [Fritz,2020]. Since then, string analogues
+of do-calculus and d-separation have been described [ Yin and Zhang ,2022,Fritz and Klingler ,2023]
+and explicit description of extensions of the categorical s tring diagram approach to causal modelling
+in non-probabilistic settings such as machine learning [ Cakiqi and Little ,2022].
+Nonetheless the full promise of this reformulation has yet t o be realized. For instance, causal
+inference in string diagrams has, to date, only been describ ed in probabilistic categories for single
+variable interventions in discrete sample spaces where int erventions can be modelled by discrete uniform
+distributions [ Jacobs et al. ,2021], or more generally to string diagrams where causal identiﬁ cation
+beyond the slightly extended form of the front-door causal s cenario is not carried out systematically
+(algorithmically) but instead requires manual string mani pulation [ Lorenz and Tull ,2023]. Thus, our
+goal in this report is to provide the ﬁrst, purely syntactic, algorithmic characterization of general causal
+2x1
+(a)x3
+x2X3
+X1 X2
+qX3
+(b)
+Figure 1: Example string diagram representations of maximal causal m odels for monoidal signatures: (a)
+signature Σ =/parenleftbig
+{X1,X2,X3},{x1,x2,x3},/braceleftbig
+x1: 1→X2
+1,x2:X1→X2,x3:X1X2→X3/bracerightbig/parenrightbig
+with explicit inter-
+nal causal mechanisms; (b) exterior signature Ext(Σ) = ({X3},{q},{q: 1→X3})hiding the internal causal
+mechanisms in (a).
+identiﬁcation by ﬁxing which is applicable to the full range of causal models expressible as a structured,
+categorical compositional process.
+2 Theory
+2.1 Symmetric monoidal categories and their algebraic sign atures
+Symmetric monoidal categories (SMCs) are algebraic structures which capture the notion of simulta-
+neous sequential and (in our application) parallel composition of maps between types. Examples of
+such categories include ordinary sets and functions betwee n these sets with the cartesian product indi-
+cating parallel composition, the category of sets and relat ions [Fong,2013], (aﬃne)Markov categories
+of sample spaces with conditional distributions modelled b y sets and probability monads between them
+[Fritz,2020] or other non-deterministic monads in arbitrary semiﬁelds [Cakiqi and Little ,2022].
+Following Sellinger [2011], a symmetric monoidal category signature Σprovides all the information
+required to specify a particular SMC. This consists of a set o fobject terms Σ0andmorphism variables ,
+Σ1, along with a pair of functions dom,cod : Σ 1→Mon(Σ 0)which determine the domain and
+codomain of the morphism variables respectively. Here, Mon(Σ 0) = (Σ 0,⊗,1)is the free commutative
+monoid generated by the object terms in Σ0.For brevity we will use exponential notation to indicate
+terms in Mon(Σ 0)with repeated objects, i.e. for A,B∈Σ0the object expression (A⊗B)⊗(1⊗A)
+is written A2B. A morphism with no input, v: 1→A, has monoidal unit domain 1; a morphism
+with deleted (empty) output has type u:A→1. We include the domain and codomain functions as
+a part of the signature i.e. Σ = (Σ 0,Σ1,dom,cod). To save space, we will alternatively denote the
+information in dom,codthrough the more traditional type speciﬁcations of the morp hisms, e.g. for
+the category containing the morphism dom(u) =A,dom(v) =AB,cod(u) = 1 andcod(v) =Vwe
+writeΣ = ({A,B},{u,v},{u:A→1,v:AB→V}).
+An (aﬃne, symmetric) monoidal signature Σdetermines a symmetric monoidal category whose
+morphisms are generated by combining morphism variables using sequential composit ion·and com-
+mutative monoidal product ⊗along with identities idA:A→A, copies∆A:A→A2and deletions
+delA:A→1for every object in A∈Σ0. Every expression formed this way is itself a morphism in the
+category speciﬁed by Σ.
+However, the signature also determines a speciﬁc causal model which is the one of practical interest,
+in the following sense. Construct an expression in which all causal module morphism variable terms
+3appear once, composed using sequential composition ◦and monoidal product ⊗, inserting only the
+necessary identities and copies in order to ensure that the d omains and codomains of these morphisms
+are matched. We call this expression the maximal model (quotiented by the identities, copies and
+deletions) determined by the signature. The maximal model i s a (possibly composite) causal morphism
+in the monoidal category, with its own domain and codomain. F or example, the signature
+Σ =/parenleftbig
+{X1,X2,X3},{x1,x2,x3},/braceleftbig
+x1: 1→X2
+1,x2:X1→X2,x3:X1X2→X3/bracerightbig/parenrightbig
+, (1)
+has the maximal causal model expression q=x3·(x2⊗idX1)·x1with type
+dom(q) = 1x1→X1X1x2⊗idX1−→X2X1x3→X3= cod(q). (2)
+While the expression qis itself a morphism in the category generated by Σ, below we will ﬁnd
+it useful to isolate this as a separate causal morphism which generates a category with composite
+signature Σ′= ({X3},{q},{q: 1→X3}). This signature hides the internal details of how qwas
+obtained; the detailed signature can always be reconstruct ed from information in the expression from
+which it is formed. We call the signature Σ′= Ext(Σ) theexterior signature Σ, and in this case
+Module( X3) =qbecause in Ext(Σ) ,cod(q) =X3.
+A convenient graphical notational device for representing such (maximal) causal models are string di-
+agrams [Sellinger ,2011] which have a rigorous algebraic meaning which coincides wi th that of monoidal
+categories, see Figure 1.
+In the next section we build a bridge between latent CBNs repre sented as ADMGs, and their repre-
+sentation as (aﬃne) SMC signatures specifying a causal mode l.
+2.2 Monoidal category signatures from ADMGs
+The monoidal category signature ΣGgenerated by the ADMG GisΣG=/parenleftbig
+ΣG
+0,ΣG
+1,dom,cod/parenrightbig
+, where
+ΣG
+0=VG,ΣG
+1=/braceleftbig
+Module( V′)|V′∈VG/bracerightbig
+and for each node (signature object) V∈VGwith corre-
+sponding causal module (signature morphism),
+dom(Module( V)) =/circlemultiplydisplay
+V′∈paG(V)V′
+cod(Module( V)) =V|chG(V)|+1.(3)
+Our formulation of syntactic causal identiﬁcation can only be applied where the domain and codomain
+of the causal module v= Module( V)is explicit in a signature. Therefore, in practice, syntact ic causal
+identiﬁcation requires the undirectional part of the ADMG t o be available in chain-factored form. This
+is obtained using any topological ordering of the ADMG as ΣF=/parenleftbig
+ΣG
+0,ΣG
+1,dom,cod/parenrightbig
+where,
+dom(Module( V)) =/circlemultiplydisplay
+V′∈preG(V)V′
+cod(Module( V)) =V|succG(V)|+1.(4)
+It is useful to have access to parent and child information fr om a signature. The set of parent modules
+of causal module v= Module( V)are given by paΣ(V) ={v′∈Σ1: cod(v′)∩dom(Module( V))/\e}atio\slash=∅}
+and child modules by chΣ(V) ={v′∈Σ1: dom(v′)∩cod(Module( V))/\e}atio\slash=∅}.
+2.3 Syntactic causal identiﬁcation
+Here we present our main result. Richardson et al. [2012, Theorem 49] is a re-formulation of the ID
+algorithm [Shpitser ,2008] for causal identiﬁcation in general causal models with lat ent variables, in
+terms of ﬁxing operations on conditional ADMGs (CADMGs). In this section we provide a purely
+syntactic description of the same algorithm which uses only the structural information in the ADMG.
+4In the ADMGG, consider the set of causeA⊂VGand eﬀect variables Y⊂VG, whereAandY
+do not intersect. Now consider the set of variables Y⋆= anGVG\A(Y)andD⋆the set of districts of
+the subgraphGY⋆. The signature of the syntactic causal eﬀect ,ΣG
+Y|do(A), ofAonYisidentiﬁable if,
+for every district D′∈D⋆the set of nodes VG\D′is a valid ﬁxing sequence. If identiﬁable, this causal
+eﬀect is given by the following composite signature manipul ation,
+ΣG
+Y|do(A)= Hide Y⋆\Y/parenleftBigg/uniondisplay
+D′∈D⋆Simple/parenleftBig
+FixseqVG\D′/parenleftbig
+ΣF/parenrightbig/parenrightBig/parenrightBigg
+. (5)
+2.4 Signature manipulations
+This section details the manipulations required to impleme nt the syntactic identiﬁcation algorithm of
+(5).
+Marginalization
+For a chain-factored signature ΣF=/parenleftbig
+ΣF
+0,ΣF
+1,dom,cod/parenrightbig
+, the analogue of marginalization of a single
+variable Vfrom a distribution over a set of variables, is given by HideV/parenleftbig
+ΣF/parenrightbig
+=/parenleftbig
+ΣF
+0,ΣF
+1,dom,cod′/parenrightbig
+,
+where for V,
+cod′(Module( V)) =V|succG(V)|(6)
+andcod′= cod otherwise. For the set W={V1,...,V k}⊂VG, we extend this function to the
+composite HideW= Hide V1◦···◦HideVk.
+Control
+Pearl’s causal interventions in ADMGs requires deleting pa rent edges [ Pearl,2009,Richardson et al. ,
+2012,Bareinboim et al. ,2020]. For aﬃne SMC signatures, this entails replacing causal mo dules with
+identity/copy morphisms and deleting any wires connected t o that module. This corresponds to the
+signature manipulation Control V(Σ) =/parenleftbig
+Σ0,Σ1,dom′,cod′/parenrightbig
+,where for V,
+dom′(Module( V)) =V, (7)
+which replaces the module with a copied identity morphism, a nd for all other v′∈Σ1such that
+v′/\e}atio\slash= Module( V),
+dom′/parenleftbig
+v′/parenrightbig
+= dom/parenleftbig
+v′/parenrightbig
+cod′/parenleftbig
+v′/parenrightbig
+= cod/parenleftbig
+v′/parenrightbig
+\dom(Module( V)),(8)
+where the second line deletes incoming wires using the multiset diﬀerence . This operation is extended
+to controlling a set as with marginalization above.
+Fixing and ﬁxing sequences
+The composition of marginalization and control,
+FixV= Control V◦HideV, (9)
+is the syntactic analogue of ﬁxing in ADMGs [ Richardson et al. ,2012].
+To ensure identiﬁability, ﬁxing can only be applied to objec ts which are ﬁxable relative to some
+signature, ΣGderived from an ADMG G. Given a set of objects W={V1,...,V k}to ﬁx, we need to
+determine a valid sequence of ﬁxing operations, FixseqW, for this set [ Richardson et al. ,2012]. This is
+computed recursively as follows. To initialize the recursi on, setW′=W, initialize Σ = ΣG, initialize
+the ﬁxing sequence operation FixseqW=id(the identity operation). The recursion step is as follows:
+choose any V∈W′such that Vis ﬁxable in Σ. If there exists no such Vthen the sequence Wcannot
+5have a valid ﬁxing sequence and the recursion terminates. Ot herwise, if chΣ(V) =∅then update
+FixseqW/mapsto→HideV◦FixseqW, otherwise update FixseqW/mapsto→FixV◦FixseqWinstead. Now, apply
+this operation to obtain the updated signature Σ/mapsto→FixseqW/parenleftbig
+ΣG/parenrightbig
+and delete Vfrom the ﬁxing set,
+W′/mapsto→W′\V. If all objects to ﬁx have been exhausted, i.e. W′=∅, then the recursion terminates
+with the ﬁxing operation sequence FixseqW, otherwise the process returns to the recursion step.
+Simpliﬁcation
+Manipulating a signature can lead to a causal module v= Module( V)being equivalent to the
+identity morphism i.e. where dom(Module( V)) = cod(Module( V)) =V. These can be deleted
+from the signature, simplifying the causal model it speciﬁe s. Writing the set of modules which are
+not equivalent to a identity as W=/braceleftbig
+V∈ΣG
+0|(dom(Module( V))/\e}atio\slash=V)∨(cod(Module( V))/\e}atio\slash=V)/bracerightbig
+,
+thenDeleteId(Σ) = ( W,{Module( V′)|V′∈W},dom,cod)is the simpliﬁed signature. Furthermore,
+signature manipulation can lead to a causal module having no downstream eﬀects. Such modules
+can also be deleted from the signature, further simplifying the causal model. Consider the set
+W={V∈Σ0|cod(Module( V))/\e}atio\slash= 1}of objects whose causal modules do not have marginalized out -
+puts, then the simpliﬁed signature can be written,
+Simplify(Σ) =/parenleftbig
+W,/braceleftbig
+Module/parenleftbig
+V′/parenrightbig
+|V′∈W/bracerightbig
+,dom,cod′/parenrightbig
+(10)
+with modiﬁed codomain cod′(Module( V′)) = cod(Module( V′))\dom(Module( W′))for allV∈
+Σ0\WandW′∈W.
+Deleting a module might lead to other causal modules having n o downstream eﬀects, therefore it is
+necessary to iterate ( 10) until a ﬁxed point signature is reached. Formally, startin g atΣ0= Σ, the
+iteration Σn+1= Simplify(Σn)is repeated until some Nis obtained such that Simplify/parenleftbig
+ΣN/parenrightbig
+= ΣN,
+whereupon we use Simple(Σ) = DeleteId/parenleftbig
+ΣN/parenrightbig
+as the fully simpliﬁed signature.
+Combining exterior signatures
+Syntactic causal identiﬁcation requires combining exteri or morphisms of manipulated signatures. For
+signatures Σ1andΣ2, their combination is,
+Σ = Ext/parenleftbig
+Σ1/parenrightbig
+∪Ext/parenleftbig
+Σ2/parenrightbig
+=/parenleftbig
+Σ1
+0∪Σ2
+0,Σ1
+1∪Σ2
+1,dom1∪dom2,cod′/parenrightbig (11)
+whereExt/parenleftbig
+Σ1/parenrightbig
+=/parenleftbig
+Σ1
+0,Σ1
+1,dom1,cod1/parenrightbig
+,Ext/parenleftbig
+Σ2/parenrightbig
+=/parenleftbig
+Σ2
+0,Σ2
+1,dom2,cod2/parenrightbig
+are the signatures of the
+exteriors of Σ1andΣ2respectively, and their combined codomain is,
+cod′(Module( V)) =V|chΣ(V)|+1(12)
+for allV∈Σ1
+0∪Σ2
+0for which a causal module is assigned through cod1andcod2.
+3 Applications
+3.1 Back-door adjustment: simple case
+As ﬁrst application, we show how to derive a purely syntactic account of back-door adjustment. Con-
+sider a simple, fully observed model with one confounder. Th e ADMG is deﬁned by VG={X,Y,U}
+and edges EG={X→Y,U→X,U→Y}, and we want the interventional signature ΣG
+Y|do(X). In
+this situation, the model is equivalent to a fully chain-fac tored graph so we can directly ﬁx Xin the
+signature without the need for explicit district decomposi tion.
+The corresponding signature ΣG=/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U3,x:U→X2,y:XU→Y/bracerightbig/parenrightbig
+so that, on application of ﬁxing, we obtain the manipulated s ignature,
+6Σ = Fix X/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U3,x:U→X2,y:XU→Y/bracerightbig/parenrightbig
+= (Control X◦HideX)/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U3,x:U→X2,y:XU→Y/bracerightbig/parenrightbig
+= (Control X)/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U3,x:U→X,y:XU→Y/bracerightbig/parenrightbig
+=/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U2,x:X→X,y:XU→Y/bracerightbig/parenrightbig
+,(13)
+which, when simpliﬁed becomes,
+Simple(Σ) = Simple/parenleftbig
+{X,Y,U},{x,y,u},/braceleftbig
+u: 1→U2,x:X→X,y:XU→Y/bracerightbig/parenrightbig
+=/parenleftbig
+{X,Y,U},{y,u},/braceleftbig
+u: 1→U2,y:XU→Y/bracerightbig/parenrightbig
+= ΣG
+YU|do(X),(14)
+and then ﬁnally marginalizing out Uwe obtain the desired interventional signature,
+ΣG
+Y|do(X)= Hide U/parenleftbig
+{X,Y,U},{y,u},/braceleftbig
+u: 1→U2,y:XU→Y/bracerightbig/parenrightbig
+= ({X,Y,U},{y,u},{u: 1→U,y:XU→Y}).(15)
+This is the purely syntactic categorical analogue of the wel l-known back-door adjustment formula
+in this simple case. When this signature is interpreted as a M arkov category [ Fritz,2020] with con-
+tinuous sample spaces X/mapsto→ΩX,U/mapsto→ΩUandY/mapsto→ΩYwith composition ·corresponding to the
+Chapman-Kolmogorov equation [Little,2019,Jacobs et al. ,2021] and the causal morphisms are condi-
+tional distributions u/mapsto→p(U)andy/mapsto→p(Y|X,U), then ( 15) is the interventional distribution,
+p(Y=y|do(X=x)) =/integraldisplay
+ΩUp(Y=y|X=x,U=u)p(U=u)du. (16)
+Another interesting interpretation is in terms of the min-plus semiﬁeld Markov category [Cakiqi and Little ,
+2022] for which
+q(y|do(x)) = min
+u∈U[q(y|x,u)+q(u)], (17)
+whereu/mapsto→q(u)is aninferential bias andy/mapsto→q(y|x,u)aclique potential widely encountered in
+machine learning. For these functions to be biases/potenti als, they must be normalizable in the min-
+plus semiﬁeld, i.e. minu∈Uq(u) = 0 andminy∈Yq(y|x,u) = 0 [Little,2019].
+3.2 Front-door adjustment
+The front-door graph [ Pearl,2009] is an ADMGGgiven by VG={X,Y,Z}with edges EG=
+{X→Z→Y,X↔Y}. We want the pure syntactic interventional signature ΣG
+Y|do(X), which repre-
+sents the causal eﬀect on Y={Y}ofA={X}. Here,VG\A={Y,Z}so thatY⋆= anG{Y,Z}({Y}) =
+{Y,Z}with corresponding districts D⋆={{Y},{Z}}of subgraphG{Y,Z}(See Figure 2).The monoidal
+signature ofGis,
+ΣG=/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X2,z:X→Z2,y:Z→Y/bracerightbig/parenrightbig
+, (18)
+with corresponding chain-factored signature,
+ΣF=/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X3,z:X→Z2,y:XZ→Y/bracerightbig/parenrightbig
+. (19)
+For the district D′={Y}, the ﬁxing set is W={X,Z}, for which we obtain the sequence
+Fixseq{X,Z}= Hide X◦FixZapplied to ΣF,
+7xz
+(a)Y X Z
+y
+x
+(b)y
+zY X Z
+xyY
+(c)Zq
+ZY
+(d)XZ
+z
+(e)X
+(f)Y Z
+q
+z
+XZY
+(g)q
+z x′y
+XY
+ZX′
+(h)z
+Figure 2: String diagram representations of maximal causal models fo r monoidal signatures obtained dur-
+ing the derivation of the purely syntactic front-door adjus tment interventional signature ΣG
+Y|do(X). Signa-
+tures are as follows: (a) ΣG(front-door ADMG, observable variables only); (b) ΣF(chain-factored observable
+ADMG); (c) Σ1=/parenleftBig
+Simple◦Fixseq{X,Z}/parenrightBig/parenleftbig
+ΣF/parenrightbig
+(ﬁxed district{Y}); (d)Ext/parenleftbig
+Σ1/parenrightbig
+(exterior signature of Σ1); (e)
+Σ2=/parenleftBig
+Simple◦Fixseq{X,Y}/parenrightBig/parenleftbig
+ΣF/parenrightbig
+(ﬁxed district{Z}); (f)ΣG
+ZY|do(X)= Ext/parenleftbig
+Σ1/parenrightbig
+∪Ext/parenleftbig
+Σ2/parenrightbig
+(interventional
+signature); (g) ΣG
+Y|do(X)(marginalized interventional signature) and (h) ΣG
+Y|do(X)with internal mechanisms
+made explicit.
+Σ1= (Simple◦HideX◦FixZ)/parenleftbig
+ΣF/parenrightbig
+= (Simple◦HideX◦FixZ)/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X3,z:X→Z2,y:XZ→Y/bracerightbig/parenrightbig
+= (Simple◦HideX)/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X2,z:Z→Z,y:XZ→Y/bracerightbig/parenrightbig
+= Simple({X,Y,Z},{x,y,z},{x: 1→X,z:Z→Z,y:XZ→Y})
+= ({X,Y,Z},{x,y},{x: 1→X,y:XZ→Y}),(20)
+so thatExt/parenleftbig
+Σ1/parenrightbig
+= ({Y,Z},{q},{q:Z→Y})withq=y·(idZ⊗x)andModule( Y) =q.
+For the district D′={Z}, the ﬁxing set is W={X,Y}, for which we obtain the sequence
+Fixseq{X,Y}= FixX◦FixY,
+Σ2= (Simple◦FixX◦FixY)/parenleftbig
+ΣF/parenrightbig
+= (Simple◦FixX◦FixY)/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X3,z:X→Z2,y:XZ→Y/bracerightbig/parenrightbig
+= (Simple◦FixX)/parenleftbig
+{X,Y,Z},{x,y,z},/braceleftbig
+x: 1→X2,z:X→Z,y:Y→1/bracerightbig/parenrightbig
+= Simple({X,Y,Z},{x,y,z},{x:X→X,z:X→Z,y:Y→1})
+= ({X,Z},{z},{z:X→Z})
+= Ext/parenleftbig
+Σ2/parenrightbig
+,(21)
+withModule( Z) =z, where this signature is already exterior because zis not composite. Combining
+these two exterior signatures, we obtain,
+ΣG
+ZY|do(X)= Ext/parenleftbig
+Σ1/parenrightbig
+∪Ext/parenleftbig
+Σ2/parenrightbig
+=/parenleftbig
+{X,Y,Z},{q,z},/braceleftbig
+z:X→Z2,q:Z→Y/bracerightbig/parenrightbig
+,(22)
+and since Y⋆\Y={Y,Z}\{Y}={Z}, we obtain the desired interventional distribution by marg inal-
+ization,
+8ΣG
+Y|do(X)= Hide {Z}/parenleftBig
+ΣG
+ZY|do(X)/parenrightBig
+= ({X,Y,Z},{q,z},{z:X→Z,q:Z→Y}).
+In practice, it may be useful to expose the interior of qand to do this we will need to relabel
+x→x′(and correspondingly, X/mapsto→X′) insideqto avoid a naming clash with the interventional input
+X,
+ΣG
+Y|do(X)=/parenleftbig/braceleftbig
+X,X′,Y,Z/bracerightbig
+,{x,y,z},/braceleftbig
+x′: 1→X′,z:X→Z,y:X′Z→Y/bracerightbig/parenrightbig
+. (23)
+As with the back-door model, this is the purely syntactic cat egorical analogue of the front-door
+adjustment formula . As an example interpretation, consider the Markov categor y with discrete sample
+spacesX′/mapsto→ΩX,Z/mapsto→ΩY,Y/mapsto→ΩYand with conditional distributions x′/mapsto→p(X′),z/mapsto→p(Z|X)and
+y/mapsto→p(Y|X,Z), then ( 23) is the familiar discrete interventional distribution [ Pearl,2009],
+p(Y=y|do(X=x)) =/summationdisplay
+z∈ΩZp(Z=z|X=x)/summationdisplay
+x′∈ΩXp/parenleftbig
+Y=y|X′=x′,Z=z/parenrightbig
+p/parenleftbig
+X′=x′/parenrightbig
+.(24)
+Another useful interpretation are deterministic causal models in the SMC of sets and functions, in
+which composition ·is ordinary function composition and ⊗is the pairing (bifunctor), with the identity
+1corresponding to the empty pair (). Then, interpreting X′with the set of possible values for the
+constant fX′: 1→X′, the functions fZ:X→ZandfY:X′Z→Y, the front-door interventional
+model corresponding to the signature ΣG
+Y|do(X)is
+fY|do(X)(x) =π2(fZ(x),fY(fX′(),fZ(x)))
+=fY(fX′(),fZ(x)),(25)
+whereπ2is projection onto the second item of a pair.
+3.3 A more complex example
+Richardson et al. [2012, Example 51] describe an application of their ﬁxing theorem to a more complex
+causal model with four variables and a single bidirected edg e whose latent projection ADMG Gis given
+byVG={X1,X2,X3,X4}and by edge set
+EG={X3←X1→X2,X2→X3,X3→X4,X2↔X4}. (26)
+In this example they identify the interventional distribut ionp(X4|do(X2)). To illustrate our syn-
+tactic ﬁxing algorithm for this example, we want the monoida l signature of the pure syntactic causal
+eﬀect on Y={X4}ofA={X2}, i.e.ΣG
+X4|do(X2). Here, VG\A={X1,X3,X4}so thatY⋆=
+anGVG\A({X4}) ={X1,X3,X4}with corresponding subgraph districts D⋆=GY⋆={{X1},{X3},{X4}}.
+The monoidal signature of Gis,
+ΣG
+0={X1,X2,X3,X4}
+ΣG
+1={x1,x2,x3,x4}
+dom,cod =/braceleftbig
+x1: 1→X3
+1,x2:X1→X2
+2,x3:X1X2→X2
+3,x4:X1X2X3→X4/bracerightbig
+,(27)
+with corresponding chain-factored signature,
+ΣF
+0={X1,X2,X3,X4}
+ΣF
+1={x1,x2,x3,x4}
+dom,cod =/braceleftbig
+x1: 1→X4
+1,x2:X1→X3
+2,x3:X1X2→X2
+3,x4:X1X2X3→X4/bracerightbig
+.(28)
+9For the district D′={X1}, the ﬁxing set is W={X2,X3,X4}, for which we obtain,
+Σ1= (Simple◦FixX2◦FixX3◦FixX4)/parenleftbig
+ΣF/parenrightbig
+= ({X1},{x1},{x1: 1→X1})
+= Ext/parenleftbig
+Σ1/parenrightbig
+Module( X1) =x1.(29)
+For the district D′={X3}, the ﬁxing set W={X1,X2,X4}, leading to,
+Σ2= (Simple◦FixX1◦FixX2◦FixX4)/parenleftbig
+ΣF/parenrightbig
+= ({X1,X2,X3},{x3},{x3:X1X2→X3})
+= Ext/parenleftbig
+Σ2/parenrightbig
+Module( X3) =x3.(30)
+Finally, for the district D′={X4}, the ﬁxing set W={X1,X2,X3}leads to,
+Σ3= (Simple◦HideX2◦FixX3◦FixX1)/parenleftbig
+ΣF/parenrightbig
+=/parenleftbig
+{X1,X2,X3,X4},{x4,x2},/braceleftbig
+x1:X1→X2
+1,x2:X1→X2,x4:X1X2X3→X4/bracerightbig/parenrightbig
+,(31)
+with exterior signature
+Ext/parenleftbig
+Σ3/parenrightbig
+= ({X1,X3,X4},{q},{q:X1X3→X4}),Module( X4) =q
+q=x4·(x2⊗idX1⊗idX3)·(x1⊗idX3),(32)
+where the maximal exterior morphism qhas type,
+dom(q) =X1X3→X1X1X3→X2→X1X3→X4= cod(q). (33)
+Combining the exterior signatures obtains
+ΣG
+X1X3X4|do(X2)= Ext/parenleftbig
+Σ1/parenrightbig
+∪Ext/parenleftbig
+Σ2/parenrightbig
+∪Ext/parenleftbig
+Σ3/parenrightbig
+=/parenleftbig
+{X1,X2,X3,X4},{x1,x3,q},/braceleftbig
+x1: 1→X3
+1,x3:X1X2→X2
+3,q:X1X3→X4/bracerightbig/parenrightbig
+,
+(34)
+from which we can compute the desired, syntactic interventi onal signature by marginalization,
+ΣG
+X4|do(X2)= Hide {X1,X3}/parenleftBig
+ΣG
+X1X3X4|do(X2)/parenrightBig
+=/parenleftbig
+{X1,X2,X3,X4},{x1,x3,q},/braceleftbig
+x1: 1→X2
+1,x3:X1X2→X3,q:X1X3→X4/bracerightbig/parenrightbig
+.(35)
+4 Discussion
+In this paper, we have shown that purely syntactic causal ide ntiﬁcation can be performed using rel-
+atively simple steps. We observe that the simplicity of this approach largely arises from the process-
+centric formulation of directed causal modelling and the fa ct that manipulations of this model this can
+be expressed in terms of functions of the signature of the cat egory in which this model is represented.
+These steps are unambiguous and therefore easily implement ed in software.
+Although our approach relies on chain factorization of the o bserved process, we note that this is more
+of a mathematical convenience than a restriction. An altern ative development of our approach can use
+comb disintegration in place of the ﬁxing operator described here. This would lea d to diﬀerent forms
+of the resulting interventional signatures which are, none theless equivalent exterior processes. Finally,
+application to other, more elaborate forms of causal identi ﬁcation such as conditional causal eﬀects,
+those arising through edge interventions, and more general forms of causal identiﬁcation by combining
+multiple causal models, would be valuable. It would be inter esting to see the extent to which the
+signature-based approach also simpliﬁes the formulation o f existing algorithms for these problems.
+10References
+E. Bareinboim, J.D. Correa, D. Ibeling, and T. Icard. On Pearl’s Hierarchy and the Foundations of
+Causal Inference . ACM Books, 2020.
+D. Cakiqi and M.A. Little. Non-probabilistic Markov catego ries for causal modeling in machine learn-
+ing. In ACT 2022: Applied Category Theory , 2022.
+K. Cho and B. Jacobs. Disintegration and bayesian inversion v ia string diagrams. Mathemati-
+cal Structures in Computer Science , 29(7):938–971, March 2019. ISSN 1469-8072. doi: 10.1017/
+s0960129518000488.
+B. Fong. Causal theories: A categorical perspective on Bayesi an networks, 2013.
+T. Fritz. A synthetic approach to Markov kernels, condition al independence and theorems on suﬃcient
+statistics. Advances in Mathematics , 370:107239, August 2020.
+T. Fritz and A. Klingler. The d-separation criterion in cate gorical probability. Journal of Machine
+Learning Research , 24(46):1–49, 2023.
+B. Jacobs, A. Kissinger, and F. Zanasi. Causal inference via s tring diagram surgery: A diagrammatic
+approach to interventions and counterfactuals. Mathematical Structures in Computer Science , 31(5):
+553–574, 2021.
+M.A. Little. Machine Learning for Signal Processing: Data Science, Algo rithms, and Computational
+Statistics . Oxford University Press, 2019.
+R. Lorenz and S. Tull. Causal models in string diagrams. page arXiv:2304.07638, 2023.
+E. Patterson. Knowledge representation in bicategories of relations, 2017.
+J. Pearl. Causality: Models, Reasoning and Inference . Cambridge University Press, 2009.
+T.S. Richardson, R.J. Evans, J.M. Robins, and I. Shpitser. N ested Markov properties for acyclic
+directed mixed graphs. In UAI’12: Proceedings of the Twenty-Eighth Conference on Unc ertainty in
+Artiﬁcial Intelligence , page 13. ACM, 2012.
+P. Sellinger. A survey of graphical languages for monoidal c ategories. In B. Coecke, editor, New
+Structures for Physics, Lecture Notes in Physics , pages 289–355. Springer, 2011.
+I. Shpitser. Complete identiﬁcation methods for the causal hierarchy. Journal of Machine Learning
+Research , pages 1941–1979, 2008.
+Y. Yin and J. Zhang. Markov categories, causal theories, and the do-calculus. page arXiv:2204.04821,
+2022.
+11

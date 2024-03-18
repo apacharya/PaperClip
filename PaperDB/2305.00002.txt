@@ -1,0 +1,1524 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+GALAXY CLASSIFICATION USING TRANSFER LEARNING AND 
+ENSEMBLE OF CNN S WITH MULTIPLE COLO UR SPACES  
+ 
+ 
+ 
+ 
+YEVONNAEL ANDREW  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+A thesis submitted in partial fulfilment of the requirements of 
+Liverpool Jo hn Moores Univers ity for the degree of  
+Master of Science  in Artificial Intelli gence and Machine Learning  
+ 
+ 
+ 
+ 
+ 
+JUNE 2022  
+ 
+ i 
+ ABSTRACT  
+Big data is now a norm in astronomy. The growth of astronomical images makes it a very 
+suitable domain for computer science research. It is common for astronomer uses the 
+morphological of galaxies to classify galaxies into categories . This practice was first applied 
+systematically by Hubble (1936) . When the data is small in size, the classification process could 
+be easily done by small teams or individu als. However, the exponential growth of data collected 
+by modern telescopes made it impossible to rely on an expert to classify every single galaxy 
+image.  
+In December 2013, Winton Capital and Galaxy Zoo, together with the Kaggle team , created a 
+Galaxy Cha llenge, where participants were asked to create a model to classify galaxies into 
+categories. Since then, researchers worldwide have often used the Kaggle Galaxy Zoo dataset .  
+This research will focus on investigating how colo ur space transformation could affect 
+classification accuracy , and we will investigate whether the CNN architecture will affect this 
+too. For this research, we will consider  multiple  colour space s (RGB, XYZ, LAB, etc) and 
+multiple CNN architecture s (VGG , ResNet, Den seNet, Xception, etc). We will use a pre -trained 
+model and weights . However, most of the pre -trained model was trained on a natural RGB 
+image, so we will investigate the performance in predicting the transformed (non -RGB) non-
+natural image (astronomical images).  
+We test our hypothesis by first testing individual network s using RGB and transformed colour 
+spaces. We also test multiple ensemble configurations of different networks and colour spaces.  
+We did a minimal hyperparameter search  to en sure we obtained an optimum result. Our 
+experimental results show that using transformed colour spaces on individual network s 
+produced a higher validation accuracy. Ensembles of network and colour spaces further 
+increase  the validation accuracy.  
+Finally, this research aims to validate the usefulness of colo ur space transformation for 
+astronomical images. This research will also become a benchmark that is useful for future 
+research.   ii 
+ LIST OF TABLES  
+ 
+ 
+Table 1: Literature review summary on transfer learning in astronomy  ................................ .. 11 
+Table 2: Literature review summary on feature extraction using a pre -trained model  ............  11 
+Table 3: Literature review summary on colour space transformation in CNN  ........................  16 
+Table 4: Text representation of classification flowchart (Willett et al., 2013)  .........................  19 
+Table 5: Classification threshold (Willett et al., 2013)   ................................ ............................  20 
+Table 6: Combination of variables tested in this research  ................................ ........................  23 
+Table 7: Batch Size and Training Time  ................................ ................................ ....................  32 
+Table 8: Single Network Classification Accuracy  ................................ ................................ ... 33 
+Table 9: Top 3 Highest Overall Accuracy for Single Network  ................................ ................  34 
+Table 10: Validation Accuracy of Tested Ensemble Networks  ................................ ...............  35 
+ 
+  iii 
+ LIST OF FIGURES  
+ 
+ 
+Figure 1: Classification flowchart for Galaxy Zoo (Willett et al., 2013)  ................................ . 19 
+Figure 2: Proposed Architecture  ................................ ................................ ...............................  22 
+Figure 3: Sample images  ................................ ................................ ................................ ..........  24 
+Figure 4: Cropped Images  ................................ ................................ ................................ ........  25 
+Figure 5: Sample Images from Each Class  ................................ ................................ ...............  26 
+Figure 6: Validation Accuracy of Multiple Top Layer Configurations ................................ .... 28 
+Figure 7: Validation Loss of Multiple Top Layer Configurations  ................................ ...........  28 
+Figure 8: Validation Accuracy of Data Augmentation Configuration  ................................ ..... 29 
+Figure 9: Validation Loss of Data Augmentation Configuration  ................................ .............  29 
+Figure 10: Validation Accuracy of Multiple Learning Rate Configurations  ............................  30 
+Figure 11: Validation Loss of Multiple Learning Rate Configurations  ................................ ... 30 
+Figure 12: Validation Accuracy of Learning Rates (100 Epochs)  ................................ ...........  31 
+Figure 13: Validation Loss of Learning Rates (100 Epochs)  ................................ ...................  31 
+Figure 14: Validation Accuracy of Multiple Batch Size Configurations  ................................ . 32 
+Figure 15: Validation Loss of Multiple Batch Size Configurations  ................................ .........  32 
+Figure 16: Validation Accuracy of DenseNet201 with Multiple Colour Spaces  .....................  35 
+Figure 17: Validation Accuracy of Ensembles Networks with Multiple Colour Spaces  .........  37 
+Figure 18: Validation Loss of Ensembles of Four Networks with Multiple Colour Spaces  .... 37 
+  iv 
+ LIST OF ABBREVIATIONS  
+ 
+ 
+BN   Batch Normalization  
+CIE   Comission International de L’Éclairage  
+CIFAR    Canadian Institute for Advanced Research  
+CNN    Convolutional Neural Network  
+FIRST    Faint Images of the Radio Sky at Twenty -cm 
+GPU    Graphics Processing Unit  
+GZ2   Galaxy Zoo 2  
+HSL    Hue, Saturation, Lightness (colour space)  
+HSV    Hue, Saturation, Value (colour space)  
+ILSVRC   ImageNet Large Scale Visual Recognition Challenge  
+LSTM    Long  Short Term Memory  
+MLP    Multi Layer Perceptron  
+NTSC    National Television Standards Committee  
+NVSS    NRAO VLA Sky Survey  
+RGB     Red, Green , Blue (colour space)  
+SDSS    Sloan Digital Sky Survey  
+SECAM   Séquentiel Couleur à Mémoire  
+SGD    Stochastic Gradient Descent  
+VGGNet   Visual Geometry Group Deep Convolutional Networks  
+ 
+ 
+ 
+  v 
+ TABLE OF CONTENTS  
+ 
+ABSTRACT  i 
+LIST OF TABLES  ii 
+LIST OF FIGURES  iii 
+LIST OF ABBREVIATIONS  iii 
+CHAPTER 1  1 
+1.1 Background  1 
+1.2 Problem Statement and Related Research  2 
+1.3 Research Questions  3 
+1.4 Aim and Objectives  4 
+1.5 Significance of the Study  4 
+1.6 Scope of the Study  5 
+CHAPTER 2  6 
+2.1. Machine Learning in Astronomy  6 
+2.2. Convolutional Neural Netwo rks 7 
+2.2.1 AlexNet  7 
+2.2.2 VGGNet  8 
+2.2.3 GoogLeNet  9 
+2.2.4 Xception  9 
+2.2.5 ResNet  9 
+2.2.6 DenseNet  10 
+2.3. Pre -trained Model and Transfer Learning  10 
+2.3.1 Transfer Learning in Astronomy  10 
+2.3.2 Pre -trained Model as a Feature Extractor  11 
+2.4. Colour Space  12 
+2.4.1 Transformation to XYZ  12 
+2.4.2 Transformation to HSL  13 
+2.4.3 Transformation to HSV  13 
+2.4.4 Transformation to CIELAB  13 
+2.4.5 Transformation to CIELUV  14 
+2.4.6 Transformation to YUV  14 
+2.4.7 Transformation to YCbCr  15 
+2.4.8 Transformation to YDbDr  15 vi 
+ 2.4.9 Transformation to YIQ  15 
+2.4.10 Transformation to HED  15 
+2.5. Color Space Transformation in CNN  15 
+2.6. Deep Learning Ensemble  17 
+2.6.1 Unweighted model averaging  17 
+2.6.2 Majority Voting  17 
+CHAPTER 3  18 
+3.1 Introduction  18 
+3.2 Research Methodology  18 
+3.2.1 Dataset  18 
+3.2.2 Data Transformation  21 
+3.2.3 Data Augmentation  21 
+3.2.4 Modelling  21 
+3.2.5 Evaluation  22 
+3.3 Ensemble Method  22 
+3.4 Summary  23 
+CHAPTER 4  24 
+4.1 Introduction  24 
+4.2 Dataset Creation  24 
+4.2.1  Image Resizing  24 
+4.2.2  Label Creation for Classification  25 
+4.3 Colour Space Conversion  26 
+4.4 Building Network  27 
+4.4.1  Load Pre -trained Model Base Model and Weights  27 
+4.4.2  Stack Classification Layers  27 
+4.4.3  Configuring for Performance  28 
+4.4.4  Data Augmentation  29 
+4.4.5  Learning Rate  30 
+4.4.6  Epochs  31 
+4.4.7  Batch Size  31 
+CHAPTER 5  33 
+5.1 Introduction  33 
+5.2 Evaluation of Single Network  33 vii 
+ 5.3 Evaluation of Ensemble Networks  35 
+5.4 Summary  37 
+CHAPTER 6  39 
+6.1 Introduction  39 
+6.2 Discussion and Conclusion  39 
+6.3 Contribution to Knowledge  39 
+6.4 Future Recommendations  39 
+REFERENCES  41 
+ 
+  1 
+ CHAPTER 1 
+ 
+INTRODUCTION  
+1.1 Background  
+ 
+Big data is now a norm in astronomy due to a shared culture of cooperation and regulations, in 
+which the collective data from those telescopes are made available online  (Feigelson and Babu, 
+2012) . SDSS, which began operat ing in 2000 (Gunn et al. , 2006) , now produce s about 200 GB 
+of data every night (Feigelson and Babu, 2012) . 
+Fortunately , the growth of astronomical images happen s simul taneousl y with the growth of 
+computing power . Astronomy arguably is a  perfec t domain for computer science research  
+because it pushes the boundaries of  existing  analysis (Kremer et al. , 2017) . This makes  sense 
+because as data increases, analysis become s more difficult.  Common astronomical images 
+found in our daily life are the colo urised RGB version. Most original datasets of astronomical 
+images do not correspond to the wavelength range that is sensitive to the human eye (Rector et 
+al., 2005) . The way of astronomy image creation could affect how the image is interpreted.  
+Hence , computer science researchers need  to develop techniques that can address the nature of 
+astronomical images, both in terms of their volumes and their uniqueness.  
+It is common for astronomer uses the morphological of galaxies to classify galaxies into 
+categories . This practice was first applied systematically by  Hubble  (1936) . Small teams or 
+individuals could quickly process the classification process when the data is small in size . 
+However, the exponential growth of data collected by modern telescopes made it impossible to 
+rely on an expert to classify every single galaxy image.  
+To solve this , a crowdso urced project Galaxy Zoo project was launched  (Lintott et al. , 2008) , 
+which invites volunteer s to assist in classification. The project was very succes sful because , in 
+approximately 175 days, more than 100,000 volu nteers were involved in assisting classification 
+(Lintott et al., 2011) . 
+The success of ConvNets in the ImageNet competition (2012) brought a revolution in computer 
+vision; since then , ConvNets was becoming a dominant approach for almost all image -related 
+tasks (LeCun, Bengio and Hinton, 2015) . The archite cture that won the ImageNet competition 
+(Krizhevsky, Sutskever and Hinton, 2012)  is now known as AlexNe t. 2 
+ Shortly after the success of the ImageNet competition, ConvNet also began to be widely used 
+in astronomical images. The availability of datasets collected from the Galaxy Zoo project 
+makes it a perfect situation to boost the usage of ConvNets in astronomy. In December 2013, 
+Winton Capital and Galaxy Zoo, together with the Kaggle team , created a Galaxy Challenge, 
+where participants were asked to create a model to classify galaxies into categories. Since then, 
+researchers worldwide have often used t he Kaggle Galaxy Zoo dataset . 
+There is a lot of pos sible ConvNet application in astronomy. For classification alone, current 
+usage of CNN are galaxy classification (Dieleman, Willett and Dambre, 2015) , solar radio 
+spectrum classification (Chen et al. , 2017) , sunspot group classification (Tang et al. , 2021) , 
+variable stars classification (Szklenár et al. , 2020) , pulsar candidate classification (Wang et al. , 
+2019) .  
+CNN can also be combined with other  networks for a particular task . For example , the 
+combination of CNN and LSTM can be used to classify transient radio frequency  inference 
+(Czech, Mishra and Inggs, 2018) . 
+A digital i mage can be represented in different colo ur spaces (RGB, HSV, LAB, etc .). However, 
+the most common colo ur space used in deep learning is RGB. The galaxy  images from Kaggle 
+Galaxy Challenge are also in RGB format. We are interested in how different colo urs can affect 
+the model 's performance. This research  will consider all colour spaces and network architecture 
+combinations  on astronomical images. We will also compare the performance if we train the 
+model from scratch and use the pre -trained model.  
+1.2 Problem Statement and Related Research  
+ 
+Kaggle Galaxy Challenge asked participants to create a model to classify galaxies. Dieleman, 
+Willett and Dambre (2015)  developed a deep neural network model which exploits rotational  
+and translational  symmetr y. Dieleman 's winning solution in the Kaggle competition required 
+simple ensembling by averaging over 17 network variants and 60 transformations. The network 
+variants differ in their number of dense layers, filter size configuration, activation function on 
+the dense l ayer, and the number of filters.  
+Dieleman 's winning solution incorporate s the ensembling of networks. Ensembling is often 
+used to increase the accuracy of the results. However, e nsemble in deep learning is still not well 
+studied . Most of the deep learning  literature focuses on the design of the network , and most of 3 
+ them only appl ies naïve ensembling  (Ju, Bibaut and van der Laan, 2018) . The authors further 
+test multiple ensembling methods on the CIFAR -10 dataset. Super Learner (Van der Laan, 
+Polley and Hubbard, 2007)  yield the highest accuracy over other ensembling methods. Super 
+Learner finds the be st weights adaptively without human intervention, which mean s we can 
+include all the weak learners in the library.  
+Ensembling multiple networks has increased accuracy in numerous image -related task s, 
+including astronomical images. However,  none of them studie d in-depth ensembling multiple 
+networks trained  in different  colour spaces.  
+ColorNet (Gowda and Yuan, 2019)  shows that transforming RGB colo ur into different colo ur 
+spaces can significantly affect classification accuracy. Using a simp le convolutional network 
+on the CIFAR -10 dataset on multiple colo ur spaces (RGB, HSV, LAB, etc) shows that LAB 
+colour spaces yield the highest accuracy . The experiment also shows that each class has 
+different accuracy for each colo ur space, which means the re is no perfect correlation between 
+colour spaces. Finally , ColorNet proposed an ensemble of Dense Net based model s with seven  
+colour spaces to obtain high classification accuracy . 
+In other fields, some works exist  that tried to do colo ur space transformations before doing 
+further analysis. For example, in medical images, conversion to CIE Lab col uor space for 
+dysplastic nuclei segmentation achieve s the best -averaged accuracy (dos Santos et al. , 2020) . 
+CIE Lab also yield s the highest classification accuracy in histological image classificat ion 
+(Velastegui and Pedersen, 2021) . The authors also further show that despite CIE Lab yield ing 
+the highest overall accuracy, some  classes are more accurate when they are represented in other 
+colour spaces. FusionNet (Guo et al. , 2020)  used YIQ colo ur space for multi -modal medical 
+image fusion. In the field of steganography, StegColNet (Gowda and Yuan, 2021)  shows that 
+the ensemble of the colour space model outperforms the recent state -of-the-art approach.  
+1.3 Research Questions  
+ 
+After conducting literature reviews, several research questions  would like to be addressed by 
+this research.  
+• How does the colo ur transformation affect the classification accuracy in the 
+astronomical images?  
+• Would  the network learn different representation s when we feed them with different 
+colour spaces?  4 
+ • How does the  usage of pre -trained model s and training from scratch affect classification 
+accuracy?  
+• How does the usage of different base architecture for ensembling affect the 
+classification accuracy?  
+• What are the best ensemble methods to combine multiple networks trained on different 
+colour spaces in order to yield a higher accuracy?  
+1.4 Aim and Objectives  
+ 
+This research aims to understand the effect of colo ur transformation and ensembles of CNN 
+trained on different colo ur transformation s on the classification accuracy of astronomical 
+images.  
+Based on the aim of this study , the research objectives are formulated  as follows:  
+• To analy se the effect of colo ur transformation with respect to classification accuracy  
+• To compare the effect of different  CNN  architectures used to train images with  different 
+colour space  
+• To analy se whether using a pre-trained model suitable for astronomical images 
+(considering most of the pre -trained model was trained on daily object images)  
+• To identify relevant research related to colo ur space transformations on CNN  
+• To identify relevant research on the usage of CNN  in astronomical images  
+• To compare between the ensembling methods  to improve classification accuracy  
+• Develop a new methodology so that they can combine the benefit of multiple colo ur 
+spaces and ensembling  
+This research is intended to develop a novel methodology that can effectively combine 
+networks trained on multiple colo ur spaces. We hypothesi se that the combination of these 
+networks will improve classification accuracy.  
+1.5 Significance of the Study  
+This research aims to contribute new pieces of kn owledge  to the deep learning and computer 
+vision fields in the following ways:  
+• To validate the usefulness of colo ur space transformation to increase the classification 
+accuracy of astronomical images  
+• To validate the usefulness of transfer learning for astronomical images  5 
+ • A benchmark for the comparison of different CNN architecture on galaxy classification  
+• A benchmark of multiple ensembling methods on galaxy classification  
+1.6 Scope of the Study  
+Taking into account the time and resource constraints, we will limit the scope of the study as 
+follows:  
+• This work only focu ses on astronomical data, i.e. , Kaggle Galaxy Challenge data.  
+• Other methods, such as statistical feature extraction , will not be considered here.   
+  6 
+ CHAPTER 2  
+ 
+LITERATURE REVIEW  
+ 
+2.1. Machine Learning in Astronomy  
+The earliest published work exploring  the use of machine learning in astronomy was by  Adorf 
+and Meurs  (1988) , which use d both supervised and unsupervised classification  to classify the 
+IRAS Point Source Catalog.  
+The earliest published work to automatically classify star s/galax ies using neural network s was 
+by Odewahn et al (1992) . The authors use both linear perceptron and multi -layer perceptron for 
+the classification task. The classification is based on manua lly extracted features, e.g. diameter, 
+ellipticity, average transmission, centr al transmission, gradients, etc.  
+The earliest review paper on neural network applications in astronomy was published by Miller 
+(1993) . The author identified several major areas of research: adaptive  telescope optics, object 
+classification , object matching, and detector event filtering. The state -of-the-art algorithm in 
+this paper is the multi -layer perceptrons employing back -propagation learning (MLP) and self-
+organi sing maps (SOM).  
+The b ack-propagation algorithm is a learning procedure , in which the weights of connections 
+are adjusted iteratively to minimi se the difference between  the tru e value and the predicted 
+value  (Rumelhart, Hinton and Williams, 1986) . Years later, the back -propagation algorithm 
+was applied to solve a real -world problem, recogni sing handwritten zip code s (LeCun et al. , 
+1989) . 
+Neural network s and back -propagation were developed in the 1980s. The ability of the 
+algorithms was also already demonstrated by LeCun in 1989. However,  there was a 
+fundamental problem in deep learning, which made res earchers los e interest. By the late 1980s, 
+it was known that traditional deep feedforward networks were hard to train by back -propagation 
+(Schmidhuber, 2015) . The reason is that deep neural networks suffer from a problem that is 
+now famous as exploding and vanishing gradients (Hochreiter, 1991) .  
+Due to the limitation of back -propagation  of recurrent neural networks , i.e., exploding and 
+vanishing gradients, an impor tant concept called Long Short Term Memory (LSTM) was 
+developed (Hochreiter and Schmidhuber, 1997) . But, the LSTM breakthrough did little to fix 7 
+ the larger problem of neural networks and did not work very well ; also, computers were not 
+fast enough, algorithm s were not smart enough, and people were not satisfied (Kurenkov, 
+2020) .  
+In the 1990s, the enthusiasm and optimism on AI are at a low point. Thus, this period is often 
+referred to as AI Winter, when  the funding and interest in AI research were reduced  (AI 
+Newsletter , 2005) . This situation was confirmed by  work from LeCun et al, which compares 
+learning algorithms for recogni sing handwritten digit s (LeCun et al. , 1995) . The paper 
+compares classification algorithms developed at Bell Laboratories and elsewhere, i.e., Linear 
+Classifier (Baseline), Nearest Neighbor Classifier (Baseline), Pairwise Linear Classifier, PCA 
+and Polynomial Classifier, RBF Network, Large Fully Connected Multi -Layer Neural Network, 
+LeNet 1, LeNet 4, LeNet 5, Boosted LeNet 4, Tangent Distance Classifier and  Optimal Margin 
+Classifier . Using the Optimal Margin Classifier  (Boser, Guyon and Vapnik, 1992) , a test error 
+of 1.1% was reached. LeNet 4 has a test error of 1.1%, while the best algorithm is Boosted 
+LeNet , with a test error of 0.7%. It shows that the Optimal Margin Classifier, now known 
+famous as Suppor t Vector Machine, worked better or the same c ompared to the neural networks.  
+A decision -tree-based classifier called Random Decision Forests (Ho, 1995)  was developed, 
+and the validity is demonstrated by experiments on recogni sing handwritten digits. Random 
+Forests are proven to be very effective and come with a sound mathematical theory (Kurenkov, 
+2020) . This also contribute s to the AI winter.  
+2.2. Convolutional Neural Networks  
+Convolutional neura l networks, which are sometimes referred to as ConvNets or CNNs, are a 
+speciali sed kind of neural network that is suitable for data that has a grid -like topology, like 
+images, which are usually thought of as a two-dimensional grid of pixels (Goodfellow, B engio 
+and Courville, 2016) . 
+2.2.1 AlexNet  
+In 2012, there was a competition called ImageNet Large Scale Visual Recognition Challenge , 
+which is now often refe rred to as ImageNet  only. The winning solution achieved a top -5 error 
+of 15.3%, which is substantially lower than the runner -up. This winning solution is now well 
+known as AlexNet (Krizhevsky, Suts kever and Hinton, 2012) . 8 
+ AlexNet has eight layers – five convolutional and three fully -connected  layers . To prevent 
+overfitting, the network uses ReLU s non -linearity  (Nair and Hinton, 2010)  and dropout layer 
+(Hinton et al. , 2012) . While ReLU do es not require input normali sation, applying normali sation 
+after ReLU in certain layers succe ssfully reduce s error rates. This architecture also used 
+overlapping pooling, which reduces the error rates compared with non -overlapping pooling.  
+To combat memory limitation, the network is trained across two GPUs, where each GPU has 
+half of the neurons. The GPU communicates with each other on a certain layer, e.g., layer 3 
+take input from all kernel from two GPUs in layer 2; layer 4 only take input from the kernel  of 
+layer 3 within the same GPU.  
+AlexNet uses two data augmentation strateg ies. The first strategy is done by extracting random 
+224 x 224 -pixel patches from 256 x 256 images, along with their horizontal reflections. This 
+augmentation is done with little computation and is not stored  in the disk. The second strategy 
+is by altering RGB intensities , i.e.,  performing PCA on the RGB pixel values.  
+The model was trained using SGD (stochastic gradient descent) with batch size 128, the 
+momentum of 0.9, and weigh decay 0.0005. The learning rat e was initiali sed at 0.01, divided 
+by 10 if the validation rate was  not improving.  
+2.2.2 VGG Net 
+VGG Net is a class of neural networks that employ s a very deep network for image recognition 
+(Simonyan and Zisserman, 2014) . This architecture won ImageNet Challenge 2014 competition  
+- first place in the localisation track and second place in the classification track.  
+VGG Net uses a 3 x 3 receptive field , 1-pixel convolution stride, and spati al padding such that 
+spatial resolution after convolution is prese rved. Max -pooling window size is 2 x 2 pixel s, with 
+stride 2. T he total pooling layer for each architecture is five. Thus, not every convolution is 
+followed by pooling. The fully connected layers consist of two 4096 channels and one 1000 
+channels, with a soft-max layer as the final layer. All layers use R eLu for non -linearity . This 
+paper also uses LRN normalisation (Krizhevsky, Sutskever and Hinton, 2012)  in one of the 
+architecture s, but it does not improve the performance.  9 
+ 2.2.3 Goog LeNet  
+GoogLeNet, a n Inception -based  deep convolutional neural network with 22 layers, achieved a 
+new state of the art in the ImageNet Challenge 2014 (Szegedy et al. , 2015) .  
+A set of te chniques were adopted to obtain higher performance:  
+• Ensembling 7 models independently with the same architecture, same initiali sation, and 
+same learning rate policies. The difference between models is in the sampling 
+methodologies and random order of input  image.  
+• Data augmentation involve s resizing, cropping, and mirroring, which leads to 144 crops 
+for each image.  
+• The softmax is the average over multiple crops and over all the individual classifiers. 
+The authors tested that max -pooling over crops and avera ging over the individual 
+classifiers lead to inferior performance.  
+2.2.4 Xception  
+Xception (Chollet, 2017) , "Extreme Inception ," is a neural network architecture that uses a 
+"depthwise separable convolution ." Xception has a slightly better performance on the ImageNet 
+dataset.  
+2.2.5 ResNet  
+ResNet (He et al. , 2016) . The network 's convolutional layers mostly have filters of 3 x 3. The 
+number of filters is designed to preserve the time complexity per layer . Downsampling is done 
+by convolutional layers of stride 2. The network ends with a global average pooling layer. Then 
+we will i nsert "shortcut connections ." 
+The input is processed by the following methods (Krizhevsky, Sutskever and Hinton, 2012; 
+Simonyan and Zisserman, 2014) . To reduce the internal covariate shift , Batch Normalization 
+(Ioffe and Szegedy, 2015)  is applied before activation and right after each convolution. The 
+dropout layers are  not needed because of the regulari sation provided by BN. The model was 
+trained using SGD (stochastic gradient descent) with batch size 256, momentum of 0.9, and 
+weigh t decay of 0.0001. The learning rate was initiali sed at 0.01, which was divided by 10 whe n 
+plateaus. The models trained for up to 60 x 104 iterations.   10 
+ 2.2.6 DenseNet  
+Dense Convolutional Network  (Huang et al. , 2017)  is a type of neural network architecture 
+where each layer takes all preceding feature  maps as input. This is the benefit of DenseNet, 
+collective knowledge of preceding feature  maps.  
+If L denote s the number of layers, then Densenet has 𝐿(𝐿+1)
+2 connections.  In Dense Net, each 
+layer applies a non -linear transformation 𝐻𝑙(∙), which is defined as three consecutive 
+operations: Batch Normali sation, ReLU, and 3 x 3 convolution.   
+The network is divided into multiple densely connected dense blocks . The layer between the 
+dense blocks is referred to as transition layers , which consists of batch normali sation, 1 x 1 
+convolution layer, and 2 x 2 average pooling layer.  
+2.3. Pre -trained Model and Transfer Learning  
+The term "transfer learning " can be traced to its earliest work by Stevo and Ante (1976 , 2020) . 
+In machine learning and deep learning, the distributions of training and testing data are assumed 
+to be the same. Thus, if there is a discrepancy  between training and testing data, the model may 
+not work well , and the model need s to be re built from scratch (Pan and Yang, 2009) . For 
+example, a model train ed to discriminate astronomical images captured by an old telescope may 
+not work well to predict astronomical images from the newer telescope as they will have a 
+different quality.  
+Fortunately, transfer learning allows us to use training and testing data that have different 
+distributions and  different tasks and domains  (Pan and Yang, 2009) . The use of transfer learning 
+allows us not to train the model from scratch.  
+In computer vision, transfer learning is done by using  a pre-trained model.  
+2.3.1 Transfer Learning in Astronomy  
+Transfer  learning has been used i n astronomy as well . There are two common types of transfer 
+learning implementation in astronomy: transfer learning from one survey to another or transfer 
+learning from ImageNet. The second one is interesting considering the pre -trained model 
+usually  was trained on the ImageNet dataset, which contain s natural images like animals, cars, 
+etc.  11 
+ Table 1: Literature review summary on transfer learning in astronomy  
+Authors  and Year  Objective/ Purpose  Architecture /Methods  Used  
+(George, Shen and 
+Huerta, 2018)  Glitch classification and 
+clustering of gravitational 
+waves  Inception , ResNet, VGG . The 
+trained CNN also used as a 
+feature extractor for clustering  
+(Ackermann et al. , 
+2018)  Galaxy merger detection  Xception  
+(Tang, Scaife and 
+Leahy, 2019)  Radio galaxy classification  Transfer learning from different 
+surveys (NVSS and FIRST)  
+(A. Khan et al. , 2019)  Galaxy classification  Xception . The model also used 
+as a feature extractor for 
+clustering  
+(Yang et al. , 2020)  Lunar impact crater 
+identification and age 
+estimation  ResNet101 as a feature extractor  
+(Awang Iskandar et 
+al., 2020)  Planetary nebulae classification  InceptionResNetV2, 
+DenseNet201 , MobileNetV2  
+(Wei et al. , 2020)  Star cluster classification  VGG19 -BN, ResNet18  
+(Tanoglidis, 
+Ćiprijanović and 
+Drlica -Wagner, 2021)  Separating low surface 
+brightness galaxies from 
+artifacts  Transfer learning from different 
+surveys ( DES and HSC -SSP)  
+(Farrens et al. , 2022)  Blended sources identification  VGG  
+Table 1 shows literature that use s transfer learning in the astronomy field. Except noted, all pre -
+trained models are using the ImageNet dataset. For example, Tang, Scaife , and Leahy  (2019)  
+use transfer learning from different surveys (NVSS and FIRST) for radio galaxy classification.  
+2.3.2 Pre-trained Model as a  Feature Extractor  
+A pre-trained model can be used as a features extractor as an image representation (Sharif 
+Razavian et al. , 2014) . The authors use the first fully -connected layer as a feature vector  of size 
+4096 , which is further trained on linear SVM for a classification task.   
+This method is also known as deep feature extraction . 
+Table 2: Literature review summary on feature extraction using a pre -trained model  
+Authors and Year  Objective/Purpose  Architecture/Methods Used  
+(Chaib et al. , 2017)  Remote sensing image 
+classification  CaffeNet + V GG-VD16. Fe atures are 
+extracted from the first FC layer, 
+which then combined using either of 
+two options: addition  or concatenation.  12 
+ (Lopes and Valiati, 
+2017)  Tuberculosis detection  GoogleNet, VGG, Resnet. Three 
+different proposals: 1) Simple CNN 
+feature extraction, 2) Bag of CNN 
+features, 3) Ensembles  
+(Rajaraman et al. , 
+2018)  Malaria parasi te 
+detection  AlexNet, VGG16 , Xception, 
+ResNet50, DenseNet121 . Candidate 
+layers of the network were tested to get 
+the optimal layer.  
+(Varshni et al. , 2019)  Pneumonia detection  Xception, VGG, ResNet, and 
+DenseNet are used as feature 
+extractor s, followed by RF, KNN, NB 
+and SVM. Hyperparameter tuning is 
+done in the SVM cl assifier.  
+(Saxena, Shukla and 
+Gyanchandani, 2020)  
+(Saxena, Shukla and 
+Gyanchandani, 2020)  Breast cancer detection  Ten different pre-trained CNNs were 
+investigated . Images are divided into 
+non-overlapping  patches . Linear SVM 
+classifier  used as final classifier.  
+(Barbhuiya, Karsh 
+and Jain, 2021)  Sign language 
+classification  Modified pre-trained Alexnet and 
+VGG16 used as feature extractor, 
+followed by SVM classifier.  
+2.4. Colo ur Space  
+Light in the visible region of the electromagnetic spectrum that fall s upon the human retina is 
+what we know as colo ur (Poynton, 1997) . The h uman retina has three t ypes of colo ur 
+photoreceptor cells. Thus, three numerical components are needed to describe a colo ur.  
+The first defined quantitative links between electromagnetic spectrums and perceived colo ur by 
+human s are by the Comission International de L’Éclairage  (Smith and Guild, 1931; CIE, 1932) , 
+which created two colo ur spaces: CIE 1931 RGB colo ur space and CIE 1931 XYZ colo ur space.  
+CIE 1931 colo ur space model defines three parameters denoted as "X", "Y", and "Z", where Y 
+is the luminance component, and additional X and Z components.  
+2.4.1 Transformation to XYZ  
+The standardi sed transformation equations recommended by CIE (Fairman, Brill and 
+Hemmendinger, 1997)  are as follow s: 
+[𝑋
+𝑌
+𝑍]=⌈0.49 0.31 0.2
+0.17697 0.81240 0.01063
+0 0.01 0.99⌉[𝑅
+𝐺
+𝐵] 13 
+ 2.4.2 Transformation to HS L 
+HSL (hue, saturation, lightness)  represent s an image in terms of chromatic and achromatic 
+information. The commonly used equations  (Hanbury and Serra, 2002)  are: 
+𝑆=         0 if max (R,G,B )=min( R,G,B )
+max (𝑅,𝐺,𝐵)−min (𝑅,𝐺,𝐵)
+max (𝑅,𝐺,𝐵)+min (𝑅,𝐺,𝐵)if L≤1/2
+max (𝑅,𝐺,𝐵)−min (𝑅,𝐺,𝐵)
+2−[max (𝑅,𝐺,𝐵)+min (𝑅,𝐺,𝐵)]otherwise 
+The L component, which expres ses the brightness, is expressed as:  
+𝐿=max (𝑅,𝐺,𝐵)+min (𝑅,𝐺,𝐵)
+2 
+The H component is expressed as:  
+𝐻′=        undefined if S=0
+𝐺−𝐵
+max (𝑅,𝐺,𝐵)−min (𝑅,𝐺,𝐵)if R=max( R,G,B )
+2+B−R
+max (𝑅,𝐺,𝐵)−min (𝑅,𝐺,𝐵)if G=max( R,G,B )
+4+R−G
+max (𝑅,𝐺,𝐵)−min (𝑅,𝐺,𝐵)if B=max( R,G,B ) 
+To get the final H value, H ' is multiplied by 60o, 𝐻=𝐻′×60𝑜. 
+ 
+2.4.3 Transformation to HSV  
+The H component of HSV is the same as the H component of HSL. The S and V components 
+can be expressed as:  
+𝑉=𝑚𝑎𝑥 (𝑅,𝐺,𝐵) 
+𝑆=         𝑚𝑎𝑥 (𝑅,𝐺,𝐵)−𝑚𝑖𝑛 (𝑅,𝐺,𝐵)
+𝑚𝑎𝑥 (𝑅,𝐺,𝐵)if max(R,G,B) ≠0
+0 otherwise 
+2.4.4 Transformation to CIELAB  
+LAB colo ur space, also known as CIE 1976 L*a*b*, and CIELAB colo ur space. The conversion 
+from RGB to LAB cannot be done straightforward, but we need to convert it into XYZ, 
+followed by the conversion into LAB using the following equations (Schanda, 2007) : 
+𝐿∗=116 𝑓(𝑌
+𝑌𝑛)−16  
+𝑎∗=500 [𝑓(𝑋
+𝑋𝑛)−𝑓(𝑌
+𝑌𝑛)] 
+ 14 
+ 𝑏∗=200 [𝑓(𝑌
+𝑌𝑛)−𝑓(𝑍
+𝑍𝑛)] 
+where, being t = 𝑡=𝑋
+𝑋𝑛,𝑌
+𝑌𝑛,𝑜𝑟𝑍
+𝑍𝑛: 
+𝑓(𝑡)=            √𝑡3if 𝑡>(24
+116)3
+(841
+108)(𝑡)+16
+116if 𝑡≤(24
+116)3 
+2.4.5 Transformation to CIELUV  
+CIELUV is also known as the CIE 1976 L*, u*, v* colo ur space.  The L* of CIELUIV is the 
+same as that of the CIELAB. The other coordinates are defined as follows (Schanda, 2007) : 
+𝑢∗=13𝐿∗(𝑢′−𝑢𝑛′) 
+and 
+𝑣∗=13𝐿∗(𝑣′−𝑣𝑛′) 
+Following the CIE 1960 UCS Diagram recommendation, the equations for u ' and v ' are as 
+follow  (Schanda, 2007) : 
+𝑢′=4𝑋
+𝑋+15𝑌+3𝑍 
+and 
+𝑣′=9𝑌
+𝑋+15𝑌+3𝑍 
+The value of 𝑢𝑛′ and 𝑣𝑛′ can be taken from the white reference 's table  (Poyn ton, 2012) . For 
+example , in CIE III C, 𝑢𝑛′=0.2009 , 𝑣𝑛′=0.4609 ; in CIE III D 65, 𝑢𝑛′=0.1978 , 𝑣𝑛′=0.4683 .    
+2.4.6 Transformation to YUV  
+YUV is created from RGB, where Y is created from weighted values of R, G, and B as a 
+measure of luminance. U and V are computed as differences between the calculated Y and B 
+and R.  
+Derived from BT.470 -6 (1998 ), the formula to convert RGB to YUV is as follows (equasys 
+GmbH) : 
+[𝑌
+𝑈
+𝑉]=⌈0.299 0.587 0.114
+−0.147 −0.289 0.436
+0.615 −0.515 −0.100⌉[𝑅
+𝐺
+𝐵] 
+The RGB value should be in the interval of [0,1].  15 
+ 2.4.7 Transformation to YCbCr  
+YCbCr, sometimes written as YC BCR. From full -scale 8 -bit RGB, YCbCr can be computed 
+using the following equations  (Itu-t, 2011) : 
+𝑌=0.299 ∗R+0.587 ∗𝐺+0.114 ∗𝐵 
+𝐶𝐵=128 +(−0.299 ∗R−0.587 ∗𝐺+0.886 ∗𝐵)
+1.772 
+𝐶𝑅=128 +(0.701 ∗R−0.587 ∗𝐺−0.114 ∗𝐵)
+1.402 
+2.4.8 Transformation to YDbDr  
+YDb Dr, sometimes written  YD BDR, is a colo ur space used in the SECAM TV system, which is 
+used in France and some Eastern European countries. To convert RGB into YDbDr can be done 
+using the following equations (Shi and Sun, 2019) : 
+[𝑌
+𝐷𝑏
+𝐷𝑟]=⌈0.299 0.587 0.114
+−0.450 −0.883 1.333
+−1.333 1.116 −0.217⌉[𝑅
+𝐺
+𝐵] 
+2.4.9 Transformation to YIQ  
+YIQ has been used in NTSC TV systems for years. To convert RGB into YIQ can be done using 
+the following equations  (Broesch, 2008; Shi and Sun, 2019) : 
+[𝑌
+𝐼
+𝑄]=⌈0.299 0.587 0.114
+0.596 −0.275 −0.321
+0.212 −0.523 0.311⌉[𝑅
+𝐺
+𝐵] 
+2.4.10 Transformation to HED  
+HED (Haematoxylin -Eosin -DAB) is a special purpose colo ur space  used in the medical field to 
+analy se tissues (Ruifrok and Johnston, 2001) , with the conversion equations as follow:  
+[𝐻
+𝐸
+𝐷]=⌈1.88 −0.07 −0.60
+−1.02 −1.13 −0.48
+−0.55 −0.13 1.57⌉[𝑅
+𝐺
+𝐵] 
+2.5. Color Space Transformation in CNN  
+This is a summary of the literature review for the use of colo ur space transformation in CNN. 
+We only include research that involves transforming original colo ur space into other colo ur 
+spaces , e.g. , RGB to LAB . 
+ 
+ 16 
+ Table 3: Literature review summary on colour space transformation in CNN  
+Author  Colour  Space  Task Type  Field/Dataset   
+(Rachmadi and 
+Purnama, 2015)  RGB, LAB, XYZ, HSV  Classification  Vehicle images  
+(Kim and Ro, 2016)  RGB, LAB, YCbCr, HSV, YI Q, 
+XYZ, RQCr, RIQ, YQCr  Face 
+Recognition  Multi -PIE 
+(Atha and 
+Jahanshahi, 2017)  RGB, YCbCr  Detection  Corrosion images  
+(Jafarbiglo, Danyali 
+and Helfroush, 
+2018)  LAB  Classification  MITOS -
+ATYPIA -14 
+(Gowda and Yuan, 
+2019)  RGB, HSV, LAB, YUV, YCbCr, 
+YpBPr, YI Q, XYZ, HED, LCH, 
+CMYK  Classification  CIFAR -10, 
+CIFAR -100, 
+CVHN, ImageNet  
+(M. A. Khan et al. , 
+2019)  LAB  Classification  Weizmann, KTH, 
+UIUC, Muhavi, 
+WVU  
+(Castro et al. , 2019)  RGB, HSV, LAB  Classification  Fruit dataset  
+(Li et al. , 2020)  RGB , HSV  Segmentation  Medical  
+(Moh ammadi 
+Lalabadi, Sadeghi 
+and Mireei, 2020)  RGB, HSV, LAB  Classification  Fish dataset  
+(Gowda and Yuan, 
+2021)  RGB, HSV, LAB, YUV, YCbCr, 
+YpBPr, YI Q, XYZ, HED, LCH, 
+CMYK  Classification  Bossbane, 
+BOWS2  
+Using LAB colo ur space for face recognition task s results in higher accuracy than using RGB 
+(Kim and Ro, 2016) , 79.77% and 71.50% , respectively. The authors also propose  "collaborative 
+feature learning ", a framework to aggregates features from multiple colo ur spaces, which 
+further improves accuracy to  90.81%.  
+However, c olour space transformation does not always bring a better result. For example, a 
+publication on vehicle colo ur recognition (Rachmadi and Purnama, 2015)  achieves slightly 
+higher  accuracy using RGB colo ur space compared to XYZ, LAB, and HSV – 0.9447, 0.9432, 
+0.9414, and 0.9372 , respectively. The authors didn 't address the stochastic factor of neural 
+network – whether the accuracy differences were just a random chance, nor evaluate the use of 
+differen t architecture on different colo ur spaces.  17 
+ 2.6. Deep Learning Ensemble  
+Ensemble learning combines several models to reduce generali sation error. If the models make 
+independent errors, the ensemble will perform significantly better than its individual models 
+(Goodfellow, Bengio and Courville, 2016) .  
+Many machine learning competitions are won by the use of  ensemble  model s or ensembl e 
+learning. Several reasons behind the success of ensemble learning are  (Dietterich, 2000) : 
+• Statistica l reason . Ensembl e reduce s the risk arising from a single model and can help 
+us find a good approximation to f.   
+• Computa tional  reason . A single model may get stuck in local optima. An e nsemble may 
+start from different starting points  to avoid get ting stuck in the same position . 
+• Representational reason.  In machine learning, sometimes , the function f cannot be 
+represented by any hypothesis  in a given space . By using an ensemble, the approximated 
+function may  expand beyond the given sp ace.  
+2.6.1 Unweighted model averaging  
+This approach is the most used approach in the literature . To get the final prediction, the output s 
+of learner s are averaged. The averaging is performed either on the output s of learners  or by 
+using the softmax function (Ju, Bibaut and van der Laan, 2018; Ganaie and Hu, 2021) . 
+This simple averaging of six ResNet models with different depth s is used as the winning 
+solution for ILSVRC 2015 classification tasks (He et al. , 2016) . VGGNet (Simonyan and 
+Zisserman, 2014)  also uses this ensemble method to get a lower test error. GoogleNet trained 7 
+versions of the same model , with different sampling methodologies and random  input order, to 
+create ensemble prediction (Szegedy et al. , 2015) . However, this naïve averaging is not data -
+adaptive : it works well for networks that  have comparable performance, and are sensitive to the 
+excessively biased learners  (Ju, Bibaut and van  der Laan, 2018) .  
+2.6.2 Majority Voting  
+This approach is similar to unweighted averaging. Majority voting works by counting the 
+number of all predicted labels from each individual learner. The final prediction depends  on 
+which label has the most votes.  The m ajority voting is less sensitive to the excessively biased 
+learners. (Ju, Bibaut and van der Laan, 2018)   18 
+ CHAPTER 3 
+ 
+RESEARCH METHODOLOGY  
+3.1 Introduction  
+This chapter presents the methodology that will be use d in this research. Section 3.2.1 talks 
+about the dataset that will be used in this research. The section also talks about converting the 
+original dataset into a format suitable for classification. The original images are in the RGB 
+format  and need to be co nverted into multiple colo ur spaces, which are discussed in section 
+3.2.2.  To get a better generali sation, data augmentation will be discussed in section 3.2.3.  The 
+modelling approach will be discussed in section 3.2.4 , followed by an evaluation in section  
+3.2.5. The proposed method will be discussed in section 3.3.  
+3.2 Research Methodolog y 
+This section discusses the methodology used in this research based on literature reviews in 
+chapter 2.  The methodology described is end -to-end, from dataset creation to ensemble models.  
+3.2.1 Dataset  
+The dataset used in this research was downloaded from Galaxy Zoo – The Galaxy Challenge. 
+The dataset contains 61578 images in JPG and RGB format. This Galaxy Challenge vote 
+fraction is a modified version  of The Galaxy Zoo 2 project (Willett et al. , 2013) . The Gala xy 
+Zoo 2 (GZ2) has a total of 11 tasks and 37 possible responses.  
+The original challenge is a regression task, in which participants should pre dict the vote 
+percentage , and the lowest RMSE determined the winner . The probability values in each set of 
+responses are the likelihood of the galaxy falling in that category. The sum of all possible 
+response s in one category is 1.0. For example , a galaxy had 75% of all users identify as smooth 
+(Class 1.1), 15% as features/disk (Class 1.2), and 10% as a star/art efact. The total probability 
+of Class 1 is 75% + 15% + 10% = 100%.  
+• Class 1.1 = 0.75  
+• Class 1.2 = 0.15  
+• Class 1.3 = 0.10  
+ 19 
+  
+Figure 1: Classification flowchart for Galaxy Zoo (Willett et al., 2013)  
+Thus , to make it suitable for the classification task, we should convert them into classes. The 
+conversion can be as simple as thresholding. For example, if we want to create a binary 
+classification task, i.e. , to predict whether the galaxy is smooth or features/disk, we can use a 
+50% vote as the threshold. This number should be determined carefully because we should 
+incorporate s tatistics uncertainty.  
+Table 4: Text representation of classification flowchart (Willett et al. , 2013)  
+Task  Question  Responses  Next  
+01 Is the galaxy simply smooth and 
+rounded, with no sign of disk?  smooth  
+features or disk  
+star or art efact 07 
+02 
+end 
+02 Could this be a disk viewed edge -
+on? yes 
+no 09 
+03 
+03 Is there a sign of a bar feature 
+through the centre of the galaxy?  yes 
+no 04 
+04 
+04 Is there any sign of a spiral arm 
+pattern?  yes 
+no 10 
+05 
+20 
+ 05 How prominent is the central bulge, 
+compared with the rest of the 
+galaxy?  no bulge  
+just noticeable  
+obvious  
+dominant  06 
+06 
+06 
+06 
+06 Is there anything odd?  yes 
+no 08 
+end 
+07 How rounded is it?  completely round  
+in between  
+cigar -shaped  06 
+06 
+06 
+08 Is the odd feature a ring, or is the 
+galaxy disturbed or irregular?  ring 
+lens or arc  
+disturbed  
+irregular  
+other  
+merger  
+dust lane  end 
+end 
+end 
+end 
+end 
+end 
+end 
+09 Does the galaxy have a bulge at its 
+centre? If so, what shape?  rounded  
+boxy  
+no bulge  06 
+06 
+06 
+10 How tightly wound do the spiral 
+arms appear?  tight 
+medium  
+loose  11 
+11 
+11 
+11 How many spiral arms are there?  1 
+2 
+3 
+4 
+more than four  
+can't tell 05 
+05 
+05 
+05 
+05 
+05 
+We will follow an appropriate threshold (Willett et al. , 2013)  to select clean samples for this 
+research . The final data will be represented by five classes, i.e. , "edge -on", "spiral ", "completely 
+round smooth ", "cigar -shaped smooth ", and "in-between smooth ". 
+Table 5: Classification threshold (Willett et al. , 2013)  
+Class Name  Task s Threshold  
+Completely round smooth  T01 
+T07 𝑓𝑠𝑚𝑜𝑜𝑡 ℎ≥0.469 
+𝑓𝑐𝑜𝑚𝑝𝑙𝑒𝑡𝑒𝑙𝑦  𝑟𝑜𝑢𝑛𝑑 ≥0.50 
+In-between smooth  T01 
+T07 𝑓𝑠𝑚𝑜𝑜𝑡 ℎ≥0.469 
+𝑓𝑖𝑛−𝑏𝑒𝑡𝑤𝑒𝑒𝑛 ≥0.50 
+Cigar -shaped smooth  T01 
+T07 𝑓𝑠𝑚𝑜𝑜𝑡 ℎ≥0.469 
+𝑓𝑐𝑖𝑔𝑎𝑟 −𝑠ℎ𝑎𝑝𝑒𝑑 ≥0.50 
+Edge -on T01 𝑓𝑓𝑒𝑎𝑡𝑢𝑟𝑒𝑠 /𝑑𝑖𝑠𝑘 ≥0.430 21 
+ T02 𝑓𝑒𝑑𝑔𝑒 −𝑜𝑛,𝑦𝑒𝑠≥0.602 
+Spiral  T01 
+T02 
+T04 𝑓𝑓𝑒𝑎𝑡𝑢𝑟𝑒𝑠 /𝑑𝑖𝑠𝑘 ≥0.430 
+𝑓𝑒𝑑𝑔𝑒 −𝑜𝑛,𝑛𝑜≥0.715 
+𝑓𝑠𝑝𝑖𝑟𝑎𝑙 ,𝑦𝑒𝑠≥0.619 
+The classes created from the given threshold are called clean samples  because they are well -
+sampled.  
+3.2.2 Data Transformation  
+After obtaining  the clean samples, the RGB images will be converted to multiple colo ur spaces 
+using an open -source image -processing Python library, OpenCV and Scikit -image. The colo ur 
+spaces available are HED, HSV, LAB, RGBCI  E, XYZ, YCbCr, YDbDr, YIQ, YPbPr, and 
+YUV. Wh en we predict an image, a network that is trained on a specific colo ur space will only 
+predict that specific colo ur space.  
+3.2.3 Data Augmentation  
+Data augmentation is a common practice in deep learning. We use data augmentation to make 
+the network more robust to novel images, hence preventing overfitting and increasing the final 
+accuracy (O’Gara and McGuinness, 2019) . Following the paper results , we wi ll apply data 
+augmentation into our training process.  
+3.2.4 Modelling  
+There are a lot of readily available CNN architectures. We will test our transformed images 
+with several architectures, including AlexNet (Krizhevsky, Sutskever and Hinton, 2012) , VGG 
+(Simonyan and Zisserman, 2014) , Inception (Szegedy et al. , 2015) , ResNet (He et al. , 2016) , 
+DenseNet (Huang et al. , 2017) . DenseNet based ensembles are used in ColorNet (Gowda and 
+Yuan, 2019) .  
+We will consider two training scenarios:  
+• Train the entire model from scratch (using only the architecture)  as a benchmark  
+• Using a pre -trained model as a base, freeze the convolutional layers and train only the 
+fully -connected layers  
+According to the results that we obtained from transformed images trained on several CNN 
+architectures, we will create an ensemble (Figure 1) to  yield a higher classification accuracy. 22 
+ The number of networks and what colo ur space we should  use for each network are variables 
+for this research.  
+3.2.5 Evaluation  
+We assume no class is more important than the other for galaxy classification . Thus, the model 
+will be evaluated using accuracy.   
+𝑎𝑐𝑐𝑢𝑟𝑎𝑐𝑦 = 𝑐𝑜𝑟𝑟𝑒𝑐𝑡  𝑝𝑟𝑒𝑑𝑖𝑐𝑡𝑖𝑜𝑛
+𝑡𝑜𝑡𝑎𝑙  𝑖𝑚𝑎𝑔𝑒𝑠=𝑇𝑃+𝑇𝑁
+𝑇𝑃+𝐹𝑃+𝑇𝑁+𝐹𝑁 
+3.3 Ensemble  Method  
+Figure 1 shows the general workflow used in this research.  In this section, multiple ensembles  
+will be tested. Two types of ensembles will be tested. The first one is to ensemble the prediction 
+made by each network by using simple averaging or a meta -learner. The second one is to extract 
+feature vectors by dropping the fully -connected layers  and combine them with feature vectors 
+from other network s to be fed into a machine learning classifier.  
+ 
+Figure 2: Proposed Architecture  
+ 
+ 
+ 
+23 
+ 3.4 Summary  
+All combinations in this research can be summari sed as follows:  
+Table 6: Combination of variable s tested in this research  
+Variab le Tested  Variants  
+Architecture  ResNet , VGG , DenseNet , Xception  
+Colorspaces  RGB, HED, HSV, LAB, XYZ, YCbCr, YDbDr, YIQ, 
+YPbPr, YUV  
+Pre-trained and 
+transfer learning  1. Training from scratch  (as a benchmark)  
+2. Using a pre-trained model as a feature extractor  
+3. Fine-tuning  (train top classification later only)  
+Ensemble method  1. Concatenate multiple networks just after flatten layer  
+  24 
+ CHAPTER 4 
+ 
+IMPLEMENTATION  
+4.1 Introduction  
+This chapter  describe s the technical implementation of this research. Section 4.2. describes the 
+dataset creation process , including label creation that is suitable for classification problem s. 
+Section 4.3 describes the colour space transformation. Section 4.4 describes the technical detail 
+of network configurations .   
+4.2 Dataset Creation  
+This section describes  the dataset creation that will be used for this research.  
+4.2.1 Image Resizing  
+The dataset us ed in this research was downloaded from Kaggle. The original image was in JPG 
+format with the size of 424 x 424 x 3, where 424 x 424 is the width and height of the image, 
+and 3 is three layers of RGB.  
+151220 .jpg 157161.jpg  102422 .jpg 
+   
+Figure 3: Sample images  
+Looking at  Figure 3 , it is clear that the most important part of the image is in the centre.  The 
+outer part of the image is either not helpful for galaxy classification or contain s unrelated 
+information that  may be messing up the model and prediction results. Cropping images also 
+help to speed up the training process, even though it  is not the primary  motivation here.  
+ 
+ 
+25 
+ 151220 .jpg 157161.jpg  102422 .jpg 
+   
+Figure 4: Cropped Images  
+We crop the outermost 100 pixel s of the image. This left us with an image size of 224 x 224 x 
+3. 
+4.2.2 Label Creation  for Classification  
+The original dataset was meant for regression problems. Thus, to make it suitable for this 
+research, we should create a  label that can be used for classification. The label creation rule and 
+threshold are described in chapter 3.  
+completelysmooth  
+  
+inbetweensmooth  
+  
+26 
+ cigarsmooth  
+  
+edgeon  
+  
+spiral  
+  
+Figure 5: Sample Images from Each Class  
+The final labels consist  of: 
+• completelysmooth : 8436 images  
+• inbetweensmooth : 8069 images  
+• cigarsmooth:  579 images  
+• edgeon : 3903 images  
+• spiral : 7806 images  
+4.3 Colour Space Conversion  
+The next step of the dataset creation is to convert the image to multiple colour spaces. 
+Fortunately, Tensor Flow has built -in colour space conversion for the following colour spaces: 
+27 
+ LAB, XYZ, HSV, YUV, and YDbDr . The built -in colour space conversion is do ne by using 
+tfio.experimental.color.rgb_to_lab(x) . 
+For the rest of colour spaces  (HLS, LUV, YCrCb, YIQ, HED) , we need to  manually  do the 
+conversion using  either OpenCV or scikit -image  and save it to disk for future usage.  
+4.4 Building Network  
+Building a netwo rk in deep learning is not a simple task. There are a lot of options, parameters, 
+hyperparameters, and configurations to choose f rom. This further could also be affected  by the 
+type of data we use (natural images, medical images, etc .) and the type of task we would like 
+to accomplish (classification, regression, segmentation, etc .). Hence, in this section, we test 
+several commonly used values for every parameter  and choos e the one that produces the best 
+result  for our networks.  
+4.4.1 Load Pre-trained Model  Base Model and Weights  
+For this research , we used out -of-the-box pretrained model from TensorFlow. Architecture used 
+in this research are : 
+• Xception  
+• VGG16, VGG19  
+• ResNet50, ResNet101, ResNet152  
+• DenseNet121, DenseNet169, DenseNet201  
+When loading the model, we set include_top = “False”  to use the base model only. To load pre -
+trained weights, we set parameter weights = “imagenet” . All image s fed into networks will be 
+resized to 128 x 128 x 3. We also set the base model to be non -trainable. The only trainable part 
+in this research is the top layers.  
+4.4.2 Stack Classification Layers  
+For top layers, which are the trainable part of the network, we should strive for a balance 
+between the number of parameters and performance. We test four configurations of top layers:  
+• Configuration A: Dense(128)  
+• Configuration B: Dense(128) with Dropout(0.2)  
+• Configuration C: Dense (512) + Dense(128)  
+• Configuration D: Dense(512) + Dense(128) with Dropout(0.2)  28 
+  
+Figure 6: Validation Accuracy of Multiple Top Layer Configurations  
+ 
+Figure 7: Validation Loss of Multiple Top Layer Configura tions  
+Figure 4 shows that the validation loss o f layers with Dropout ( configuration B and D ) are more 
+stable than layers without Dropout  (configuration A and C). While the validation loss of 
+configuration s B and D are similar, Figure 3 shows that configura tion D has the highest 
+accuracy. Thus, we will choose c onfiguration D  – Dense(512) + Dense(128) with Dropout(0.2)  
+– for our top classification layers.  
+4.4.3 Configuring for Performance  
+To improve the training speed i.e. , reduces step time, we implement prefetching  and set the 
+number of elements to prefetch using AUTOTUN E. We also implement caching , which will 
+reuse the data cached for the next epoch. This  configuration are chained  and implemented using 
+DATASET .cache().prefetch(buffer_size=AU TOTUNE) . 
+29 
+ 4.4.4 Data Augmentation  
+Using data augmentation in the training pipeline is a common practice because it consistently 
+improves final results. We benchmark two configurations in detail as follows:  
+• Configuration 1: Without data augmentation  
+• Configuration 2: With data augmentation  
+o Random  Horizontal Flip  
+o Random Rotation with a factor of 0.2  
+ 
+Figure 8: Validation Accuracy of Data Augmentation Configuration  
+ 
+Figure 9: Validation Loss of Data Aug mentation Configuration  
+Figure 5 shows the validation accuracy of a network with data augmentation consistently higher 
+than a network with no augmentation. Figure 6 also shows that the validation loss of network s 
+without data augmentation is increasing , wh ile the validation loss of network s with data 
+augmentation seems still decreasing. Thus, we will use data augmentation (random horizontal 
+flip and random rotation 0.2) for our network.  
+30 
+ 4.4.5 Learning Rate  
+Learning rate is a hyperparameter that determines how much to change model weights in 
+response to the calculated error at each iteration. A learning rate that is too high  will make the 
+model become unstable , while a learning rate that is too low  will be sl ower to reach the optimum 
+performance. We will test three learning rates:  
+• Learning Rate 0.01  
+• Learning Rate 0.001 (the default of Tensor Flow) 
+• Learning Rate 0.0005  
+ 
+Figure 10: Validation Accuracy of Multiple Learning Rate Configurat ions 
+ 
+Figure 11: Validation Loss of Multiple Learning Rate Configurations  
+Figure 7 and Figure 8 show that the validation accuracy and validation loss of learning rate 0.01 
+differ  much from  the other learning rate. In other words, the learning rate of 0.01 is sub -optimal 
+for our network. This leaves us two learning rates to choose  from : 0.001 and 0.0 005. It seems 
+the performance is comparable between the two of them. We will try to test them again with 
+bigger epochs in the next subsection.  
+31 
+ 4.4.6 Epochs  
+The number of epochs is influenced by and influence s the learning rate  and another 
+hyperparameter. We will test two learning rates (0.001 and 0.0005) with a longe r epoch.  
+ 
+Figure 12: Validation Accuracy of Learning Rates (100 Epochs)  
+ 
+Figure 13: Validation Loss of Learning Rates (100 Epochs)  
+Figure 8 and Figure 9 show that the learning rate of 0.0005 is slightly better than the learning 
+rate of 0.001. Thus, we will use a learning rate of 0.0005 for our networks.  
+4.4.7 Batch Size  
+Batch size is a hyperparameter that determines the number of data that will be passed through 
+the network before updating the model. We will check three batch size s: 
+• Batch size of 16  
+• Batch size of 32  
+• Batch size of 64  
+32 
+  
+Figure 14: Validation Accuracy of Multiple Batch Size Configurations  
+ 
+Figure 15: Val idation Loss of Multiple Batch Size Configurations  
+Figure 11 and Figure 12 show that the performance of different batch size configurations is 
+comparable. However, the training time s are very different.  
+Table 7: Batch Size and Train ing Time  
+Batch Size  Training Time  
+16 2678 seconds  
+32 1691 seconds  
+64 1310 seconds  
+Table 7 shows that as the batch size increas es, the training time decreases . We will choose a 
+batch size of 64 for our networks.   
+33 
+ CHAPTER 5 
+ 
+RESULT S AND DISCUSSION S 
+5.1 Introduction  
+This chapter will discuss the final results of our research. We will begin to describe the results 
+of a single network in section 5.2, followed by the results of the ensemble  in section 5.3.  
+5.2 Evaluation of Single Network  
+Following the implementation described in chapter 4 , we test each combination of colour spaces 
+and n etwork architectures. Results indicated with * means that the colour is not further pre -
+processed by the  built-in preprocess_input  layer in TensorFlow.  
+The technical details are repeated here for clarity:  
+• Optimi ser: Adam  
+• Top layers: Dense(512) + Dense(128) with Dropout(0.2)  
+• Data augmentation: random horizontal flip, random rotation of 0.2  
+• Learning rate: 0.0005  
+• Batch size: 64 , epochs:  100 
+• Caching and prefetching enabled.  
+Table 8: Single Network Classification Accuracy  
+ RN50  RN10
+1 RN15
+2 VGG1
+6 VGG1
+9 DN12
+1 DN16
+9 DN20
+1 Xceptio
+n 
+RGB  0.893
+7 0.8836  0.885 0 0.8451  0.8295  0.8407  0.8494  0.8651  0.8456  
+HLS*  0.813
+7 0.827 0 0.8187  0.7779  0.7607  0.6705  0.6448  0.6506  0.6598  
+HLS  0.827
+7 0.8282  0.8282  0.7911  0.7864  0.7694  0.793 0 0.7963  0.7576  
+HSV*  0.575
+9 0.5478  0.5617  0.7701  0.756 0 0.7053  0.7332  0.7338  0.7209  
+HSV  0.591
+4 0.5653  0.5841  0.4297  0.4189  0.603 0 0.6768  0.6923  0.5519  
+LAB*  0.840
+4 0.8435  0.8378  0.8321  0.8051  0.8098  0.8003  0.8244  0.8057  
+LAB  0.863
+7 0.8664  0.8498  0.8272  0.8154  0.8227  0.8288  0.8362  0.8532  
+LUV*  0.901
+5 0.9034  0.8918  0.8687  0.8499  0.7893  0.809 0 0.8301  0.7061  34 
+ LUV  0.893
+2 0.8885  0.8883  0.8678  0.8454  0.8611  0.8616  0.8724  0.8501  
+XYZ*  0.480
+2 0.6266  0.4965  0.7655  0.7595  0.8854  0.9074  0.9113  0.8894  
+XYZ  0.457
+5 0.6176  0.607 0 0.289 0 0.4338  0.4995  0.5073  0.5368  0.5809  
+YCrCb
+* 0.884
+0 0.8889  0.8696  0.8541  0.8449  0.724 0 0.6926  0.7978  0.6165  
+YCrCb  0.861
+4 0.8609  0.8637  0.8519  0.8400 0.8301  0.8347  0.8513  0.8338  
+YDbDr
+* 0.484
+2 0.5582  0.521 0 0.7567  0.7668  0.8234  0.8258  0.8204  0.8463  
+YDbDr  0.484
+9 0.5078  0.501 0 0.289 0 0.289 0 0.5278  0.5967  0.6011  0.6091  
+YUV*  0.448
+6 0.5116  0.4515  0.7942  0.7977  0.8767  0.8868  0.8974  0.8807  
+YUV  0.516
+7 0.4894  0.4965  0.289 0 0.3472  0.5061  0.565 0 0.574 0 0.5722  
+Table 8 shows  the highest accuracy obtained from LUV and XYZ colour spaces. For ResNet 
+and VGG family, LUV colour space  returns the highest accuracy without using the pre -
+processing layer from the architecture . For DenseNet and Xception  family , XYZ colour space  
+returns the highest accuracy without using the pre -processing layer from the architecture . 
+Table 9: Top 3 Highest Overall Accuracy for Single Network  
+Configuration  Accuracy  
+DenseNet201 + XYZ*  0.9113  
+DenseNet169 + XYZ*  0.9074  
+ResNet101 + LUV*  0.9015  
+Table 9 shows t he top 3 highest overall accuracy and its configuration . From the result presented 
+in Table 8, the accuracy of converted images (non -RGB) is always higher than the  original RGB 
+images. The highest accuracy of  RGB images is achieved by ResNet50 with the accuracy of 
+0.8937, while the highest overall accuracy is achieved by DenseNet201 with XYZ colour spaces 
+with the accuracy of 0.9113 . 35 
+  
+Figure 16: Validation Accuracy of DenseNet201 with Multiple Colour Spaces  
+Figure 16  shows the multiple colour spaces trained on DenseNet201. In some cases, colour 
+space conversion increases  the classification accuracy. However, some colour spaces decrease  
+the classification accuracy, which  may be caused by information loss cause d by the colour space 
+conversion.  
+For each architecture, the highest accuracy is obtained from the image that is not pre -processed 
+using the preprocess_input  layer. This makes  sense because preprocess_input  layer is usual ly 
+made for RGB images. Thus, it is not suitable for converted images (non -RGB). For future 
+studies, we recommend that researchers design an optimum preprocess_input  layer for each 
+colour space . 
+5.3 Evaluation o f Ensemble Network s 
+Chapter 5.2 shows that the top validation accuracy for single network achieved by DenseNet201  
+with XYZ colour spaces. Thus, because of time and resource constraint, for this research we 
+will focus on DenseNet family and XYZ colour spaces. We will also include Xception because 
+it just happens  to have the highest accuracy achieved by XYZ. In this section, we will test 
+multiple ensembles configuration s using DenseNet, Xception, XYZ , and R GB. The technical 
+detail for ensemble networks is the same as the single network.  
+Table 10: Validation Accuracy of Tested Ensemble Networks  
+Configuration  Accuracy  
+36 
+ {Xception + DN121 + DN169 + DN201} XYZ* + 
+{Xception + DN121 + DN169 + DN201} RGB  0.9319  
+{Xception + DN121 + DN169 + DN201} XYZ*  0.9297  
+{DN169 + DN201} XYZ*  0.9258  
+{Xception + DN169 + DN201} XYZ*  0.9257  
+{DN121 + DN169 + DN201} XYZ*  0.9250  
+{DN201 + Xception) XYZ* + {DN201 + Xception) 
+RGB  0.9241  
+DN201 XYZ* + DN201 RGB  0.9172  
+{Xception + DN121 + DN169 + DN201} RGB  0.9007  
+{Xception + DN169 + DN201} RGB  0.8974  
+{DN121 + DN169 + DN201} RGB  0.8908  
+{DN169 + DN201} RGB  0.8812  
+ 
+Table 10 shows the validation accuracy of multiple ensemble configurations. It is clear tha t 
+combining two or more networks increases the accuracy. For example, the highest accuracy by 
+a single model was achieved by DenseNet201 + XYZ* with an accuracy of 0.9113. Combin ing 
+with an additional DenseNet201 network trained on RGB, the final accuracy increased to 
+0.9172. However, if we combine DenseNet201 + XYZ* with DenseNet169 + XYZ*, the final 
+accuracy increased to 0.9258.  Also, using RGB image s only failed to surpass the XYZ* 
+performances.  
+ 
+37 
+ Figure 17: Validation Accuracy of Ensembles of  Four Networks with Multiple Colour Spaces  
+ 
+Figure 18: Validation Loss of Ensembles of Four Networks with Multiple Colour Spaces  
+Figure 1 7 shows the results of c ombining four networks (DenseNet121, DenseNet169, 
+DenseNet201, and Xception) using three configurations: RGB only, XYZ* only, and a 
+combination of XYZ and RGB ( a total of eight networks) . The figure  shows that XYZ* colour 
+spaces produce better results than the RGB images ; it increases the accuracy from 0.9007 to 
+0.9297, which means a rise of  2.9 percent. Combining XYZ and RGB only increases the 
+accuracy (Figure 17) and decreases the validation loss (Figure 18) by a marginal amount.  This 
+is not significant considering we achieve this by doubl ing the number of networks . 
+Using a smaller and fewer DenseNet, the accuracy increases become s more significant. For 
+example, using DenseNet169 and DenseNet201, shows that using XYZ* colour spaces 
+increases the accuracy from 0.8812 to 0.9258, which means a rise of 4.46 percent. Looking at 
+Table 10, there is something very interesting. Using fewer networks and parameters  ({DN169 
++ DN201} XYZ*) , we can  achieve a similar or bet ter results than using more networks and 
+parameters  ({Xception + DN121 + DN169 + DN201} RGB ). This is achieved  just by applying 
+a colour space transformation (RGB to XYZ* in this case).  
+5.4 Summary  
+As described in this chapter, our finding s can be summari sed into three  important points:  
+• Transforming image colour space into other colour spaces during pre -processing  yield s 
+different results. Some colour spaces yield worse result s, some colour spaces yield better 
+results . 
+• By transforming colour space, we can use  fewer networks and parameters to achieve 
+results with similar or better results.  
+38 
+ • Ensembles network s yield even better results. Thus, combining colour space 
+transformation and ensembles produces superior results.  
+ 
+ 
+  39 
+ CHAPTER 6 
+ 
+CONCLUSION AND REC OMMENDATIONS  
+ 
+6.1 Introduction  
+This chapter is the final chapter of this thesis. Section 6.2 will discuss the result of this research. 
+New contributions are described in Section 6.3.  Future recommendations will be discussed in 
+Section 6.4.  
+6.2 Discussion and Conclusion  
+The practice of colour space transformation in the pre -processing process has been used for 
+some problems in the past. In this research , we conduct an experiment on whether  colour space 
+transformation will be helpful for astronomical problems.  
+The e xperimental result  using individual network (De nseNet, ResNet, VGG, and Xception)  and 
+colour space transformation consistently show ed a higher validation accuracy compared to a 
+network that use s original RGB images . Ensembles network using multiple networks and colour 
+spaces increases further the validation accuracy.  
+6.3 Contribution to Knowledge  
+Some contributions to knowledge from this r esearch are:  
+• A pre-trained model that is trained on natural images can also be used for astronomical 
+problems, which is considered to be a non -natural image.  
+• Colour space transformation can increase the classification accuracy o f astronomical 
+images (galax y classification).  
+• Ensembles of multiple colour spaces and networks can further increase classification 
+accuracy on astronomical images (galaxy classification).  
+6.4 Future Recommendations  
+Some configurations, tests, and experiments are not being done in this r esearch due to the time 
+and resource constraint s (i.e., the author had limited access to the GPU computation power). 
+Future works can include experimenting with more configurations and combinations to see if 
+any interesting pattern emerges .  40 
+ There are some  ideas that could be tried in future works:  
+• Finding a more optimal hyperparameter  for each architecture. In this research, we only 
+find an optimal hyperparameter for one network and apply the same values to all 
+networks. A different network may need a different hyperparameter to achieve it s best 
+performance.  
+• Using different layers in the network architecture. For example, we use MaxPool2D for 
+the pooling layer in this research . However,  we also can test whether AveragePooling 2D 
+could achieve better results.  
+ 
+ 
+  41 
+ REFERENCES  
+ 
+1. Ackermann, S. et al.  (2018) ‘Using transfer learning to detect galaxy mergers’, Monthly 
+Notices of the Royal Astronomical Society , 479(1), pp. 415 –425. 
+2. Adorf, H. -M. and Meurs, E.J.A. (1988) ‘Supervised and unsupervised classification — The 
+case of IRAS point sources BT  - Large -Scale Structures in the Universe Observational and 
+Analytical Methods’, in Seitter, W.C., Duerbeck, H.W., and Tacke, M. (eds). Be rlin, 
+Heidelberg: Springer Berlin Heidelberg, pp. 315 –322. 
+3. Atha, D.J. and Jahanshahi, M.R. (2017) ‘Evaluation of deep learning approaches based on 
+convolutional neural networks for corrosion detection’, Structural Health Monitoring , 
+17(5), pp. 1110 –1128. d oi:10.1177/1475921717737051.  
+4. Awang Iskandar, D.N.F. et al.  (2020) ‘Classification of Planetary Nebulae through Deep 
+Transfer Learning’, Galaxies . doi:10.3390/galaxies8040088.  
+5. Boser, B.E., Guyon, I.M. and Vapnik, V.N. (1992) ‘A Training Algorithm for Optim al 
+Margin Classifiers’, in Proceedings of the Fifth Annual Workshop on Computational 
+Learning Theory . New York, NY, USA: Association for Computing Machinery (COLT 
+’92), pp. 144 –152. doi:10.1145/130385.130401.  
+6. Bozinovski, S. (2020) ‘Reminder of the first pa per on transfer learning in neural networks, 
+1976’, Informatica , 44(3).  
+7. Broesch, J.D. (2008) Digital signal processing: instant access . Elsevier.  
+8. BT.470 : Conventional television systems  (no date). Available at: https://www.itu.int/rec/R -
+REC -BT.470 -6-19981 1-S/en (Accessed: 27 March 2022).  
+9. Castro, W. et al.  (2019) ‘Classification of cape gooseberry fruit according to its level of 
+ripeness using machine learning techniques and different color spaces’, IEEE access , 7, pp. 
+27389 –27400.  
+10. Chaib, S. et al.  (2017) ‘ Deep feature extraction and combination for remote sensing image 
+classification based on pre -trained CNN models’, in Proc.SPIE . doi:10.1117/12.2281755.  
+11. Chen, S. et al.  (2017) ‘Convolutional neural network for classification of solar radio 
+spectrum’, in 2017 IEEE International Conference on Multimedia & Expo Workshops 
+(ICMEW) , pp. 198 –201. doi:10.1109/ICMEW.2017.8026227.  
+12. Chollet, F. (2017) ‘Xception: Deep learning with depthwise separable convolutions’, in 
+Proceedings of the IEEE conference on computer visio n and pattern recognition , pp. 1251 –
+1258.  
+13. CIE, C. (1932) ‘Commission internationale de l’eclairage proceedings, 1931’, Cambridge 
+University, Cambridge  [Preprint].  
+14. Czech, D., Mishra, A. and Inggs, M. (2018) ‘A CNN and LSTM -based approach to 
+classifying tran sient radio frequency interference’, Astronomy and computing , 25, pp. 52 –
+57. 42 
+ 15. Dieleman, S., Willett, K.W. and Dambre, J. (2015) ‘Rotation -invariant convolutional neural 
+networks for galaxy morphology prediction’, Monthly Notices of the Royal Astronomical 
+Society , 450(2), pp. 1441 –1459. doi:10.1093/mnras/stv632.  
+16. Dietterich, T.G. (2000) ‘Ensemble methods in machine learning’, in International workshop 
+on multiple classifier systems . Springer, pp. 1 –15. 
+17. equasys GmbH (no date) Color Conversion . Available at: 
+https://web.archive.org/web/20180423091842/http://www.equasys.de/colorconversion.ht
+ml (Accessed: 27 March 2022).  
+18. Fairman, H.S., Brill, M.H. and Hemmendinger, H. (1997) ‘How the CIE 1931 color -
+matching functions were derived from Wright -Guild data’, Color Rese arch & Application , 
+22(1), pp. 11 –23. doi:https://doi.org/10.1002/(SICI)1520 -6378(199702)22:1<11::AID -
+COL4>3.0.CO;2 -7. 
+19. Farrens, S. et al.  (2022) ‘Deep transfer learning for blended source identification in galaxy 
+survey data’, Astronomy & Astrophysics , 657, p. A98.  
+20. Feigelson, E.D. and Babu, G.J. (2012) ‘Big data in astronomy’, Significance , 9(4), pp. 22 –
+25. doi:https://doi.org/10.1111/j.1740 -9713.2012.00587.x.  
+21. Ganaie, M.A. and Hu, M. (2021) ‘Ensemble deep learning: A review’, arXiv preprint 
+arXiv:2104.02395  [Preprint].  
+22. George, D., Shen, H. and Huerta, E.A. (2018) ‘Classification and unsupervised clustering 
+of LIGO data with Deep Transfer Learning’, Physical Review D , 97(10), p. 101501.  
+23. Goodfellow, I., Bengio, Y. and Courville, A. (2016) Deep Learning . MIT Press.  
+24. Gowda, S.N. and Yuan, C. (2019) ‘ColorNet: Investigating the Importance of Color Spaces 
+for Image C lassification BT  - Computer Vision – ACCV 2018’, in Jawahar, C. V et al. 
+(eds). Cham: Springer International Publishing, pp. 581 –596. 
+25. Gowda, S.N. and Yuan, C. (2021) ‘StegColNet: Steganalysis based on an ensemble 
+colorspace approach’, in Joint IAPR Intern ational Workshops on Statistical Techniques in 
+Pattern Recognition (SPR) and Structural and Syntactic Pattern Recognition (SSPR) . 
+Springer, pp. 313 –323. 
+26. Gunn, J.E. et al.  (2006) ‘The 2.5 m telescope of the sloan digital sky survey’, The 
+Astronomical Journa l, 131(4), p. 2332.  
+27. Guo, K. et al.  (2020) ‘Multi -Modal Medical Image Fusion Based on FusionNet in YIQ 
+Color Space’, Entropy . doi:10.3390/e22121423.  
+28. Hanbury, A. and Serra, J. (2002) A 3d -Polar Coordinate Colour Representation Suitable 
+for Image Analysis, P RIP. TU Wien, Tech. Rep. PRIP -TR-77. 
+29. He, K. et al.  (2016) ‘Deep residual learning for image recognition’, in Proceedings of the 
+IEEE conference on computer vision and pattern recognition , pp. 770 –778. 
+30. Hinton, G.E. et al.  (2012) ‘Improving neural networks b y preventing co -adaptation of 43 
+ feature detectors’, arXiv preprint arXiv:1207.0580  [Preprint].  
+31. Ho, T.K. (1995) ‘Random decision forests’, in Proceedings of 3rd International Conference 
+on Document Analysis and Recognition , pp. 278 –282 vol.1. 
+doi:10.1109/ICDA R.1995.598994.  
+32. Hochreiter, S. (1991) ‘Untersuchungen zu dynamischen neuronalen Netzen’, Diploma, 
+Technische Universität München , 91(1).  
+33. Hochreiter, S. and Schmidhuber, J. (1997) ‘Long short -term memory’, Neural computation , 
+9(8), pp. 1735 –1780.  
+34. Huang, G. et al. (2017) ‘Densely connected convolutional networks’, in Proceedings of the 
+IEEE conference on computer vision and pattern recognition , pp. 4700 –4708.  
+35. Hubble, E.P. (1982) The realm of the nebulae . Yale University Press.  
+36. Ioffe, S. and Szegedy, C. (2015) ‘Batch normali sation: Accelerating deep network training 
+by reducing internal covariate shift’, in International conference on machine learning . 
+PMLR, pp. 448 –456. 
+37. Itu-t (2011) ITU-T Rec. T.871 (05/2011) Information technology - Digital compression and 
+coding of continuous -tone still images: JPEG File Interchange Format (JFIF) . Available 
+at: https://www.itu.int/rec/T -REC -T.871 -201105 -I/en (Accessed: 27 March 2022).  
+38. Jafarbiglo, S.K., Danyali, H. and Helfroush, M.S. (2018) ‘Nuclear Atypia Grading in 
+Histopathological Images of Breast Cancer Using Convolutional Neural Networks’, in 2018 
+4th Iranian Conference on Signal Processing and Intelligent Systems (ICSPIS) , pp. 89 –93. 
+doi:10.1109/ICSPIS.2018.8700540.  
+39. January 2005 - AI Newsletter  (2005). Available a t: 
+https://www.ainewsletter.com/newsletters/aix_0501.htm#w (Accessed: 22 March 2022).  
+40. Ju, C., Bibaut, A. and van der Laan, M. (2018) ‘The relative performance of ensemble 
+methods with deep convolutional neural networks for image classification’, Journal of  
+Applied Statistics , 45(15), pp. 2800 –2818. doi:10.1080/02664763.2018.1441383.  
+41. Khan, A. et al.  (2019) ‘Deep learning at scale for the construction of galaxy catalogs in the 
+Dark Energy Survey’, Physics Letters B , 795, pp. 248 –258. 
+doi:https://doi.org/10.10 16/j.physletb.2019.06.009.  
+42. Khan, M.A. et al.  (2019) ‘An implementation of optimi sed framework for action 
+classification using multilayers neural network on selected fused features’, Pattern Analysis 
+and Applications , 22(4), pp. 1377 –1397.  
+43. Kim, H. and Ro, Y .M. (2016) ‘Collaborative facial color feature learning of multiple color 
+spaces for face recognition’, in 2016 IEEE International Conference on Image Processing 
+(ICIP) , pp. 1669 –1673. doi:10.1109/ICIP.2016.7532642.  
+44. Kremer, J. et al.  (2017) ‘Big universe, big data: machine learning and image analysis for 
+astronomy’, IEEE Intelligent Systems , 32(2), pp. 16 –22. 44 
+ 45. Krizhevsky, A., Sutskever, I. and Hinton, G.E. (2012) ‘Imagenet classification with deep 
+convolutional neural networks’, Advances in neural informatio n processing systems , 25. 
+46. Kurenkov, A. (2020) ‘A Brief History of Neural Nets and Deep Learning’, Skynet Today  
+[Preprint].  
+47. Van der Laan, M.J., Polley, E.C. and Hubbard, A.E. (2007) ‘Super learner’, Statistical 
+applications in genetics and molecular biology , 6(1).  
+48. LeCun, Y. et al.  (1989) ‘Back -propagation applied to handwritten zip code recognition’, 
+Neural computation , 1(4), pp. 541 –551. 
+49. LeCun, Y. et al.  (1995) ‘Comparison of learning algorithms for handwritten digit 
+recognition’, in International conference on artificial neural networks . Perth, Australia, pp. 
+53–60. 
+50. LeCun, Y., Bengio, Y. and Hinton, G. (201 5) ‘Deep learning’, nature , 521(7553), pp. 436 –
+444. 
+51. Li, H. et al.  (2020) ‘Color space transformation and multi -class weighted loss for adhesive 
+white blood cell segmentation’, IEEE Access , 8, pp. 24808 –24818.  
+52. Lintott, C. et al.  (2011) ‘Galaxy Zoo 1: data r elease of morphological classifications for 
+nearly 900 000 galaxies’, Monthly Notices of the Royal Astronomical Society , 410(1), pp. 
+166–178. 
+53. Lintott, C.J. et al.  (2008) ‘Galaxy Zoo: morphologies derived from visual inspection of 
+galaxies from the Sloan Di gital Sky Survey*’, Monthly Notices of the Royal Astronomical 
+Society , 389(3), pp. 1179 –1189. doi:10.1111/j.1365 -2966.2008.13689.x.  
+54. Lopes, U.K. and Valiati, J.F. (2017) ‘Pre -trained convolutional neural networks as feature 
+extractors for tuberculosis detec tion’, Computers in Biology and Medicine , 89, pp. 135 –
+143. doi:https://doi.org/10.1016/j.compbiomed.2017.08.001.  
+55. Miller, A.S. (1993) ‘A review of neural network applications in Astronomy’, Vistas in 
+astronomy , 36, pp. 141 –161. 
+56. Mohammadi Lalabadi, H., Sadeg hi, M. and Mireei, S.A. (2020) ‘Fish freshness 
+categori sation from eyes and gills color features using multi -class artificial neural network 
+and support vector machines’, Aquacultural Engineering , 90, p. 102076. 
+doi:https://doi.org/10.1016/j.aquaeng.2020.1 02076.  
+57. Nair, V. and Hinton, G.E. (2010) ‘Rectified linear units improve restricted boltzmann 
+machines’, in Icml. 
+58. O’Gara, S. and McGuinness, K. (2019) ‘Comparing data augmentation strategies for deep 
+image classification’.  
+59. Odewahn, S.C. et al.  (1992) ‘Autom ated star/galaxy discrimination with neural networks’, 
+in Digitised Optical Sky Surveys . Springer, pp. 215 –224. 
+60. Pan, S.J. and Yang, Q. (2009) ‘A survey on transfer learning’, IEEE Transactions on 45 
+ knowledge and data engineering , 22(10), pp. 1345 –1359.  
+61. Poynt on, C. (1997) ‘Frequently asked questions about color’, Retrieved June , 19(449), p. 
+2004.  
+62. Poynton, C. (2012) Digital video and HD: Algorithms and Interfaces . Elsevier.  
+63. Rachmadi, R.F. and Purnama, I. (2015) ‘Vehicle color recognition using convolutional 
+neural network’, arXiv preprint arXiv:1510.07391  [Preprint].  
+64. Rajaraman, S. et al.  (2018) ‘Pre -trained convolutional neural networks as feature extractors 
+toward improved m alaria parasite detection in thin blood smear images’, PeerJ , 6, p. e4568.  
+65. Rector, T. et al.  (2005) ‘Philosophy for the creation of astronomical images’, In IAU 
+Commission , 55, pp. 194 –204. 
+66. Ruifrok, A.C. and Johnston, D.A. (2001) ‘Quantification of histoch emical staining by color 
+deconvolution’, Analytical and quantitative cytology and histology , 23(4), pp. 291 –299. 
+67. Rumelhart, D.E., Hinton, G.E. and Williams, R.J. (1986) ‘Learning representations by back -
+propagating errors’, Nature , 323(6088), pp. 533 –536. doi:10.1038/323533a0.  
+68. dos Santos, D. et al.  (2020) ‘Impacts of Color Space Transformations on Dysplastic Nuclei 
+Segmentation Using CNN’, in Anais do XVI Workshop de Visão Computacional . SBC, pp. 
+6–11. 
+69. Saxena, S., Shukla, S. and Gyanchandani, M. (2020) ‘Pre ‐trained convolutional neural 
+networks as feature extractors for diagnosis of breast cancer using histopathology’, 
+International Journal of Imaging Systems and Technology , 30(3), pp. 577 –591. 
+70. Schanda, J. (2007) Colorimetry: understanding the CIE system . John Wiley & Sons.  
+71. Schmidhuber, J. (2015) ‘Deep learning in neural networks: An overview’, Neural networks , 
+61, pp. 85 –117. 
+72. Sharif Razavian, A. et al.  (2014) ‘CNN features off -the-shelf: an astounding baseline for 
+recognition’, in Proceedings of the IEEE con ference on computer vision and pattern 
+recognition workshops , pp. 806 –813. 
+73. Shi, Y. -Q. and Sun, H. (2019) Image and Video Compression for Multimedia Engineering: 
+Fundamentals, Algorithms, and Standards . CRC Press.  
+74. Simonyan, K. and Zisserman, A. (2014) ‘Very deep convolutional networks for large -scale 
+image recognition’, arXiv preprint arXiv:1409.1556  [Preprint].  
+75. Smith, T. and Guild, J. (1931) ‘The CIE colorimetric standards and their use’, Transactions 
+of the optica l society , 33(3), p. 73.  
+76. Stevo, B. and Ante, F. (1976) ‘The influence of pattern similarity and transfer learning upon 
+the training of a base perceptron B2’, in Proceedings of Symposium Informatica , pp. 3 –121. 
+77. Szegedy, C. et al.  (2015) ‘Going deeper with c onvolutions’, in Proceedings of the IEEE 46 
+ conference on computer vision and pattern recognition , pp. 1 –9. 
+78. Szklenár, T. et al.  (2020) ‘Image -based Classification of Variable Stars: First Results from 
+Optical Gravitational Lensing Experiment Data’, The Astrophysical Journal , 897(1), p. 
+L12. doi:10.3847/2041 -8213/ab9ca4.  
+79. Tang, H., Scaife, A.M.M. and Leahy, J.P. (2019) ‘Transfer lea rning for radio galaxy 
+classification’, Monthly Notices of the Royal Astronomical Society , 488(3), pp. 3358 –3375.  
+80. Tang, R. et al.  (2021) ‘Multiple CNN Variants and Ensemble Learning for Sunspot Group 
+Classification by Magnetic Type’, The Astrophysical Jour nal Supplement Series , 257(2), p. 
+38. doi:10.3847/1538 -4365/ac249f.  
+81. Tanoglidis, D., Ćiprijanović, A. and Drlica -Wagner, A. (2021) ‘DeepShadows: Separating 
+low surface brightness galaxies from artifacts using deep learning’, Astronomy and 
+Computing , 35, p. 100469.  
+82. Velastegui, R. and Pedersen, M. (2021) ‘The Impact of Using Different Color Spaces in 
+Histological Image Classification using Convolutional Neural Networks’, in 2021 9th 
+European Workshop on Visual Information Processing (EUVIP) , pp. 1 –6. 
+doi:10.11 09/EUVIP50544.2021.9484035.  
+83. Wang, Y. -C. et al.  (2019) ‘Pulsar candidate classification with deep convolutional neural 
+networks’, Research in Astronomy and Astrophysics , 19(9), p. 133.  
+84. Wei, W. et al.  (2020) ‘Deep transfer learning for star cluster classific ation: I. application to 
+the PHANGS –HST survey’, Monthly Notices of the Royal Astronomical Society , 493(3), 
+pp. 3178 –3193. doi:10.1093/mnras/staa325.  
+85. Willett, K.W. et al.  (2013) ‘Galaxy Zoo 2: detailed morphological classifications for 304 
+122 galaxies fro m the Sloan Digital Sky Survey’, Monthly Notices of the Royal 
+Astronomical Society , 435(4), pp. 2835 –2860.  
+86. Yang, C. et al.  (2020) ‘Lunar impact crater identification and age estimation with Chang’E 
+data by deep and transfer learning’, Nature Communications , 11(1), p. 6358. 
+doi:10.1038/s41467 -020-20215 -y. 
+ 
+ 

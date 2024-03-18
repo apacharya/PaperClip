@@ -1,0 +1,464 @@
+arXiv:hep-lat/9502007v1  13 Feb 1995Parallel Cluster Labeling
+for
+Large-Scale Monte Carlo Simulations
+M. Flanigan∗and P. Tamayo
+Thinking Machines Corp.
+Cambridge, MA 02142.
+August 15, 2018
+ABSTRACT
+We present an optimized version of a cluster labeling algorithm previou sly introduced by the authors. This
+algorithm is well suited for large-scale Monte Carlo simulations of spin m odels using cluster dynamics on parallel
+computers with large numbers of processors. The algorithm divides physical space into rectangular cells which
+are assigned to processorsand combines a serial local labeling proc edure with a relaxation process acrossnearest-
+neighbor processors. By controlling overhead and reducing inter- processor communication this method attains
+goodcomputationalspeed-upandeﬃciency. Largesystemsofup to655362spinshavebeensimulatedatupdating
+speeds of 11 nanosecs/site (90 .7×106spin updates/sec) using state-of-the-art supercomputers. I n the second
+part of the article we use the cluster algorithm to study the relaxat ion of magnetization and energy on large Ising
+models using Swendsen-Wang dynamics. We found evidence that exp onential and power law factors are present
+in the relaxation process as has been proposed by Hackl et al. The variation of the power-law exponent λM
+taken at face value indicates that the value of zMfalls in the interval 0 .31−0.49 for the time interval analysed
+and appears to vanish asymptotically.
+* Current Address: GSIA, Carnegie-Mellon University, Pittsburgh , PA 15213.
+11. Introduction.
+Over the last twenty years Monte Carlo simulations have become an im portant and reliable calculation
+methodinStatisticalMechanicsandFieldTheory[1-4]. Large-scaleh igh-resolutionMonteCarlosimulationshave
+provided means to compute critical exponents, transition temper atures, cumulants and other critical properties
+with unprecedented accuracy[5-20].
+Eﬃcient cluster labeling algorithms are needed for large-scale simulat ions of spin models using cluster
+dynamics[21, 22] and other physical systems such as percolation c lusters, nucleation droplets, polymers, fractal
+structures, and particle tracks. Cluster labeling is related to the p roblem of ﬁnding the connected components
+of a graph, which has applications in computer vision, image processin g and network analysis, among others.
+Many general parallel algorithms for ﬁnding connected component s have been introduced in the Computer
+Science literature [23-37]. Most of these methods are designed for SIMD architectures using high-level language
+algorithmic descriptions. These algorithms can be used for lattice pr oblems, such as in the case of image
+processing, but are not well suited for large-scale Monte Carlo simu lations which require the repeated labeling of
+complicated structures (fractals). The main problem with these ge neral methods is their absolute performance
+when implemented in real parallel computers.
+Over the last ﬁve years a number of SPMD (Single Program Multiple Dat a) parallel cluster labeling methods
+for Monte Carlo simulations have been introduced [8, 10, 15-20]. The se methods have attained scalability
+with diﬀerent degrees of success. A few of these methods are sca lable and can be used with large numbers
+of processors[10, 16, 18, 19]. SIMD and vector cluster labeling algo rithms explicitly designed for Monte Carlo
+simulationshavealsobeen introduced[10-13,38]but theirabsolute performancestill lagsbehind the oneattained
+by the best SPMD algorithms.
+In this paper we present an optimized version of a SPMD relaxation-b ased algorithm introduced in ref. [16].
+The algorithm is general and can be applied to higher dimensional syst ems. We will concentrate on the problem
+ofclusterlabeling forthe 2 DIsingModel with Swendsen-Wangdynamics[21]. A percolationproces s[14] is usedto
+deﬁne bonds between aligned spins. The bonds are thrown with prob abilitypbond= 1−e−2β, and the clusters of
+connected spins, the Coniglio-Klein[39, 40] percolation clusters, ar e ﬂipped with 50% probability. At the critical
+point the clusters span the system and labeling information has to pr opagate across the entire computational
+domain. The basic algorithm is discussed in ref. [16] and here we will give a brief review of the improved version
+and presentnew data. In the secondpart ofthe paper we will show new results ofthe application ofthe algorithm
+to study the relaxation of large 2 DIsing models.
+2. Description of the Algorithm.
+Physical space is divided into rectangular cells in such way that each c ell is assigned to one processor (see
+Fig. 1). The algorithm labels the clusters in two stages: ﬁrst it ﬁnds a ll the clusters inside each processor using
+a serial algorithm, and then it performs a global relaxation process where processors exchange clusters labels
+with nearest neighbors until a ﬁxed point is reached. The operation s of the algorithm are shown in Figs. 2 and
+3. The Cluster-Labeling procedure can be described as follows:
+Procedure Spin-Dynamics & Cluster-Labeling:
+(i) Deﬁne connectivity for the sites (spins) by throwing the Swends en-Wang percolation bonds.
+2(ii) Apply a serial algorithm (see procedure Local-Labeling below) to la bel the clusters inside each processor
+independently. At boundary sites the oﬀ-node bonds are ignored f or now. At the end all sites are labeled
+with their “local root” labels which are then globalized (i.e. made unique over the whole system).
+(iii) Iterate several relaxation cycles (see procedure Relaxation b elow), exchanging local root labels with neigh-
+boring processors until all processors detect no change in the lab els. At the end all sites get their ﬁnal
+global label from their local roots.
+(iv) Clusters of spins are ﬂipped with 50% probability and measuremen ts of relevant quantities are accumulated
+(energy, magnetization etc.).
+The serial local algorithm we used in ref. [16], and which is based on the Hoshen-Kopelman[41] algorithm, was
+somewhat ineﬃcient in terms of cache memory utilization and other imp lementation-dependent characteristics.
+To improve it we explored diﬀerent variations of it until we found one t hat is signiﬁcantly better. This particular
+serial algorithm can be described as follows.
+Procedure Local-Labeling: ( cluster labels are used as “pointers” to local sites.)
+(i) All sites are initialized with a unique label (i.e. each site points to itself ).
+(ii) For each site do the following, starting from the north-west cor ner and moving down row-wise:
+(a) If the neighbor to the north is connected then follow the label p ointer until the root is found (site
+pointing to itself). If the root label is less than the current label th en set the current label (and
+current root) to the root label.
+(a) If the neighbor to the east is connected set its label to the cur rent label.
+(iii) After this has been done for all nodes then do a ﬁnal collapse of t he connectivity trees, deﬁned by the
+previous operations, by making every site point to the root label of the cluster it belongs to.
+The connections acrossprocessorboundariesare ignoredduring the local labeling. Once the local labeling has
+beencompleted(seeFig. 2)anumberofrelaxationcyclesareiterat edinordertolabeltheclustersglobally(across
+processors). Each cycle consists of interchanging, comparing an d resetting labels with neighboring processors.
+The relaxation procedure consists of the following:
+Procedure Relaxation:
+(i) A preparation step is executed to set up a list of pointers to the lo cal roots on each node boundary (see
+last panel in Fig. 2).
+(ii) A number of relaxation steps are iterated. To do this each proce ssor interchanges boundary labels with
+the neighbors in each direction for those boundary sites which have connections oﬀ processor. The labels
+are sent in a single block of data using standard message-passing ca lls. The local root labels are compared
+with the ones received from the neighbors and then set to the minimu m values. This is done for the four
+directions (north, east, south, west) before checking for the t ermination condition (all nodes detect no
+change in the labels).
+3We found that this algorithm is well suited for Monte Carlo simulations a nd that even for large numbers
+of processors the time spent on the relaxation cycles is relatively sm all. The relaxation procedure appears to
+be a wasteful operation at ﬁrst sight; however, the algorithm is eﬃ cient because communications are done by
+exchanging largeblocks and the label comparison and resetting ove rheadis kept to a minimum. The connectivity
+of the “renormalized” processor-grid lattice is much simpler than th at of the original system and therefore
+the relaxation process converges very quickly. Total execution t imes are dominated by local labeling not by
+communications. All these results in good scaling and performance. As we will see in the next section this
+algorithm can attain updating speeds of about 90 million spin-updates per second, on a 256-node CM-5E, and
+is considerably faster than comparable algorithms on vector super computers[42, 13]. Surprisingly enough it is
+even faster than some of the high-performance single-spin ﬂip algo rithms using multi-spin coding[43].
+2. Scaling and Numerical Results.
+Taking into account the fact that the cluster labeling algorithm oper ates at the core of equilibrium Monte
+Carlosimulationsonehastoworrymoreaboutaveragethanworstc aseperformance. Theprobabilityofobtaining
+a given conﬁguration of clusters is determined by the Boltzmann weig ht of that conﬁguration. The probability of
+observingthe worstcaseis negligible. On the other hand, “typical”c onﬁgurationsoften containfractalstructures
+which are relatively hard to label.
+In order to make a meaningful scaling analysis one has to concentra te on average execution times deﬁned
+over critical equilibrium Monte Carlo conﬁgurations. A detailed comple xity and scaling analysis was presented
+in ref. [16]. Here we will review the main results.
+The total time to perform the cluster labeling consists of two contr ibutions: a “local time”, the time spent
+by the serial algorithm inside each processor, and a “relax time” whic h is the time spent in the global relaxation
+procedure until completion,
+Tparallel=Tlocal+Trelax=an+bpdmin/2n1/2, (1)
+wheren=l×lis the size for the subsystem assigned to each processor, aandbare constants that characterize
+the computation and communication rates for a given machine, and pis the total number of processors. The
+scaling of the local part is assumed to be basically O(n). In principle it is O(nlog∗n) but, as is discussed it
+ref. [24], log∗ncan be safely considered a constant. The exponent dminis thechemical distance exponent that
+plays the role of a dynamical critical exponent for the labeling proce ss[44, 45, 16]. If nis large compared with p,
+and the communication to computation ratio a/bis small, the scaling will be dominated by the local part. This
+can be better seen by analyzing the speed-up function S(n,p), which is the ratio between the serial and parallel
+times,
+S(n,p) =Tserial
+Tparallel=anp
+an+bpdmin/2n1/2. (2)
+The speed-up improves with large nand gets worse as pincreases. The speed-up as a function of pfor ﬁxed
+total system size Nis given by,
+SN(p) =aNp
+aN+bp(dmin+1)/2N1/2, (3)
+4and the corresponding eﬃciency EN(p) =SN(p)/pis,
+EN(p) =1
+1+b
+a[p(dmin+1)N−1]1/2. (4)
+The eﬃciency decreases as the number of processors increases b ecause inter-processor communication times
+eventually dominate. In practice, it is important to make b/aas small as possible to reduce absolute times. The
+eﬃciency is a universal function of p(dmin+1)N−1and therefore the only important parameter in the simulation,
+from a computational point of view, is the value of p(dmin+1)N−1. The larger Nis in relation to p, the better
+the algorithm will perform.
+Ourimplementation of the algorithmwas done using standardC langua geplus message-passingcalls(CMMD
+library) on the CM-5E supercomputer. We measured execution time s for diﬀerent total system sizes Nand
+numbers of processors pfor 2D Ising Swendsen-Wang simulations. We obtained: a= 2.79×10−6secs. and
+b= 6.2×10−6secs., and therefore b/a= 2.22. The timings are shown in Table I.
+Fig. 4 shows local, relax, and total times for diﬀerent system sizes o n a 64-node CM-5E. Measurements times
+(energy, magnetization, etc.) were not included. As we can see in th e ﬁgure, local times dominate except for
+smallN. Typical updating times are of the order of 40 nanosecs/site and 1 0 nanosecs/site for 64 and 256 node
+CM-5E machines respectively.
+Table I: Timings for 2D Swendsen-Wang dynamics on CM-5E supercom puters.
+System Size number of procs. Local time Relax time Total time Speed Time/site
+N p [secs] [secs] [secs] [106spin updates/sec] [nanosecs]
+128232 0.0012 0.0014 0.0026 6.3 164
+256232 0.005 0.002 0.007 9.4 104
+512232 0.020 0.003 0.023 11.3 88.3
+1024232 0.078 0.007 0.085 12.3 81.1
+2048232 0.312 0.017 0.329 12.7 78.5
+4096232 1.24 0.04 1.28 13.1 76.5
+8192232 5.15 0.08 5.23 12.8 78.0
+16384232 22.19 0.16 22.4 12.0 83.3
+256264 0.002 0.002 0.004 15.2 66.4
+512264 0.010 0.003 0.013 20.2 48.2
+1024264 0.039 0.006 0.045 23.3 42.5
+2048264 0.157 0.013 0.169 24.8 40.4
+4096264 0.623 0.027 0.650 25.8 38.7
+8192264 2.580 0.060 2.640 25.4 39.3
+16384264 11.12 0.12 11.24 23.9 41.9
+32768264 46.27 0.24 46.52 23.1 43.3
+5122256 0.002 0.004 0.006 41.6 24.02
+10242256 0.009 0.006 0.015 69.4 14.41
+20482256 0.037 0.011 0.048 87.2 11.47
+40962256 0.149 0.021 0.170 98.5 10.15
+81922256 0.596 0.049 0.645 104 9.61
+163842256 2.430 0.096 2.520 106 9.40
+327682256 10.63 0.105 10.73 100 9.99
+655362256 47.10 0.261 47.36 90.7 11.0
+For very large systems the performance decreases slightly due to decreased cache memory usage. This eﬀect
+is not taken into account in the scaling model. Simulating a 327682(655362) system requires about 84 Mbytes of
+local memory on a 64 (256) node CM-5E. This is about 5 bytes per site : 4 bytes (one integer) for the label and
+one byte for the spin. The scaling behavior of the model agrees well with the actual measured times. The local
+5times scale linearly with n, and the relaxation times with n1/2as expected. The speed-up SN(p), as a function
+of the number of processors for diﬀerent system sizes, is shown in Fig. 5. Notice that even for small system
+sizes, such as L= 512, the speed-up increases without saturation even for pequal to 256 processing nodes. The
+327682and 655362lattices are simulated with more than 99% eﬃciency on 64 and 256 proc essors respectively.
+The eﬃciency EN(p) =SN(p)/pas a function of pis shown in Fig. 5. When these points are plotted as a
+function of [ p(dmin+1)N−1]1/2, as shown in Fig. 6, they show the universal scaling behavior predict ed by Eq. 4:
+data for diﬀerent system sizes and number of processors collapse s reasonably well to a single curve.
+The relaxation method can be extended in a hierarchical style, for e xample using the multi-grid approach
+introduced in ref. [11], but in practice this is unnecessary because n earest neighbor relaxation is a very eﬃcient
+operation for global labeling even on large processor grids.
+3. Relaxation of Large 2D Ising Model with Swendsen-Wang Dyn amics.
+In this section we present results of a study of the relaxation of ma gnetization and energy on large 2D
+Swendsen-Wang Ising models. The typical simulation consists of set ting all spins up and then letting the system
+relax to equilibrium at Tc. Several relaxation experiments are performed to obtain signiﬁca nt statistics. When
+enough data is available diﬀerent scaling models can be tested and the value of zestimated. This method has
+been used for local Ising dynamics in two and three dimensions by Sta uﬀer[14], Stauﬀer and Kertesz[46] and
+Miranda[45]. Stauﬀer and Kertesz[15] simulated large Swendsen-Wa ng Ising systems with up to 64002spins and
+found large corrections to scaling and ﬁnite size eﬀects. They also f ound that the time dependent exponent z(t)
+vanishes linearly in 1 /timplying z= 0 in agreement with previous results of Heermann and Burkitt[8], an d
+others. Tamayo[9] performed a similar analysis with systems up to 32 7682spins and found relaxation behavior
+for intermediate and large times which was consistent with a power law decay and z= 0.25±0.05. Later, Hackl
+et al[19] studied systems with up to 179202spins and proposed a relaxation ansatz combining power law and
+exponential behavior. They found that this ansatz was able to ﬁt t he data reasonably well and explained the
+diﬀerence in the behaviors observed by Stauﬀer and Kertesz[15] a nd Tamayo[9]. Their power law exponents
+correspond to zM= 0.43 and zE= 044. These values are higher than the value zM= 0.25 found by Tamayo,
+however a comparison of Hackl et al’s raw relaxation data with Tamayo’s showed good agreement[47].
+In order to better understand the nature of these diﬀerences a nd explore the complex relaxation of energy
+and magnetization we performed relaxation experiments with large 2 Dsystems with L= 2048, L= 16384
+andL= 32768 spins. Each experiment consisted of setting all spins up and letting the system run for 100
+Swendsen-Wang time steps with the temperature set to Tc. In total we performed 5,000 relaxation experiments
+forL= 2048, 210 for L= 16384 and 46 for L= 32768. Our analysis will focus on the data for the L= 32768
+system.
+Figs. 8 and 9 show the average magnetization and energy as a funct ion of time for diﬀerent lattices. For
+short times the relaxation is basically the same for all lattice sizes but for longer times is diﬀerent due to ﬁnite
+size eﬀects. The behavior at short times appears to be dominated b y an exponential factor as was observed by
+Kertesz and Stauﬀer[15]. At intermediate and longer times the beha vior appears to be dominated by a power
+law[9]. To account for this exponential/power-law phenomenology Ha cklet alproposed an ansatz combining
+exponential and power law decay[19],
+M(t)∼(t+∆M)−λMe−bMt(5)
+6and similarly for the energy,
+E(t)∼(t+∆E)−λEe−bEt. (6)
+If one considers an overall amplitude in addition to bM,λMand ∆ Mthe model has 4 parameters. In order
+to ﬁt this model to Monte Carlo data Hackl et alfound useful to deﬁne the following auxiliary functions,
+hM(t) =−1
+M(t)dM(t)
+dt(7)
+and
+gM(t) =−1
+hM(t+2)−hM(2). (8)
+These functions can be expressed in terms of ∆ M,bMandλMas follows,
+hM(t) =λM
+t+∆M+bM (9)
+gM(t) =1
+λM/bracketleftbigg(∆M+2)2
+t+∆M+2/bracketrightbigg
+. (10)
+Analogous equations can be deﬁned for the energy. The reason fo r this reformulation is that gM(gE(t)) is
+independent of bM(bE) and then a standard linear ﬁt can be done for gM(gE)vs1/t. In this linear ﬁt the slope
+and intersect correspond to 1 /λM(∆M+ 2)2and 1/λM(2+∆ M) respectively. Hackl et alﬁtted this model to
+their data and found the following values for the parameters[19]: bM= 0.0043±0.0010,λM= 0.29±0.03, and
+∆M= 4.5±0.6 for the magnetization and bE= 0.0281±0.0020,λE= 2.26±0.08, and ∆ E= 5.9±0.25 for the
+energy.
+The exponent bM(bE) was obtained using the values of λM(λE) and ∆ M(∆E) to calculate the function,
+˜bM(t) =λMlog/bracketleftbiggt+1+∆ M
+t+∆M/bracketrightbigg
++log/bracketleftbiggM(t+1)
+M(t)/bracketrightbigg
+, (11)
+and averaging ˜bM(t) (˜bE(t)) over long times where it is roughly constant. Another way in which t hey obtained
+bM(bE) is by imposing the condition M(t= 0) = 0 and E(t= 0) =−2 on the ansatz,
+bM(t) =−1
+t/bracketleftbigg
+logM(t)
+M(0)+λMlogt+∆M
+∆M/bracketrightbigg
+, (12)
+and then averaging the roughly constant bM(t) (bE(t)) for intermediate and long times.
+The exponential/power-law ansatz ﬁtted their data reasonably we ll. From the values of λMandλEthey also
+computed values for zusing the following relations,
+λM=β/νz (13)
+λE= (1−α)/z, (14)
+which produced zM= 0.43 and zE= 0.44. They did not ﬁnd evidence of a logarithmic factor in the energy .
+7In our study we followed a similar methodology. We analyzed data from 46 relaxation experiments with the
+327682system. Figs. 8 and 9 show the raw relaxation data for energy and m agnetization on three diﬀerent
+lattice sizes. From these plots we obtained instantaneous slopes an d values of zM(t) andzE(t) as a function of
+time (see Figs. 10 and 11). These values of zM(t) andzE(t) appear to scale roughly linearly with 1 /timplying
+z/negationslash= 0, as was found in ref. [9], but the oscillating behavior near t= 0 makes diﬃcult to make an accurate
+extrapolation for 1 /t→0 and compute an eﬀective z. If the decay process were a pure power-law then according
+to the ﬁgures the values of zMandzEwill be in the range 0 .2−0.3. In addition to the instantaneous slopes we
+also computed gM(gE) which are shown in Figs. 12 and 13. A linear ﬁt of these data using Eq. 10, from t= 1
+tot= 80, produced the following values,
+bM= 0.0043±0.0005 (15)
+λM= 0.28±0.01 (16)
+∆M= 5.2±0.1, (17)
+and
+bE= 0.031±0.001 (18)
+λE= 2.2±0.1 (19)
+∆E= 7.5±0.1. (20)
+These numbers agree well with the values of Hackl et al[19] for all the parameters except for ∆ E. The
+exponent bM(bE) was computed by evaluating Eq. 11 using the values of λM(λE) and ∆ M(∆E) from the gM
+(gE) ﬁt and averaging ˜bM(˜bE) fromt= 10 tot= 60. This is shown in Figs. 14 and 15.
+In Figs. 16 and 17 we have plotted the original data and the ﬁt descr ibed by the ansatz. The power
+law/exponential ansatz, parameterized either with the values obt ained in this paper or with Hackl et alvalues,
+describes the data reasonablywell for initial and intermediate times although it appearsto slightly underestimate
+the values for long times. To study this eﬀect we repeated the analy sis but now ﬁtted the data from t= 10 to
+t= 80 in this way giving more weight to long time behavior. The ﬁt produce d somewhat diﬀerent values for the
+magnetization parameters,
+bM= 0.0020±0.0005 (21)
+λM= 0.38±0.01 (22)
+∆M= 7.0±0.1 (23)
+but basically identical ones for the energy,
+bE= 0.031±0.001 (24)
+λE= 2.2±0.1 (25)
+∆E= 7.5±0.1 (26)
+8In this case the ansatz for the magnetization ﬁts better the data for long times as can be seen in Fig. 16. In
+fact, the λM= 0.38 implies zM= 0.33 which is now closer to the value Tamayo found ﬁtting a single powe r law
+decay. To expose this apparent diﬀerent behavior of the short an d long time magnetization data we performed
+an incremental ﬁt of gM(gE)vs1/talways starting at t= 1 but ending at multiples of 10; the results are,
+initial time ﬁnal time ∆MλM∆EλE
+1 11 4.70 0.253 7.58 2.22
+1 21 4.94 0.267 7.52 2.20
+1 31 5.04 0.273 7.52 2.20
+1 41 5.11 0.278 7.52 2.20
+1 51 5.18 0.280 7.52 2.20
+1 61 5.20 0.283 7.52 2.20
+1 71 5.22 0.284 7.52 2.20
+1 81 5.29 0.288 7.52 2.20
+1 91 5.33 0.291 7.52 2.20
+Compare that with a similar incremental ﬁt but now starting from t= 10,
+initial time ﬁnal time ∆MλM∆EλE
+10 20 5.33 0.292 7.48 2.18
+10 30 5.63 0.305 7.53 2.19
+10 40 5.96 0.323 7.54 2.20
+10 50 6.18 0.335 7.54 2.20
+10 60 6.49 0.352 7.55 2.20
+10 70 6.58 0.357 7.55 2.20
+10 80 6.98 0.381 7.55 2.20
+10 90 7.34 0.402 7.55 2.20
+There are several conclusions we draw from this. The ﬁrst is that t he ansatz describes the energy relaxation
+very well. The energy results are consistent and very robust indep endent of the particular subset of data being
+used for the ﬁt. For the magnetization the ansatz works well for s hort or intermediate times but for long times
+there is a trend by which the ansatz underestimates the data. This manifests as the change of values of ∆ M
+andλMas one adds longer time data points to the ﬁt. Assuming this trend is s igniﬁcant then the behavior of
+the magnetization relaxation at long times might be more complex than expected. The variation of λMtaken
+at face value indicates that the value of zMfalls in the interval 0 .31−0.49 for the time interval analysed and
+appears to vanish asymptotically. For the energy zEappears to be around 0 .45 and we didn’t ﬁnd evidence of a
+logarithmic factor.
+In summary, we found evidence that exponential as well as power la w factors are present in the relaxation of
+the energy and magnetization of large 2 DIsing models with Swendsen-Wang dynamics. The ansatz proposed b y
+Hacklet al, which combines an exponential factor with a power law, describes t he energy relaxation very well.
+The magnetization relaxation is also described well for short and inte rmediate times but the behavior appears
+to be more complex at longer times.
+The eﬀect of diﬀerent initial conditions (eg. M(t= 0)/negationslash= 1), as has been studied in refs. [48, 49], was not
+considered here but will be the subject of future work.
+Acknowledgments.
+WewanttothankL.Colonna-Romano,A.I.Mel´ cuk, H.Gould, W. K lein, L.Tucker,R.HacklandD.Stauﬀer,
+for comments and correspondence and J. Mesirov and B. Lordi of Thinking Machines Corp. for supporting this
+project. We wish to acknowledge the DOE Advanced Computing Lab. at Los Alamos, the Naval Research
+9Laboratory and Thinking Machines Corp. for providing the compute r time that was needed to perform the
+simulations reported in this work.
+References
+[1] C. Rebbi, Ed. Lattice Gauge Theories and Monte Carlo Simulations , World Scientiﬁc Singapore (1992).
+[2] K. Binder, Ed. Monte Carlo Methods in Statistical Physics , Springer-Verlag Berlin, New York (1986); K. Binder
+and D. W. Heermann. Monte Carlo Simulation in Statistical Physics: an Introduc tion, Springer-Verlag Berlin, New
+York (1988).
+[3] D. Stauﬀer and A. Aharony, Introduction to Percolation Theory 2nd. ed., Taylor and Francis, London (1992).
+[4] D. Stauﬀer and H. E. Stanley, From Newton to Mandelbrot: a Primer in Theoretical Physics , Springer-Verlag Berlin,
+New York (1990).
+[5] D. C. Rapaport, J. Phys. A 18, (1985) L175.
+[6] A. M. Ferrenberg and D. P. Landau, Critical Behavior of th e Three-Dimensional Ising Model: a High-Resolution
+Monte Carlo Study Phys. Rev. B 44, 5081 (1991).
+[7] C. F. Baillie, R. Gupta, K. Hawick and G. S. Pawley, Monte C arlo Renormalization-Group Study of the Three-
+Dimensional Ising Model Phys. Rev. B 45, 10438 (1992); P. D. Coddington and C. F. Baillie, Phys. Rev. Lett. 68
+(1992) 962.
+[8] A. N. Burkitt and D. W. Heermann, Comp. Phys. Comm. 54, (1989) 210; D. W. Heermann and A. N. Burkitt,
+Parallel Algorithms in Computational Science , Springer Verlag, Heidelberg 1991.
+[9] P. Tamayo, Physica A 201, 543 (1993).
+[10] C. F. Baillie and P. D. Coddington, Concurrency: Practice and Experience 3(2), 129 (1991); C. F. Baillie and P.D.
+Coddington, Phys. Rev. B 43, 10617 (1991);
+[11] R. C. Brower, P. Tamayo and B. York, Jour. of Stat. Phys. 63, (1991) 73.
+[12] J. Apostolakis, P. Coddington and E. Marinari, Europhys. Lett. 17(3), 198 (1992).
+[13] H. Mino, Comp. Phys. Comm. 66, 25 (1991).
+[14] D. Stauﬀer, Physica A 171, 471 (1991).
+[15] J. Kertesz and D. Stauﬀer, Int. Jour. of Mod. Phys. C 3, 1275 (1992).
+[16] M. Flanigan and P. Tamayo, Int. Jour. of Mod. Phys. C 3, 1235 (1992).
+[17] R. Hackl, H.-G. Matuttis, J. M. Singer, Th. Husslein and I. Morgenstern, Parallelization of the 2D Swendsen-Wang
+Algorithm , in: Large Scale Computational Physics on Massively Parall el Computers, H. J. Herrmann and F. Karsch
+Eds. World Scientiﬁc Pub. Co. LTD. p59 (1993); and Int. Jour. of Mod. Phys. C , December 1993.
+[18] M. Bauernfeind, R. Hackl, H.-G. Matuttis, J. M. Singer, Th. Husslein and I. Morgenstern, 3D Ising-Model with
+Swendsen-Wang Dynamics: A Parallel Approach , preprint. To appear in Physica A 1994.
+[19] R. Hackl, H.-G. Matuttis, J. M. Singer, Th. Husslein and I. Morgenstern, Eﬃcient Parallelization of the 2D
+Swendsen-Wang Algorithm , to appear in Int. Jour. of Mod. Phys. C 1994.
+[20] G. T. Barkema and T. MacFarland, Phys. Rev. E 50, 1623 (1994).
+[21] R. Swendsen and J. S. Wang, Phys. Rev. Lett. ,58,86 (1987).
+[22] R. Brower and P. Tamayo, Phys. Rev. Lett. ,62, 1087 (1989); R. Brower and S. Huang, Phys. Rev. D 41, 708
+(1990); U. Wolﬀ, Phys. Rev. Lett. 60, 1461 (1988); R. Edwards and A. Sokal, Phys. Rev. D 38, 2009 (1988); W.
+Klein, T. Ray and P. Tamayo, Phys. Rev. Lett. ,62, 163 (1989); P. Tamayo, R. C. Brower and W. Klein, J. of Stat.
+Phys.,58, 1083 (1990).
+[23] T. H. Cormen, C. E. Leiserson and R. L. Rivest, Introduction to Algorithms , MIT Press, (1990); D. Knuth, The Art
+of Computer Programming, vol 3, Addison-Wesley (1973).
+[24] E. Horowitz and S. Sahni, Fundamentals of Computers Algorithms , Potomac, Md. Computer Science Press, 1978.
+[25] Y. Shiloach and U. Vishkin, Jour. of Algorithms 3, 57 (1982).
+10[26] U. Vishkin, Discrete Applied Mathematics 9, 197 (1984).
+[27] M. J. Quinn and N. Deo, Computing Surveys, Vol. 16, No 3, September 1984.
+[28] P. S. Gopalakrishnan, I. V. Ramakrishnan and L. N. Kanal , 1985IEEE, Int. Conf. on Parallel Processing.
+[29] W. Lim, A. Agrawal and L. Nekludova, Thinking Machines Tech. Report NA86-2.
+[30] L. W. Tucker, Proc. IEEE Conference on Computer Vision and Pattern Recognition ,June 1986, Miami, Florida.
+[31] J. Woo and S. Sahni, Jour. of Supercomputing 3, (1989) 209.
+[32] H. Embrechts, D. Roose and P. Wambacq, Hypercube and Distributed Computers, F. Andre and J. P. Verjus eds.
+Elsevier Science Pubs. B. V. (North-Holland) 1989.
+[33] R. Cypher, J. L. C. Sanz and L. Snyder, Journal of Algorithms 10, 140 (1989).
+[34] G. H. Blelloch, Vector Models for Data-Parallel Computing , MIT Press, 1990.
+[35] D. A. Bader and J. J´ aJ´ a, Parallel Algorithms for Image Histogramming and Connected Components with an
+Experimental Study, Draft, University of Maryland 1994.
+[36] J. Greiner, A Comparison of Data-Parallel Algorithms f or Connected Components, Tech. Rep. CMU-CS-93-191.
+[37] A. Choudhary and R. Thakur, Jour. of Parallel and Dist. Comp. 20, 78 (1994).
+[38] John Apostolakis, Paul Coddington, Enzo Marinari, New SIMD Algorithms for Cluster Labeling on Parallel Com-
+puters, NPAC technical report SCCS-279 (1992).
+[39] A. Coniglio and W. Klein, J. Phys. A, 13, (1980) 2775. p
+[40] A. Coniglio, Phys. Rev. Lett. ,62, (1989) 3054.
+[41] J. Hoshen and R. Kopelman, Phys. Rev. B, 14, (1976) 3438.
+[42] U. Wolﬀ, Phys. Lett. B 228, (1989) 379 .
+[43] C. Munkel, Int. Jour. of Mod. Phys. C 4, 79 (1993).
+[44] H. J. Herrmann and H. E. Stanley, J. Phys. A 21L829 (1988).
+[45] E. N. Miranda, Physica A 175, 235 (1991), 179, 340 (1991); Physica A 175, 229 (1991).
+[46] D. Stauﬀer and J. Kertesz, Physica A 177, 381 (1991).
+[47] R. Hackl, Personal Communication.
+[48] L. Colonna-Romano, A. I. Mel´ cuk, H. Gould, and W. Klein ,Physica A 209, 396 (1994).
+[49] H. K. Janssen, B. Schaub and B. Schmittmann, Z. Phys. B 73, 539 (1988).
+11This figure "fig1-1.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig2-1.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig2-2.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-4.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-5.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-6.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-7.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-8.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-9.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-10.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-11.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-12.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-13.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-14.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-15.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-16.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1This figure "fig1-17.png" is available in "png"
+ format from:
+http://arxiv.org/ps/hep-lat/9502007v1Fig /1/./- P artitioning of a /6/4 x /6/4 lattice of spins in to /1/6 cell domains/. Eac h celldomain is assigned to a pro cessor/./1Local
+Labeling
+Set
+Boundaries
+for
+RelaxationFig/. /2/./- Initial and /nal stages of the Lo cal/-Lab eling pro cedure for one pro/-cessor/. The initial condition on top sho ws the sites connected b y p ercolation/(connectivit y/) b onds/. The second /gure sho ws the result of the lo cal lab elingwhere eac h site p oin ts to its lo cal ro ot/. A t the b ottom the lo cal ro ots areglobalized /(i/.e/. made unique o v er the whole system/) and b oundary p oin tersare set up for the relaxation pro cess/./2Fig/. /3/./- The global relaxation pro cess set up is sho wn for a subsystem offour pro cessors/. Eac h pro cessor exc hanges ro ot lab els with nearest neigh b ors/.Lab els are compared and set to minim um v alues/. The pro cess is rep eated un tilno more c hanges in the lab els are detected/./3Fig/. /4/./- Lo cal/, relaxation and total times as a function of lattice size on a/6/4/-no de CM/-/5E sup ercomputer/./4Fig/. /5/./- Sp eed/-up function for di/eren t lattice sizes/. The straigh t line /( Sp
+/= p /)sho ws the ideal linear sp eed/-up/./5Fig/. /6/./- E/ciency /( Sp
+/=p /) function for di/eren t lattice sizes/./6Fig/. /7/./- Univ ersal form of the e/ciency function/./7Fig/. /8/./- Magnetization relaxation data for di/eren t lattice sizes/./8Fig/. /9/./- Energy relaxation data for di/eren t lattice sizes/./9Fig/. /1/0/./- Time dep enden t zM
+/( t /) exp onen t computed from the instan taneousslop e as a function of /1 /=t /./1/0Fig/. /1/1/./- Time dep enden t zE
+/( t /) exp onen t computed from the instan taneousslop e as a function of /1 /=t /./1/1Fig/. /1/2/./- Auxiliary function gM
+/( t /)/. The solid line sho ws the linear least/-squares/t/./1/2Fig/. /1/3/./- Auxiliary function gE
+/( t /)/. The solid line sho ws the linear least/-squares/t/./1/3Fig/. /1/4/./- Exp onen t bM
+/( t /) as a function of time/./1/4Fig/. /1/5/./- Exp onen t bE
+/( t /) as a function of time/./1/50.20.30.40.50.60.70.80.911.1
+0 20 40 60 80 100< |m(t)| >
+tSimulation data for L = 32768 (46 runs)
+Exponential-power-law ansatz with parameters obtained in this paper (t=10, 80 fit)
+Exponential-power-law ansatz (Hackl et al parameters)Fig/. /1/6/./- Magnetization relaxation data for L/=/3/2/7/6/8/. The mo del /(ansatz/)parameterized with the v alues obtained in this pap er and Hac kl et al v aluesare also sho wn/./1/60.00010.0010.010.11
+0 20 40 60 80 100< |E(t) - E_eq | >
+tSimulation data for L = 32768 (46 runs)
+Exponential-power-law ansatz with parameters obtained in this paper (t=10, 80 fit)
+Exponential-power-law ansatz (Hackl et al parameters)Fig/. /1/7/./- Energy relaxation data for L/=/3/2/7/6/8/. The mo del /(ansatz/) parame/-terized with the v alues obtained in this pap er and Hac kl et al v alues are alsosho wn/./1/7

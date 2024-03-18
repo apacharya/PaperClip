@@ -1,0 +1,1422 @@
+Source-sink dynamics in a two-patch SI epidemic
+model with life stages and no recovery from
+infection
+Jimmy Calvo-Monge1, Jorge Arroyo-Esquivel2*, Alyssa Gehman3,
+Fabio Sanchez1,4
+1Escuela de Matem´ atica, Universidad de Costa Rica, San Pedro, 11501,
+San Jos´ e, Costa Rica.
+2*Department of Global Ecology, Carnegie Institution for Science,
+Washington DC, 20015, United States of America.
+3Hakai Institute, 25039, British Columbia, Canada.
+4Centro de Investigaci´ on en Matem´ atica Pura y Aplicada, Universidad
+de Costa Rica, San Pedro, 11501, San Jos´ e, Costa Rica.
+*Corresponding author(s). E-mail(s):
+jarroyoesquivel@carnegiescience.edu;
+Contributing authors: jimmy.calvo@ucr.ac.cr; alyssa.gehman@hakai.org;
+fabio.sanchez@ucr.ac.cr;
+Abstract
+This study presents a comprehensive analysis of a two-patch, two-life stage SI
+model without recovery from infection, focusing on the dynamics of disease
+spread and host population viability in natural populations. The model, inspired
+by real-world ecological crises like the decline of amphibian populations due to
+chytridiomycosis and sea star populations due to Sea Star Wasting Disease, aims
+to understand the conditions under which a sink host population can present
+ecological rescue from a healthier, source population. Mathematical and numer-
+ical analyses reveal the critical roles of the basic reproductive numbers of the
+source and sink populations, the maturation rate, and the dispersal rate of juve-
+niles in determining population outcomes. The study identifies conditions for
+disease-free, endemic, and extinction equilibria in sink populations, emphasizing
+the potential for ecological and evolutionary mechanisms to facilitate coexistence
+or recovery. These findings provide insights into managing natural populations
+affected by disease, with implications for conservation strategies, such as the
+1arXiv:2402.06779v1  [q-bio.PE]  9 Feb 2024importance of maintaining reproductively viable refuge populations and con-
+sidering the effects of dispersal and maturation rates on population recovery.
+The research underscores the complexity of host-pathogen dynamics in spatially
+structured environments and highlights the need for multi-faceted approaches to
+biodiversity conservation in the face of emerging diseases.
+Keywords: patch epidemic model, dispersal, non-recovery models, stability analysis
+1 Introduction
+Many natural populations are at risk of extinction due to disease-driven mortality,
+making managing these diseases a crucial endeavor to protect these species [1]. One
+of the most documented cases of this population decline is the mortality of amphib-
+ian populations caused by chytridiomycosis, a disease caused by the fungal pathogen
+Batrachochytrium dendrobatidis (Bd) [2]. More recently, sea star populations have
+been declining due to the presence of an unidentified pathogen that causes the Sea
+Star Wasting Disease (SSWD) [3]. Management of diseases in natural populations is a
+task that requires understanding both the transmission dynamics of such diseases as
+well as the population dynamics of the species studied. Ecological models that consider
+the role of the transmission of infectious diseases have been studied for almost half a
+century [4, 5]. Host population decline can be caused when recovery from the disease
+is significantly slower than disease-induced mortality [6] or when recovery events are
+rare [7]. However, classical models undermine the possibility of host populations going
+extinct, observed empirically and likely caused by demographic stochasticity at low
+populations or the presence of pathogen reservoirs in the environment [8].
+Host population decline caused by disease-induced mortality has been observed to
+vary spatially. For example, a lower transmission rate of Bd in bromeliad microhabitats
+leads to higher recruitment of amphibian juveniles than in stream microhabitats [9].
+In the case of SSWD, higher water temperatures in some regions potentially hinder
+the immune response of the sea stars to the disease, causing increased disease-induced
+mortality [10]. This spatial variation begs how disease transmission is affected when
+individuals can disperse between patches. The role of mobility in disease modeling has
+been recently identified as crucial to understanding the regional patterns of disease
+transmission observed in data [11]. In the case of natural metapopulations, previous
+analyses found that dispersal can either facilitate or dilute the transmission of the
+disease [12]. Facilitation of transmission can occur due to the presence of superspreader
+patches with high reproduction numbers [13], while dilution of transmission can occur
+when patches with low reproduction numbers act as refugia where the population can
+persist [14].
+Another factor that can affect the risk of extinction due to the disease of host
+populations is the stage structure of this population. Pathogens may have different
+transmission rates or mortality effects on different life stages of a species [15]. Moreover,
+this can cause a shift in the stage structure and reduce the population resiliency to
+disturbance [16, 17]. This loss of resiliency is particularly problematic when mortality
+2is higher in juvenile, nonreproductive stages. High mortality of juveniles reduces the
+number of reproductive individuals and causes a population decline even when fertility
+rates are high [18].
+A case example of conservation interest where the risk of population extinction,
+spatial variation, and life history play a role in population decline is the sunflower
+sea star, Pycnopodia helianthoides [19]. This species has experienced a substantial
+population decline in the Northeastern Pacific driven by increased water temperatures
+and the presence of SSWD [20]. This decline has led the local population to a functional
+extinction in some parts of the coastline. Pycnopodia is one of the main predators of
+the barren-forming purple urchin Strongylocentrotus purpuratus . This decline has thus
+contributed to a substantial loss of coverage of the highly productive kelp forest in
+places where Pycnopodia is the main predator due to an increased grazing pressure
+from purple sea urchins [21]. Furthermore, this increases the interest in recovering
+Pycnopodia populations to recover kelp forest coverage [22] and promote its long-term
+resistance to disturbance events [23].
+In the northern extent of Pycnopodia ’s geographic range, the effect of SSWD has
+been patchy [19]. Remnant populations of Pycnopodia have been found in nearshore
+relatively shallow habitats within Fjords in British Columbia following regional expo-
+sure to SSWD [19, 24]. In contrast, adjacent habitats considerably declined [19, 24].
+Importantly, populations within Fjords have maintained a mean individual size above
+the reproductive minimum. In contrast, since the SSWD outbreak, the mean size in
+adjacent habitats has not reached the reproductive minimum [24]. In the years follow-
+ing the SSWD outbreak, there has been consistent recruitment of juvenile Pycnopodia ,
+likely sourced from the populations within the Fjords [24].
+This paper presents a mathematical analysis of a two-patch, two-life stages SI
+model with unidirectional dispersal and no recovery from infection. Two-patch models
+are classical approaches to analyzing spatial dynamics of metapopulations mathemati-
+cally. With the increasing interest in understanding spatial dynamics of disease spread,
+many two-patch epidemiological models have appeared in recent literature [25–31]. In
+the next section, we will introduce our model, which will then be followed by a math-
+ematical and numerical analysis of its equilibria in Section 3. Finally, we will discuss
+the ecological implications of our analysis in Section 4.
+2 Model and methods
+We propose a two-patch SI model [25] where a natural population has a density Niat
+patch i= 1,2, where patch 1 represents a source patch and patch 2 is a sink patch.
+On each patch, healthy adult individuals AS,iproduce healthy offspring JS,ifollowing
+a logistic growth functional form. A proportion pof juveniles stay in the patch, while
+the remaining 1 −pescapes the patch, either from the source patch into the sink patch
+(Patch 1) or from the sink patch outside the system (Patch 2). In addition, healthy
+juveniles mature and become reproductive adults at a rate α.
+Healthy individuals can be infected following direct contact with an infected juve-
+nileJI,ior adult AI,iwith an age-independent, patch-specific transmission rate βi.
+3To model the effects of disease mortality, we separate mortality rates of healthy indi-
+viduals µSfrom infected individuals µI, where the common assumption of µI> µS
+is made. Finally, we model the slow or rare recovery events by assuming that no
+transition from infected to susceptible individuals is possible.
+In equation form, our system is written as
+Patch 1
+
+˙JS,1=pr 
+1−N1
+k
+AS,1−β1JS,1(JI,1+AI,1)
+N1−αJS,1−µSJS,1,
+˙JI,1=β1JS,1(JI,1+AI,1)
+N1−µIJI,1,
+˙AS,1=αJS,1−β1AS,1(JI,1+AI,1)
+N1−µSAS,1,
+˙AI,1=β1AS,1(JI,1+AI,1)
+N1−µIAI,1,
+(1)
+Patch 2
+
+˙JS,2= (1 −p)r 
+1−N2
+k
+AS,1+pr 
+1−N2
+k
+AS,2−β2JS,2(JI,2+AI,2)
+N2−αJS,2−µSJS,2,
+˙JI,2=β2JS,2(JI,2+AI,2)
+N2−µIJI,2,
+˙AS,2=αJS,2−β2AS,2(JI,2+AI,2)
+N2−µSAS,2,
+˙AI,2=β2AS,2(JI,2+AI,2)
+N2−µIAI,2,
+where N1:=JS,1+AS,1+JI,1+AI,1andN2:=JS,2+AS,2+JI,2+AI,2. Consequently,
+(1) gives us that
+˙N1=pr
+1−N1
+k
+AS,1−µS(JS,1+AS,1)−µI(JI,1+AI,1)
+˙N2=(1−p)r
+1−N2
+k
+AS,1+rAS,2−µS(JS,2+AS,2)−µI(JI,2+AI,2)(2)
+A transfer diagram for this model is given in Figure 1.
+4First Patch Second PatchJS,1
+JI,1AS,1
+AI,1α
+β1(JI,1+AI,1)
+N1β1(JI,1+AI,1)
+N1µS µS
+µI µIpr 
+1−N1
+k
+JS,2
+JI,2AS,2
+AI,2α
+β2(JI,2+AI,2)
+N2β2(JI,2+AI,2)
+N2µS µS
+µI µIpr 
+1−N2
+k
+(1−p)r 
+1−N2
+k
+Fig. 1 Transfer diagram for model (1).
+Remark 1. In the following section, we explore the analytical properties of this model,
+particularly concerning the existence and stability criteria of equilibrium points. We
+note that the general Jacobian matrix of this model is a block triangular matrix of the
+form
+J=
+J10
+G J 2
+,
+whereJ1,J2are the Jacobian matrices for the first and second patches correspondingly.
+In light of this, the stability study will be performed separately for each population
+patch.
+3 Mathematical Analysis
+3.1 First Patch Analysis
+In this section, we investigate the stability and point values for the possible equilibria
+of our primary model in the first patch. Note that this patch is entirely independent
+of the second patch; hence, starting our analytical study with this patch alone makes
+sense. There are three main types of equilibrium points possible for this patch: the
+disease-free equilibrium, in which the population of infected, I1=JI,1+AI,1equals
+zero, the endemic equilibrium, in which I1attains a nonzero value, and the extinc-
+tion equilibrium, in which all values, JS,1, AS,1, JI,1andAI,1converge to zero (the
+5population becomes extinct). We investigate the possible parameters for each scenario
+that control the point’s stability.
+3.1.1 Disease-free equilibrium for the first patch
+After some calculations, if J1is the Jacobian matrix for the first patch, then we have
+that det( J1−λI) is given by
+det
+−prAS,1
+k−β1δ1+β1JS,1η1−(α+µS)−λ−prAS,1
+k−β1JS,1ϑ1−2prAS,1
+k+β1JS,1η1−prAS,1
+k−β1JS,1ϑ1
+β1δ1−β1JS,1η1 β1JS,1ϑ1−µI−λ −β1JS,1η1 β1JS,1ϑ1
+α+β1AS,1η1 −β1AS,1ϑ1−β1δ1+β1AS,1η1−µS−λ −β1AS,1ϑ1
+−β1AS,1η1 β1AS,1ϑ1 β1δ1−β1AS,1η1 β1AS,1ϑ1−µI−λ
+
+(3)
+where
+δ1:=JI,1+AI,1
+N1, η 1:=JI,1+AI,1
+N2
+1, ϑ 1:=JS,1+AS,1
+N2
+1.
+When we find ourselves in the disease-free equilibrium for this patch, we have JI,1=
+AI,1= 0, implying that δ1=η1= 0 and ϑ1=1
+N1. Substituting these values in the
+determinant (3) we must compute
+det
+−prAS,1
+k−(α+µS)−λ−prAS,1
+k−β1JS,1
+N1−2prAS,1
+k−prAS,1
+k−β1JS,1
+N1
+0 β1JS,1
+N1−µI−λ 0 β1JS,1
+N1
+α −β1AS,1
+N1−µS−λ −β1AS,1
+N1
+0 β1AS,1
+N10 β1AS,1
+N1−µI−λ
+.(4)
+From section A in the appendix, we obtain that this determinant equals
+
+−
+−prAS,1
+k−(α+µS)−λ
+·(µS+λ) +α·2prAS,1
+k
+−β1
+N1(µI+λ)(AS,1+JS,1) + (µI+λ)2
+,
+which is a product of two quadratic polynomials. We simplify both of them. For the
+second polynomial, note that when the system attains the disease-free-equilibrium we
+have that N1=JS,1+AS,1so the second polynomial becomes
+−β1
+N1(µI+λ)(AS,1+JS,1) + (µI+λ)2=−β1(µI+λ) + (µI+λ)2=
+(µI+λ)(−β1+µI+λ) = (µI+λ)(λ−(β1−µI)).
+The reader can verify that the first polynomial is of the form λ2+B1λ+C1where
+B1>0 and C1>0, so both of it’s roots are negative1. In conclusion, the characteristic
+polynomial of the Jacobian matrix at the disease-free equilibrium is of the form
+(λ2+B1λ+C1)(µI+λ)(λ−(β1−µI)),
+1Indeed, in equation ax2+bx+c= 0,where a, b, c > 0, then one possible root has numerator −b−√
+b2−4acwhich is negative, and the other has numerator −b+√
+b2−4acwhich is also negative: −b+√
+b2−4ac < 0⇔√
+b2−4ac < b ⇔b2−4ac < b2⇔0<4ac.
+6with the following eigenvalues: λ1, λ2(the two negative roots of λ2+B1λ+C1), -µI
+andβ1−µI. Consequently, the disease-free equilibrium in this patch is stable when
+β1< µ I. This leads us to define the basic reproductive number for the first
+patch , given by
+R0,1:=β1
+µI. (5)
+We then have the following.
+Proposition 1. When R0,1<1, the disease-free equilibrium in the first patch is stable.
+Remark 2. The disease-free equilibrium can be computed explicitly as well, and a
+simple calculation shows that it is given by
+A∗,0
+S,1=kh
+1−µS
+αpr(µS+α)i
+1 +µS
+α, J∗,0
+S,1=µS
+αA∗,0
+S,1, A∗,0
+I,1= 0, J∗,0
+I,1= 0, (6)
+ifA∗,0
+S,1≥0.
+3.1.2 Endemic equilibrium for the first patch
+Consider the variable I1:=JI,1+AI,1, the total infected population in the first
+patch of the model. We find the existence of equilibria where I1>0. The appendix’s
+calculations in section B give us the following proposition regarding this endemic
+equilibria.
+Proposition 2. If the first patch of the model (1) attains an endemic equilibrium,
+then it is given by
+J∗
+S,1=1
+(R0,1−1)(λ1+ 1)I∗
+1, A∗
+S,1=λ1
+(R0,1−1)(λ1+ 1)I∗
+1, (7)
+J∗
+I,1=1
+λ1+ 1I∗
+1, A∗
+I,1=λ1
+λ1+ 1I∗
+1, (8)
+where
+I∗
+1=k(R0,1−1)
+rRpRαR0,1
+rRpRα−(R0,1+Rs+Rα−1)(R0,1+Rs−1)
+, (9)
+and
+Rp:=p
+µI, R α:=α
+µI, R s:=µS
+µI, λ 1:=Rα
+R0,1+Rs−1. (10)
+Provided that I∗
+1>0and that R0,1>12.
+Remark 3. Let us carefully analyze Equation (9). The reader will note that, looking
+atR0,1as a variable, there are three roots for I∗
+1= 0, given by:
+R0,1= 1,
+2When R0,1<1 we saw, previously, that the disease-free equilibrium is stable.
+7R0,1= 1 +Rα
+2 
+−1−r
+1 + 4 rRp
+Rα!
+−Rs= 1−"
+Rα
+2 
+1 +r
+1 + 4 rRp
+Rα!
++Rs#
+,
+R0,1= 1 +Rα
+2 
+−1 +r
+1 + 4 rRp
+Rα!
+−Rs.
+The second root is always less than 1. However, the third root can be greater or less than
+1. Both cases yield very different situations, as shown in our numerical simulations
+below.
+3.1.3 Extinction equilibrium for the first patch
+Another type of equilibrium that might be present in this model is the extinction
+equilibrium. It is simple to verify that the determinant at (3), when AS,1=JS,1=
+AI,1=JI,1= 0 equals ( µI+λ)2(µS+λ)(λ+α+µS), which has all negative roots.
+Moreover, this implies that the extinction equilibrium is stable. This equilibrium will
+be attained when R0,1>1 and I∗
+1in equation (9) is negative. Again, this will be
+discussed more in-depth in our numerical results section.
+3.2 Second Patch Analysis
+We now continue with a similar analysis of the equilibria possibilities for the second
+patch. Note that this patch is dependent on the first due to the presence of the term
+AS,1in the first equation of the second patch. Consequently, results for this patch will
+also depend on the equilibrium point attained by the first patch.
+3.2.1 Disease-free equilibrium for the second patch
+The Jacobian matrix of the second patch, J2, is analogous to J1, with the exception
+that each entry of the first row has the addition of the extra term −(1−p)r
+kAS,1. Calcu-
+lations made in section C of the appendix assure us that the determinant det( J2−λI)
+is again of the form
+(λ2+B2λ+C2)(µI+λ)(λ−(β2−µI)),
+where B2, C2>0. This yields a similar situation as in the first patch, where the
+disease-free equilibrium in the second patch is stable when β2< µI. Again this obliges
+us to define the basic reproductive number for the second patch , given by
+R0,2:=β2
+µI. (11)
+We have thus proved the following.
+Proposition 3. When R0,2<1, the disease-free equilibrium in the second patch is
+stable.
+83.2.2 Endemic equilibria for the second patch
+The endemic equilibria in the second patch are those equilibria points in which I2:=
+JI,2+AI,2is positive. The only difference with the corresponding analysis for the first
+patch consists of an extra term that depends on AS,1andN2for the first equation in
+this patch. We recall that this equation is given at the equilibrium point by
+0 = (1 −p)r
+1−N2
+k
+AS,1+pr
+1−N2
+k
+AS,2−β2JS,2(JI,2+AI,2)
+N2−αJS,2−µSJS,2.
+(12)
+Using I2=JI,2+AI,2we can repeat the same analogous from section B, applied to
+the second patch, to obtain the relations
+J∗
+S,2=1
+(R0,2−1)(λ2+ 1)I∗
+2, A∗
+S,2=λ2
+(R0,2−1)(λ2+ 1)I∗
+2,
+J∗
+I,2=1
+λ2+ 1I∗
+2, A∗
+I,2=λ2
+λ2+ 1I∗
+2, N∗
+2=R0,2
+R0,2−1I∗
+2 (13)
+andN∗
+2=R0,2
+R0,2−1I∗
+2, where
+λ2:=Rα
+R0,2+Rs−1. (14)
+We can modify Equation (12) to obtain the quadratic equation defining the equilibrium
+I∗
+2. We state this in the following proposition.
+Proposition 4. When the first patch attains an equilibrium ( J∗
+S,1,A∗
+S,1,J∗
+I,1,A∗
+I,1),
+and the second patch has endemic equilibria, they are given by the relations in (13),
+where I∗
+2is a solution of the quadratic equation
+0 =prλ2R0,2
+k(λ2+ 1)( R0,2−1)2(I∗
+2)2(15)
++1
+(λ2+ 1)( R0,2−1)
+−prλ2+β2(R0,2−1)
+R0,2+α+µS
++(1−p)rR0,2A∗
+S,1
+k(R0,2−1)
+I∗
+2
+−(1−p)rA∗
+S,1.
+andλ2is given by Equation 14.
+4 Numerical Analysis
+Example 1 (First Patch Analysis) .Remark 3 indicates that the analysis of the equilib-
+rium of the first patch depends highly on the values of the roots of the cubic polynomial
+that defines I∗
+1in terms of the basic reproductive number for the first patch, R0,1. The
+following graphs show disease-free and endemic equilibria at the first patch when the
+9third root of this polynomial is greater than 1. We highlight the type of equilibrium
+attained at each region.
+0.5 1.0 1.5 2.0 2.50.00.20.40.60.81.0
+R0,1Endemic Equilibria D.F. Equilibrium Extinction EquilibriumSusceptible 1stPatch Susceptible 2ndPatchInfected 1stPatch Infected 2ndPatch
+Fig. 2 Final infected (red) and susceptible (blue) proportions attained in both patches, varying
+values of R0,1. Keeping the value of R0,2constant, with R0,2>1. Note that when R0,1<1, the
+disease-free equilibrium for the first patch is stable. When R0,1>1, this equilibrium is not stable;
+this leads to an endemic equilibrium, given by the theoretical value of I∗
+1in proposition (2). However,
+for larger values of R0,1, the value of I∗
+1becomes negative, so the system converges to the extinction
+equilibrium.
+In the scenario of Figure (2), the third root (for I∗
+1= 0) of the polynomial in
+Equation (9) is greater than 1, giving us an interval 1< R 0,1<1 +ϵin which I∗
+1>0,
+which yields the region for the endemic equilibrium. When the third root is less than 1,
+no such interval exists, and the system only has two possibilities: if R0<1, it attains
+a disease-free equilibrium, and if R0>1, it attains the extinction equilibrium. This
+case is rather extreme and can be achieved, for example, with very low values of the
+parameter α.
+Example 2 (Second Patch Analysis) .While the first patch is independent and only
+affected by its reproductive number R0,1, the second patch is affected by the behavior
+of both patches as an aggregate. In this situation, the equilibria attained by the second
+patch are influenced by the value of R0,1andR0,2. Figure (3) shows this relationship.
+10Each point represents the average equilibrium point attained by the system using the
+corresponding values of (R0,1, R0,2)for several simulations with different initial condi-
+tions. With disease parameters r= 1, k= 1, α= 0.6, µS= 0.1, µI= 0.1andp= 0.5.
+As shown before, when R0,2<1, the disease-free equilibrium is stable in the second
+patch. When R0,2>1the equilibrium depends on both R0,1andR0,2. The region on
+the bottom right represents an extinction scenario for larger values of both R0,1and
+R0,2. A range of R0,2values yields endemic equilibria in the second patch, regardless
+of the R0,1value.
+0.5
+0.8
+1.1
+1.4
+1.7
+2.
+2.3
+2.6
+2.9
+3.2
+3.5
+3.8
+4.1
+4.4
+4.7
+5.
+5.3
+5.6
+5.9
+6.2
+6.5
+6.8
+7.1
+7.4
+7.7
+8.0.5
+0.8
+1.1
+1.4
+1.7
+2.
+2.3
+2.6
+2.9
+3.2
+3.5
+3.8
+4.1
+4.4
+4.7
+5.
+5.3
+5.6
+5.9
+6.2
+6.5
+6.8
+7.1
+7.4
+7.7
+8.
+R0,1R0,2Extinction EquilibriumDisease Free Equilibrium
+Endemic Equilibria
+0.0.170.340.510.68
+Fig. 3 Final infected proportion in second patch for each ( R0,1, R0,2) combination and an illustration
+of the three different types of equilibria regions for each case.
+Example 3 (Stability of the general endemic equilibrium) .Computing the eigenval-
+ues of J1andJ∈at the corresponding endemic equilibria becomes an arduous process.
+To inspect the stability of these points, we perform simulations and present the maxi-
+mum eigenvalues of these Jacobian matrices at the endemic equilibrium scenarios. The
+results of this experiment are presented in Figure 4 for each patch. When R0,1<1or
+R0,2<1, the corresponding disease-free equilibria are stable (as proved before). When
+R0,1andI∗
+1>0according to Equation (9), then the corresponding endemic equilib-
+rium seems to be also stable for all simulations performed. In the ultimate case, the
+extinction equilibrium is also stable.
+11(a)
+Infected 1stPatch
+Max. eigenvalue ofJ 1
+0.5 1.0 1.5 2.0 2.5-0.10.00.10.20.3
+R0,1Endemic Equilibria D.F. Equilibrium Extinction Equilibrium
+(b)
+Infected(R0,1=0.5)
+Max. eigenvalue ofJ 2(R0,1=0.5)Infected(R0,1=2.5)
+Max. eigenvalue ofJ 2(R0,1=2.5)Infected(R0,1=3.5)
+Max. eigenvalue ofJ 2(R0,1=3.5)
+1 2 3 4 50.00.20.40.60.81.0
+R0,2Endemic Eq.
+Extinction Eq.D.F. Eq.
+R0,1R0,2
+R0,1R0,2
+R0,1R0,2
+Fig. 4 (a): Maximum eigenvalue of J1for each R0,1along with the infected population attained at
+the corresponding equilibrium point. We can see that all equilibria are stable in their corresponding
+R0,1regions. (b): Maximum eigenvalue of J2for each R0,2, with different curves for three values of
+R0,1. Each curve corresponds to a vertical cut from Figure (3).
+Example 4 (Equilibria in terms of other variables) .Equation (9) serves as a basis to
+determine the type of equilibrium that is to be achieved by the system. When I∗
+1<0,
+the endemic equilibrium is not feasible, so the system will either attain a disease-free
+or an extinction equilibrium, depending on the values of the reproductive numbers R0,1
+andR0,1. Equation (9) depends on virtually all disease parameters, and many yield
+interesting bifurcation results.
+Figure (5) shows the effects of pand the maturation rate αas bifurcation param-
+eters for this system. The full impact of α, pandR0,2into the infected equilibrium
+of patch two is displayed in Figure (6). We note that these parameters determine the
+existence of each equilibrium type. In general, low values of pandα, orpclose to 1,
+are cases that lead to the extinction equilibrium for the second patch.
+120.0 0.2 0.4 0.6 0.8 1.00.00.10.20.30.4
+αInfected Proportion
+αR0,2
+Infected 1stPatch
+Infected 2ndPatch
+0.0 0.2 0.4 0.6 0.8 1.00.00.10.20.30.4
+pInfected Proportion
+pR0,2
+Infected 1stPatch
+Infected 2ndPatchFig. 5 Infected at equilibria for both patches, depending on α(left) and p(right). Other parameters
+fixed: r= 1, k= 1, β1= 0.3, β2= 0.6, µS= 0.1, µI= 0.1,α= 0.6 (for right panel) and p= 0.5 (for
+left panel). Each graph is shown to be a horizontal cut of the corresponding heatmaps in Figure (6).
+0.001
+0.041
+0.081
+0.121
+0.161
+0.201
+0.241
+0.281
+0.321
+0.361
+0.401
+0.441
+0.481
+0.52
+0.56
+0.6
+0.64
+0.68
+0.72
+0.76
+0.8
+0.84
+0.88
+0.92
+0.96
+1.0.5
+0.8
+1.1
+1.4
+1.7
+2.
+2.3
+2.6
+2.9
+3.2
+3.5
+3.8
+4.1
+4.4
+4.7
+5.
+5.3
+5.6
+5.9
+6.2
+6.5
+6.8
+7.1
+7.4
+7.7
+8.
+αR0,2Endemic EquilibriaDisease Free Equilibrium
+Extinction Equilibrium
+0.0.100.190.290.38
+0.001
+0.041
+0.081
+0.121
+0.161
+0.201
+0.241
+0.281
+0.321
+0.361
+0.401
+0.441
+0.481
+0.52
+0.56
+0.6
+0.64
+0.68
+0.72
+0.76
+0.8
+0.84
+0.88
+0.92
+0.96
+1.0.5
+0.8
+1.1
+1.4
+1.7
+2.
+2.3
+2.6
+2.9
+3.2
+3.5
+3.8
+4.1
+4.4
+4.7
+5.
+5.3
+5.6
+5.9
+6.2
+6.5
+6.8
+7.1
+7.4
+7.7
+8.pR0,2Endemic EquilibriaDisease Free Equilibrium
+Extinction Equilibrium
+0.0.100.190.290.38
+Fig. 6 Infected at equilibria for second patch, depending on α(left) and p(right), varying the values
+ofR0,2, keeping fixed α= 0.6 (for right panel) and p= 0.5 (for left panel).
+Example 5 (Population dispersion and maturation analysis) .We study the juvenile
+to adult proportion JS,2/AS,2for the second patch, attained at the equilibrium points.
+From Equation (13) we obtain that
+J∗
+S,2
+A∗
+S,1=1
+λ2=R0,2+Rs−1
+Rα, (16)
+13for the endemic equilibria case, whereas in the disease equilibrium, it is easy to compute
+thatJ∗
+S,2
+A∗
+S,1=µS
+α=Rs
+Rα. (17)
+We note that these equations depend inversely on the maturation rate αand are inde-
+pendent of the population dispersion p. However, as seen in Figure (6), both pandα
+play a role in deciding which equilibrium is attained by the system (they are bifurca-
+tion parameters). Figure (7) shows simulations where the effect of both pandαon the
+ratioJ∗
+S,2
+A∗
+S,1is displayed (which is set to the value of 0for the extinction equilibrium).
+Indeed, we can see that for endemic equilibria, the value of this ratio depends inversely
+onαand is independent of p.
+0.01
+0.05
+0.09
+0.13
+0.17
+0.21
+0.25
+0.29
+0.33
+0.37
+0.41
+0.45
+0.48
+0.53
+0.56
+0.6
+0.64
+0.68
+0.72
+0.76
+0.8
+0.84
+0.88
+0.92
+0.96
+1.0.01
+0.05
+0.09
+0.13
+0.17
+0.21
+0.25
+0.29
+0.33
+0.37
+0.41
+0.45
+0.48
+0.53
+0.56
+0.6
+0.64
+0.68
+0.72
+0.76
+0.8
+0.84
+0.88
+0.92
+0.96
+1.
+αp
+0.0.40.91.31.82.22.6
+Fig. 7 Effect of both pandαon the ratioJ∗
+S,2
+A∗
+S,1for the second patch. The ratio is set to 0 for the
+extinction equilibrium (when A∗
+S,1=J∗
+S,1= 0). Using β1= 0.3, β2= 0.4, r=k= 1, µS=µI= 0.1.
+Thus having R0,1= 3 and R0,2= 4 (which gives the two possibilities on equilibria: endemic or
+extinction).
+Example 6. Inspection of Equation (15). The infected population at the second patch
+depends, as evidenced in Equation 15, on the attained number of healthy adults in the
+first patch. Figure 8 shows the effect of A∗
+S,1over the attained value of I∗
+2for different
+values of R0,2. The effect of A∗
+S,1becomes more important as R0,2increases.
+140.0 0.1 0.2 0.3 0.4 0.5 0.60.00.10.20.30.40.50.6
+AS,1*I2*R0,21.25R0,22R0,22.5R0,23R0,23.5R0,24Fig. 8 Infected at second patch depending on the value of A∗
+S,1. This relationship is given by the
+quadratic Equation (15), which depends on A∗
+S,1andR0,2.
+5 Discussion
+In this paper, we explored the different dynamics of a two-patch metapopulation with
+a disease where recovery is impossible, and dispersal occurs in a single direction from a
+source population to a sink population. We mathematically proved the different fates
+of the sink population as a function of the independent basic reproduction numbers for
+the source R0,1(Equation 5) and sink populations R0,2(Equation 11). We numerically
+explored these different fates (Figure 3) and found that when both basic reproduction
+numbers are smaller than 1, a global disease-free equilibrium occurs. As the basic
+reproduction numbers for the sink population R0,2crosses the one threshold, the sink
+population presents an endemic equilibrium, where the population coexists with the
+disease. This is the only scenario we numerically found for intermediate values of
+R0,2>1. However, for higher R0,2values, the sink population reaches extinction if
+the source population is highly infectious by having a high basic reproduction number
+R0,1.
+The endemic equilibrium we found in our model represents a coexistence between
+the host population and its disease. This coexistence can occur through several mech-
+anisms. Our results are consistent with mechanisms such as increased resistance and
+tolerance to the pathogen and the presence of environmental refugia [32]. As the resis-
+tance and tolerance to the pathogen in a given patch iincreases, its transmission
+rateβidecreases, and thus its basic reproduction number R0,idecreases as well. This
+increases the likelihood of the sink population escaping the extinction equilibrium. A
+source patch with a healthy population can also act as a refugia where the sink pop-
+ulation is sustained through recruitment inputs. This can allow the sink population
+to persist as the proportion of juveniles that go to the sink patch pincreases over a
+certain threshold at high basic reproduction number R0,2values.
+However, whether the juveniles from the source patch can produce a self-sustaining
+population in the sink patch or the population is only sustained by the recruitment
+15inputs depends on how many productive adults are in the sink population at equilib-
+rium. Looking at the stage structure of the equilibrium population in the sink patch,
+measured by its ratio of juveniles to adultsJ∗
+S,2
+A∗
+S,2hints at whether this population is
+dominated by productive adults or juveniles, potentially arriving from the source pop-
+ulation to die (Figure 7). We found that when an endemic equilibrium is reached in
+the sink patch, the likelihood of having an ecological rescue, where the juveniles man-
+age to become productive adults (i.e., a smaller juvenile to adult ratio) depends only
+on the maturation rate αand not on the proportion of juveniles that reach the sink
+patch p. This is consistent with other empirical and modeling efforts that have shown
+a higher production rate of reproductive individuals promotes eco-evolutionary rescue
+[33, 34].
+In the study, the infection dynamics in the second patch of a two-patch SI epidemic
+model are closely tied to the variable A∗
+S,1, representing the number of susceptible
+adults in the first patch. The relationship between the infection level in the second
+patch and A∗
+S,1is governed by the quadratic equation (15). This equation underscores
+how the infection level in the second patch is influenced not only by the internal
+dynamics of that patch but also significantly by the number of susceptible adults in
+the first patch. This inter-patch dependency is further modulated by the basic repro-
+ductive number R0,2of the second patch, indicating a complex interplay between the
+two patches. This aspect of the model underscores a critical insight into the dynamics
+of infectious diseases in multi-patch environments, highlighting the necessity of con-
+sidering inter-patch interactions for a comprehensive understanding of disease spread
+and control in spatially structured populations.
+With the wide geographical spread of SSWD and the lack of documented resistance
+to disease in Pycnopodia , the question of whether these populations could recover is
+open. These modeling results suggest that reproductively viable refuge populations
+within a region could sustain nearby populations, assuming that host reproductive
+output is high enough. While the models were developed with natural populations
+in mind, these modeling results could inform the efficacy of different management
+actions suggested in the roadmap to recovery for the Pycnopodia [35]. In particular,
+a captive breeding program intending to outplant lab-raised Pycnopodia would create
+similar unidirectional recruitment/outplanting dynamics. With the continued low level
+of SSWD infection found in the surviving sea star populations across the range [36],
+outplanting will be conducted where the disease is still present in the environment.
+Additionally, our model suggests increased infected mortality with strategies such
+as selective culling. However, this has not been found to improve infection rates in nat-
+ural populations and compensate for the disease mortality [37, 38]. With Pycnopodia
+being considered for listing with the Endangered Species Act in the US [24], and under
+review by COSEWIC in Canada [35], the need for informed management actions is
+high.
+An aspect of these dynamics that are not explored in our model is the possibility
+of resistance to the disease evolving in the population [39]. Populations may evolve
+an increased recovery rate where recovery is not rare, and the recovery dynamics
+cannot be ignored [40]. In addition, dispersal of individuals with higher pathogen
+resistance could promote the persistence of the population in highly infectious patches
+16through an evolutionary rescue effect rather than only through an ecological rescue
+effect [41]. Evolutionary rescue is one of the primary mechanisms to promote host-
+pathogen coexistence and can be further explored with an eco-evolutionary model
+[42].
+In addition to species adaptation, our model considers a simple spatial structure
+where the metapopulation follows source-sink dynamics. In reality, species may be
+distributed in various spatial configurations, with patches of different quality regarding
+transmission rate. In these cases, increased interaction between patches (either through
+a higher dispersal of juveniles or patch connectedness) may lead to higher mortality,
+but endemic equilibria should still exist [43]. In addition, some patches may act as
+refugia where the disease is not present, or transmission is low enough that a disease-
+free equilibrium is achievable [14]. These previous empirical and theoretical studies
+suggest that our results on species persistence would still be valid for more complex
+spatial topologies.
+In conclusion, our analysis showed the conditions for a sink host population to
+persist in the presence of an unrecoverable disease. We focus our numerical exploration
+on juveniles’ maturation rate and dispersal rate as these were inspired by the specific
+case of Pycnopodia management. A possible extension to generalize the results of this
+model is a two-patch model where bidirectional dispersal (potentially asymmetric) is
+possible.
+Acknowledgements. The authors extend their gratitude for the support from
+the Research Center in Pure and Applied Mathematics and the Department of
+Mathematics at the University of Costa Rica.
+Declarations
+•Conflict of interest The authors declare no conflict of interest.
+•Code availability The source code for the numerical analysis performed in this
+paper can be found in https://github.com/JimmyCalvoMonge/pycnopodia.
+Appendix A First patch disease free equilibrium
+Jacobian calculation
+Summing the fourth row to the third and the second row to the first equals
+det·
+−prAS,1
+k−(α+µS)−λ−prAS,1
+k−µI−λ−2prAS,1
+k−prAS,1
+k
+0 β1JS,1
+N1−µI−λ 0 β1JS,1
+N1
+α 0 −µS−λ−µI−λ
+0 β1AS,1
+N10 β1AS,1
+N1−µI−λ
+.
+Transposing this matrix, we must compute
+17det
+−prAS,1
+k−(α+µS)−λ 0 α 0
+−prAS,1
+k−µI−λ β 1JS,1
+N1−µI−λ 0 β1AS,1
+N1
+−2prAS,1
+k0 −µS−λ 0
+−prAS,1
+kβ1JS,1
+N1−µI−λ β1AS,1
+N1−µI−λ
+
+=
+−prAS,1
+k−(α+µS)−λ
+·det
+β1JS,1
+N1−µI−λ 0 β1AS,1
+N1
+0 −µS−λ 0
+β1JS,1
+N1−µI−λ β1AS,1
+N1−µI−λ
+
+| {z }
+(A)
++α·det
+−prAS,1
+k−µI−λ β1JS,1
+N1−µI−λ β 1AS,1
+N1
+−2prAS,1
+k0 0
+−prAS,1
+kβ1JS,1
+N1β1AS,1
+N1−µI−λ
+
+| {z }
+(B)
+To compute determinant ( A), we employ the second row.
+(A) =−(µS+λ)
+β1JS,1
+N1−µI−λ
+·
+β1AS,1
+N1−µI−λ
+−β1JS,1
+N1·β1AS,1
+N1
+=−(µS+λ)
+−β1
+N1(µI+λ)(AS,1+JS,1) + (µI+λ)2
+Likewise, for computing the determinant ( B), we use the second row.
+(B) =2prAS,1
+k
+β1JS,1
+N1−µI−λ
+·
+β1AS,1
+N1−µI−λ
+−β1JS,1
+N1·β1AS,1
+N1
+=2prAS,1
+k
+−β1
+N1(µI+λ)(AS,1+JS,1) + (µI+λ)2
+Therefore, the final determinant equals
+
+−
+−prAS,1
+k−(α+µS)−λ
+·(µS+λ) +α·2prAS,1
+k
+−β1
+N1(µI+λ)(AS,1+JS,1) + (µI+λ)2
+.
+18Appendix B First patch endemic equilibrium
+calculation
+Using I1:=JI,1+AI,1we have that
+˙I1=˙JI,1+˙AI,1=β1JS,1(JI,1+AI,1)
+N1−µIJI,1+β1AS,1(JI,1+AI,1)
+N1−µIAI,1
+=β1(JS,1+AS,1)I1
+N1−µII1
+We can then consider the sub-model for the first patch,
+˙JS,1=pr
+1−N1
+k
+AS,1−β1JS,1I1
+N1−αJS,1−µSJS,1
+˙AS,1=αJS,1−β1AS,1I1
+N1−µSAS,1
+˙I1=β1(JS,1+AS,1)I1
+N1−µII1.(B1)
+We want to find an equilibrium point in this sub-model, that is, a point in which
+the following equations are satisfied,
+0 =pr
+1−N1
+k
+AS,1−β1JS,1I1
+N1−αJS,1−µSJS,1, (B2)
+0 =αJS,1−β1AS,1I1
+N1−µSAS,1, (B3)
+0 =β1(JS,1+AS,1)I1
+N1−µII. (B4)
+In particular, we are interested in finding an endemic equilibrium, which is an
+equilibrium in which I1̸= 0. Using Equation (B4) and canceling I1, we obtain that
+N1=β1
+µI(JS,1+AS,1). (B5)
+Furthermore, using (B5) we get
+I1: =N1−AS,1−JS,1
+=β1
+µI(JS,1+AS,1)−(JS,1+AS,1)
+=β1
+µI−1
+(JS,1+AS,1)
+19=β1−µI
+µI(JS,1+AS,1) (B6)
+AsI̸= 0 we must have β1̸=µI. If we multiply Equation (B3) by N1and use (B5)
+y (B6), we obtain
+0 =αJS,1N1−β1AS,1I1−µSAS,1N1⇒
+0 =αJS,1·β1
+µI(JS,1+AS,1)−β1AS,1·β1−µI
+µI(JS,1+AS,1)−µSAS,1·β1
+µI(JS,1+AS,1)⇒
+0 = ( JS,1+AS,1)
+αJS,1·β1
+µI−β1AS,1·β1−µI
+µI−µSAS,1·β1
+µI
+⇒
+clearingβ1
+µI
+0 = ( JS,1+AS,1)
+αJS,1−AS,1(β1−µI+µS)
+.
+Note that JS,1+AS,1̸= 0 because otherwise (B4) would imply I1= 0. Then it
+follows that αJS,1=AS,1(β1−µI+µS). Moreover, if we assume β1−µI+µS̸= 0 we
+arrive at the equality
+α
+β1−µI+µSJS,1=AS,1. (B7)
+Callλ1:=α
+β1−µI+µS=α
+µI
+R0,1+µS
+µI−1and note that
+N1=AS,1+JS,1+I1=λ1JS,I+JS,1+I1= (λ1+ 1)JS,1+I1.
+Modifying (B6) we get
+I1=β1−µI
+µI(JS,1+AS,1) =β1−µI
+µI(λ1+ 1)JS,1⇒µI
+β1−µII1= (λ1+ 1)JS,1
+meaning that
+N1= (λ1+ 1)JS,1+I1=µI
+β1−µII1+I1=β1
+β1−µII1. (B8)
+We turn to the first equation of the model, Equation (B2), and substitute Equation
+(B7) to obtain
+0 =pr
+1−N1
+k
+λ1JS,1−β1JS,1I1
+N1−αJS,1−µSJS,1.
+Note that JS,1= 0 would imply AS,1because of (B7), which implies JS,1+AS,1= 0,
+an impossibility when assuming I1̸= 0 as we commented above. Therefore we can
+cancel JS,1in this last equation to get
+200 =prλ1
+1−N1
+k
+−β1I1
+N1−(α+µS).
+If we multiply by N1, we get
+0 =prλ1
+1−N1
+k
+N1−β1I−(α+µS)N1.
+Using (B8) we obtain
+0 =prλ1
+1−β1
+k(β1−µI)I1β1
+β1−µII1−β1I1−(α+µS)β1
+β1−µII1.
+AsI1̸= 0 we can cancel all I1values and arrive to
+0 =prλ1
+1−β1
+k(β1−µI)I1β1
+β1−µI−β1−β1(α+µS)
+β1−µI. (B9)
+We note thatβ1
+β1−µI=R0,1
+R0,1−1, so we have that
+0 =prλ1
+1−R0,1
+k(R0,1−1)I1R0,1
+R0,1−1−µIR0,1−R0,1(α+µS)
+R0,1−1. (B10)
+Clearing I1we get
+I∗
+1=k(R0,1−1)
+prαR 0,1
+prα− 
+µIR0,1+µS−µI+α 
+µIR0,1+µS−µI
+.(B11)
+Further normalizing with respect to µI, we obtain that
+I∗
+1=k(R0,1−1)
+rRpRαR0,1
+rRpRα−(R0,1+Rs+Rα−1)(R0,1+Rs−1)
+, (B12)
+where
+Rp:=p
+µI, R α:=α
+µI, R s=µS
+µI. (B13)
+We can obtain the values of JS,1andAS,1at the equilibrium with the previous
+equations. These are given by
+21J∗
+S,1=µI
+(β1−µI)(λ1+ 1)I∗
+1=1
+(R0,1−1)(λ1+ 1)I∗
+1,
+A∗
+S,1=µIλ1
+(β1−µI)(λ1+ 1)I∗
+1=λ1
+(R0,1−1)(λ1+ 1)I∗
+1. (B14)
+Finally, we can return to the original model and find the values of JI,1andAI,1at
+this equilibrium. Using ˙JS,1= 0 in the second Equation (1) and plugging the values
+ofI∗
+1, J∗
+S,1andN∗
+1=Rβ1I∗
+1we get
+0 =β1·µIRβ1
+β1(λ1+ 1)I∗
+1·I∗
+1
+Rβ1I∗
+1−µIJ∗
+I,1⇒J∗
+I,1=1
+λ1+ 1I∗
+1
+⇒A∗
+I,1=λ1
+λ1+ 1I∗
+1.
+Appendix C Second patch disease free equilibrium
+Jacobian calculation
+By adding the term −(1−p)r
+kAS,1to each entry of the first row and transposing this
+matrix, we must compute
+det
+−prAS,2
+k−(α+µS)−λ−(1−p)r
+kAS,1 0 α 0
+−prAS,2
+k−µI−λ−(1−p)r
+kAS,1 β2JS,2
+N2−µI−λ 0 β2AS,2
+N2
+−2prAS,2
+k−(1−p)r
+kAS,1 0 −µS−λ 0
+−prAS,2
+k−(1−p)r
+kAS,1 β2JS,2
+N2−µI−λ β2AS,2
+N2−µI−λ
+
+=
+−prAS,2
+k−(α+µS)−λ−(1−p)r
+kAS,1
+·det
+β2JS,2
+N2−µI−λ 0 β2AS,2
+N2
+0 −µS−λ 0
+β2JS,2
+N2−µI−λ β2AS,2
+N2−µI−λ
+
+| {z }
+(A)
++α·det
+−prAS,2
+k−µI−λ−(1−p)r
+kAS,1β2JS,2
+N2−µI−λ β 2AS,2
+N2
+−2prAS,2
+k−(1−p)r
+kAS,1 0 0
+−prAS,2
+k−(1−p)r
+kAS,1 β2JS,2
+N2β2AS,2
+N2−µI−λ
+
+| {z }
+(B)
+To compute determinant ( A), we employ the second row.
+(A) =−(µS+λ)
+β2JS,2
+N2−µI−λ
+·
+β2AS,2
+N2−µI−λ
+−β2JS,2
+N2·β2AS,2
+N2
+22=−(µS+λ)
+−β2
+N2(µI+λ)(AS,2+JS,2) + (µI+λ)2
+Likewise, for computing the determinant ( B), we use the second row.
+(B) =2prAS,2
+k+(1−p)r
+kAS,1
+β2JS,2
+N2−µI−λ
+·
+β2AS,2
+N2−µI−λ
+−β2JS,2
+N2·β2AS,2
+N2
+=2prAS,2
+k+(1−p)r
+kAS,1
+−β2
+N2(µI+λ)(AS,2+JS,2) + (µI+λ)2
+We note that by grouping the two terms(1−p)r
+kAS,1cancel out, and the final form
+of the determinant comes to be
+
+−
+−prAS,2
+k−(α+µS)−λ
+·(µS+λ) +α·2prAS,2
+k
+−β2
+N2(µI+λ)(AS,2+JS,2) + (µI+λ)2
+.
+Just as in the case of the first patch.
+References
+[1] McCallum, H.: Disease and the dynamics of extinction. Philos. Trans. R. Soc.
+Lond. B Biol. Sci. 367(1604), 2828–2839 (2012)
+[2] Li, Z., Wang, Q., Sun, K., Feng, J.: Prevalence of batrachochytrium dendrobatidis
+in amphibians from 2000 to 2021: A global systematic review and meta-analysis.
+Front. Vet. Sci. 8, 791237 (2021)
+[3] Miner, C.M., Burnaford, J.L., Ambrose, R.F., Antrim, L., Bohlmann, H.,
+Blanchette, C.A., Engle, J.M., Fradkin, S.C., Gaddam, R., Harley, C.D.G.,
+Miner, B.G., Murray, S.N., Smith, J.R., Whitaker, S.G., Raimondi, P.T.: Large-
+scale impacts of sea star wasting disease (SSWD) on intertidal sea stars and
+implications for recovery. PLoS One 13(3), 0192870 (2018)
+[4] Anderson, R.M., May, R.M.: Population biology of infectious diseases: Part I.
+Nature 280(5721), 361–367 (1979)
+[5] May, R.M., Anderson, R.M.: Population biology of infectious diseases: Part II.
+Nature 280(5722), 455–461 (1979)
+[6] Palomar, G., Fern´ andez-Chac´ on, A., Bosch, J.: Amphibian survival compromised
+by long-term effects of chytrid fungus. Biodivers. Conserv. 32(2), 793–809 (2023)
+[7] Murray, K.A., Skerratt, L.F., Speare, R., McCallum, H.: Impact and dynamics of
+disease in species threatened by the amphibian chytrid fungus, batrachochytrium
+dendrobatidis. Conserv. Biol. 23(5), 1242–1252 (2009)
+23[8] De Castro, F., Bolker, B.: Mechanisms of disease-induced extinction. Ecol. Lett.
+8(1), 117–126 (2005)
+[9] Blooi, M., Laking, A.E., Martel, A., Haesebrouck, F., Jocque, M., Brown, T.,
+Green, S., Vences, M., Bletz, M.C., Pasmans, F.: Host niche may determine
+disease-driven extinction risk. PLoS One 12(7), 0181051 (2017)
+[10] Aalto, E.A., Lafferty, K.D., Sokolow, S.H., Grewelle, R.E., Ben-Horin, T., Boch,
+C.A., Raimondi, P.T., Bograd, S.J., Hazen, E.L., Jacox, M.G., Micheli, F., De Leo,
+G.A.: Models with environmental drivers offer a plausible mechanism for the rapid
+spread of infectious disease outbreaks in marine organisms. Sci. Rep. 10(1), 5975
+(2020)
+[11] Castillo-Chavez, C., Bichara, D., Morin, B.R.: Perspectives on the role of mobility,
+behavior, and time scales in the spread of diseases. Proc. Natl. Acad. Sci. U. S.
+A.113(51), 14582–14588 (2016)
+[12] Huang, Z.Y.X., Langevelde, F., Prins, H.H.T., Boer, W.F.: Dilution versus facili-
+tation: Impact of connectivity on disease risk in metapopulations. J. Theor. Biol.
+376, 66–73 (2015)
+[13] Lieberthal, B., Gardner, A.M.: Connectivity, reproduction number, and mobility
+interact to determine communities’ epidemiological superspreader potential in a
+metapopulation network. PLoS Comput. Biol. 17(3), 1008674 (2021)
+[14] Heard, G.W., Thomas, C.D., Hodgson, J.A., Scroggie, M.P., Ramsey, D.S.L., Cle-
+mann, N.: Refugia and connectivity sustain amphibian metapopulations afflicted
+by disease. Ecol. Lett. 18(8), 853–863 (2015)
+[15] Dwyer, G.: The roles of density, stage, and patchiness in the transmission of an
+insect virus. Ecology 72(2), 559–574 (1991)
+[16] Hite, J.L., Penczykowski, R.M., Shocket, M.S., Strauss, A.T., Orlando, P.A.,
+Duffy, M.A., C´ aceres, C.E., Hall, S.R.: Parasites destabilize host populations by
+shifting stage-structured interactions. Ecology 97(2), 439–449 (2016)
+[17] Hite, J.L., Roos, A.M.: Pathogens stabilize or destabilize depending on host stage
+structure. Math. Biosci. Eng. 20(12), 20378–20404 (2023)
+[18] Briggs, C.J., Vredenburg, V.T., Knapp, R.A., Rachowicz, L.J.: Investigating the
+population-level effects of chytridiomycosis: An emerging infectious disease of
+amphibians. Ecology 86(12), 3149–3159 (2005)
+[19] Hamilton, S.L., Saccomanno, V.R., Heady, W.N., Gehman, A.L., Lonhart, S.I.,
+Beas-Luna, R., Francis, F.T., Lee, L., Rogers-Bennett, L., Salomon, A.K.,
+Gravem, S.A.: Disease-driven mass mortality event leads to widespread extir-
+pation and variable recovery potential of a marine predator across the eastern
+24pacific. Proc. Biol. Sci. 288(1957), 20211195 (2021)
+[20] Harvell, C.D., Montecino-Latorre, D., Caldwell, J.M., Burt, J.M., Bosley, K.,
+Keller, A., Heron, S.F., Salomon, A.K., Lee, L., Pontier, O., Pattengill-Semmens,
+C., Gaydos, J.K.: Disease epidemic and a marine heat wave are associated with
+the continental-scale collapse of a pivotal predator (pycnopodia helianthoides).
+Sci. Adv. 5(1), 7042 (2019)
+[21] Rogers-Bennett, L., Catton, C.A.: Marine heat wave and multiple stressors tip
+bull kelp forest to sea urchin barrens. Sci. Rep. 9(1), 15050 (2019)
+[22] Galloway, A.W.E., Gravem, S.A., Kobelt, J.N., Heady, W.N., Okamoto, D.K.,
+Sivitilli, D.M., Saccomanno, V.R., Hodin, J., Whippo, R.: Sunflower sea star
+predation on urchins can facilitate kelp forest recovery. Proc. Biol. Sci. 290(1993),
+20221897 (2023)
+[23] Arroyo-Esquivel, J., Adams, R., Gravem, S., Whippo, R., Randell, Z., Hodin, J.,
+Galloway, A., Gaylord, B., Baskett, M.L.: Multiple resiliency metrics reveal the
+complementary roles of different restoration interventions on long-term system
+persistence multiple resiliency metrics reveal the complementary roles of different
+restoration interventions on long-term system persistence. Under Review
+[24] Lowry, D.: Endangered Species Act Status Review Report: Sunflower Sea Star
+(Pycnopodia helianthoides) (2023)
+[25] Kang, Y., Castillo-Chavez, C., Levin, S.A.: A simple two-patch epidemiolog-
+ical model with allee effects and disease-modified fitness. (2012). https://api.
+semanticscholar.org/CorpusID:14056963
+[26] Tewa, J.J., Bowong, S., Mewoli, B.: Mathematical analysis of two-patch model
+for the dynamical transmission of tuberculosis. Applied Mathematical Modelling
+36(6), 2466–2485 (2012) https://doi.org/10.1016/j.apm.2011.09.004
+[27] Arino, J., Sun, C., Yang, W.: Revisiting a two-patch SIS model with infection
+during transport. Math. Med. Biol. 33(1), 29–55 (2016) https://doi.org/10.1093/
+imammb/dqv001
+[28] Calvo, J.G., Hern´ andez, A., Porter, M.A., Sanchez, F.: A two-patch epidemic
+model with nonlinear reinfection. Rev. Mat. [online] 27(1), 23–48 (2020) https:
+//doi.org/10.15517/rmta.v27i1.39946
+[29] Lee, S., Baek, O., Melara, L.: Resource allocation in two-patch epidemic model
+with state-dependent dispersal behaviors using optimal control. Processes 8(9)
+(2020) https://doi.org/10.3390/pr8091087
+[30] Yan, D.X., Zou, X.F.: Dynamics of an epidemic model with relapse over a two-
+patch environment. Math. Biosci. Eng. 17(5), 6098–6127 (2020) https://doi.org/
+2510.3934/mbe.2020324
+[31] Saha, S., Samanta, G.: Impact of disease on a two-patch eco-epidemic model in
+presence of prey dispersal. Computational and Mathematical Biophysics 10(1),
+199–230 (2022) https://doi.org/10.1515/cmb-2022-0139
+[32] Brannelly, L.A., McCallum, H.I., Grogan, L.F., Briggs, C.J., Ribas, M.P., Hol-
+landers, M., Sasso, T., Familiar L´ opez, M., Newell, D.A., Kilpatrick, A.M.:
+Mechanisms underlying host persistence following amphibian disease emergence
+determine appropriate management strategies. Ecol. Lett. 24(1), 130–148 (2021)
+[33] Muths, E., Scherer, R.D., Pilliod, D.S.: Compensatory effects of recruitment and
+survival when amphibian populations are perturbed by disease. J. Appl. Ecol.
+48(4), 873–879 (2011)
+[34] Golas, B.D., Goodell, B., Webb, C.T.: Host adaptation to novel pathogen intro-
+duction: Predicting conditions that promote evolutionary rescue. Ecol. Lett.
+24(10), 2238–2255 (2021)
+[35] Heady, W.N., Beas-Luna, R., Dawson, M.N., Eddy, N.E., Elsmore, K., Francis,
+F.T., Frierson, T.N., Gehman, A.-L.M., Gotthardt, T., Gravem, S.A., Grebel, J.,
+Hamilton, S.L., Hannah, L., Harvell, C.D., Hodin, J., Kelmartin, I., Krenz, C.,
+Lee, L.C., Lorda, J., Lowry, D., Mastrup, S., Meyer, E., Raimondi, P.T., Rumrill,
+S.S., Saccamonno, V.R., Schiebelhut, L.M., Siddon, C.: Roadmap to Recovery for
+the Sunflower Sea Star (Pycnopodia helianthoides) along the west coast of North
+America. Technical report, The Nature Conservancy, Sacramento, CA (2022)
+[36] Kay, S.W.C., Gehman, A.-L.M., Harley, C.D.G.: Reciprocal abundance shifts of
+the intertidal sea stars, Evasterias troscheliiand Pisaster ochraceus, following sea
+star wasting disease. Proceedings of the Royal Society B: Biological Sciences
+286(1901), 20182766–9 (2019) https://doi.org/10.1098/rspb.2018.2766
+[37] LACHISH, S., McCALLUM, H., MANN, D., PUKK, C.E., JONES, M.E.: Eval-
+uation of selective culling of infected individuals to control tasmanian devil facial
+tumor disease. Conservation Biology 24(3), 841–851 (2010) https://doi.org/10.
+1111/j.1523-1739.2009.01429.x
+[38] Prentice, J.C., Fox, N.J., Hutchings, M.R., White, P.C.L., Davidson, R.S., Mar-
+ion, G.: When to kill a cull: factors affecting the success of culling wildlife for
+disease control. Journal of The Royal Society Interface 16(152), 20180901 (2019)
+https://doi.org/10.1098/rsif.2018.0901
+[39] Jiao, J., Fefferman, N.: The dynamics of evolutionary rescue from a novel
+pathogen threat in a host metapopulation. Sci. Rep. 11(1), 10932 (2021)
+[40] Hollanders, M., Grogan, L.F., Nock, C.J., McCallum, H.I., Newell, D.A.: Recov-
+ered frog populations coexist with endemic batrachochytrium dendrobatidis
+26despite load-dependent mortality. Ecol. Appl. 33(1), 2724 (2023)
+[41] Jaffe, N., Eberl, R., Bucholz, J., Cohen, C.S.: Sea star wasting disease demography
+and etiology in the brooding sea star leptasterias spp. PLoS One 14(11), 0225248
+(2019)
+[42] DiRenzo, G.V., Zipkin, E.F., Grant, E.H.C., Royle, J.A., Longo, A.V., Zamudio,
+K.R., Lips, K.R.: Eco-evolutionary rescue promotes host-pathogen coexistence.
+Ecol. Appl. 28(8), 1948–1962 (2018)
+[43] Jiao, J., Gilchrist, M.A., Fefferman, N.H.: The impact of host metapopulation
+structure on short-term evolutionary rescue in the face of a novel pathogenic
+threat. Glob. Ecol. Conserv. 23(e01174), 01174 (2020)
+27

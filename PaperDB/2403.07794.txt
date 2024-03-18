@@ -1,0 +1,936 @@
+Fine-Tuning Large Language Models with Sequential Instructions
+Hanxu Hu* 1Pinzhen Chen* 1Edoardo M. Ponti1
+Abstract
+Large language models (LLMs) struggle to follow
+a sequence of instructions in a single query as they
+may ignore or misinterpret part of it. This impairs
+their performance in complex problems whose so-
+lution requires multiple intermediate steps, such
+as multilingual (translate then answer) and mul-
+timodal (caption then answer) tasks. We empiri-
+cally verify this with open-source LLMs as large
+as LLaMA-2 70B and Mixtral-8 ×7B. Targeting
+the scarcity of sequential instructions in present-
+day data, we propose sequential instruction tuning
+(SIT), a simple yet effective strategy to automati-
+cally augment instruction tuning data and equip
+LLMs with the ability to execute multiple sequen-
+tial instructions. After exploring interleaving in-
+structions in existing datasets, such as Alpaca,
+with a wide range of intermediate tasks, we find
+that sequential instruction-tuned models consis-
+tently outperform the conventional instruction-
+tuned baselines in downstream tasks involving
+reasoning, multilingual, and multimodal abili-
+ties. To shed further light on our technique, we
+analyse how adversarial intermediate texts, un-
+seen tasks, prompt verbalization, number of tasks,
+and prompt length affect SIT. We hope that this
+method will open new research avenues on in-
+struction tuning for complex tasks. We release
+code at https://github.com/hanxuhu/
+Seq_IT .
+1. Introduction
+Instruction tuning gives large language models (LLMs) the
+ability to follow instructions and perform zero-shot general-
+isation to a wide range of tasks (Mishra et al., 2022; Sanh
+et al., 2022; Wei et al., 2022a). This technique consists in
+fine-tuning LLMs on a collection of annotated data, where
+the inputs include task instructions. Popular instruction tun-
+*Equal contribution1University of Edinburgh, United Kingdom.
+Correspondence to: Hanxu Hu <hanxu.hu@ed.ac.uk >, Edoardo
+M. Ponti <eponti@ed.ac.uk >.ing datasets mostly contain rather straightforward instruc-
+tions derived from conventional NLP tasks or open-ended
+dialogues (Sanh et al., 2022; Taori et al., 2023; Conover
+et al., 2023). However, they suffer from the absence of
+multi-task queries with sequential instructions. While this
+dataset design presumably mirrors the properties of pre-
+training data, where these interactions rarely occur naturally,
+we hypothesise that it also hinders instruction-tuned models
+from navigating a sequence of sub-tasks in a single com-
+mand, which is arguably crucial for reasoning, cross-lingual,
+and cross-model tasks (Shi et al., 2023; Zhang et al., 2023).
+This paper first verifies this hypothesis by probing whether
+state-of-the-art open-source LLMs, such as LLaMA and
+Mistral (Touvron et al., 2023a; Jiang et al., 2023), can se-
+quentially execute multiple tasks within a single prompt.
+Despite their sophistication and popularity, we find that
+these models exhibit notable limitations in this setting. Fore-
+shadowing our conclusions, most LLMs complete only one
+of the tasks specified in the query and sometimes they even
+struggle with the entire prompt. This suggests a drawback
+in current LLMs, namely the ability to generalise to instruc-
+tions that require sequential task execution.
+Second, to alleviate this problem, we propose a sequential
+instruction tuning paradigm which, contrary to techniques
+like chain-of-thought (Wei et al., 2022b) and conversational
+multi-turn fine-tuning (Touvron et al., 2023b; Chiang et al.,
+2023), relies on a simple strategy for data augmentation.
+This can be automatically performed on any existing instruc-
+tion dataset, such as Alpaca (Taori et al., 2023), without the
+need for additional human annotations. In particular, we
+extend the input instructions by concatenating them with
+more tasks—either dummy or meaningful—and modifying
+the output to accommodate this change correspondingly.
+This procedure is motivated by the fact that meaningful in-
+termediate tasks, such as translation and image captioning,
+form an intuitive chain-of-thought process for cross-lingual
+and cross-modal downstream tasks (Shi et al., 2023; Zhang
+et al., 2023). Moreover, even when the augmented tasks
+are irrelevant, prolonged LLM generation could still aid
+attention computation (Lanham et al., 2023; Goyal et al.,
+2023).
+We fine-tune LLMs on both textual and vision-and-language
+datasets (Taori et al., 2023; Goyal et al., 2017) with and with-
+1arXiv:2403.07794v1  [cs.CL]  12 Mar 2024Fine-tuning Large Language Models with Sequential Instructions
+Instruction: Classify the relationship between John and Mary.Input:John and Mary are siblings.Output: The relationship between John and Mary is that of siblings. They share a familial bond where they have common parents.
+1Sequential Instruction TuningInstruction Tuning
+Instruction: First repetition /paraphrase /translate /… the input,then classify            the relationship between John and Mary.Input:John and Mary are siblings.Output: Repetition / Paraphrase / Translation /…: ………Result / Answer: The relationship between John and Mary is that of siblings. They share a familial bond where they have common parents.MultilingualMultimodal
+Instruction: Please first translate the input into English,  then answer the questionInput:
+Output: 
+Translation in English: Answer:burning combustible materialsInstruction: First describe the image, and then answer the question based on the given imageQuestion:Is this man crying?
+Description: There is a man in blue laughing in the car.Answer: no.…………XQuADVQASequential Instruction TuningInstruction Tuning
+Figure 1: An illustration of instruction tuning and sequential instruction tuning (SIT), showing their differences (left) and
+use cases in multilingual and multimodal scenarios (right).
+out our proposed sequential augmentation, covering both
+dummy and meaningful intermediate tasks. We evaluate our
+method on several downstream benchmarks for common-
+sense, multilingual, and visual question answering. We
+observe remarkable performance gains from SIT across all
+of them: +6% for CommonsenseQA (Talmor et al., 2019),
+up to +17% for XQuAD (Artetxe et al., 2020), and +2.1%
+for VQA and GQA (Goyal et al., 2017; Hudson & Manning,
+2019). Furthermore, qualitative analyses suggest that our
+models can more closely follow the given instructions when
+a sequence of tasks is requested. Finally, we study how SIT
+generalises to unseen intermediate tasks, different prompt
+templates, and varying numbers of intermediate tasks and
+input lengths.
+In summary, we first unveil that current LLMs still struggle
+to follow long, complex sequential instructions. To miti-
+gate this limitation, we experiment with automatically aug-
+menting instruction datasets with various intermediate tasks.
+The effectiveness of our methods is two-fold: compared
+with baseline instruction tuning, we witness both enhanced
+instruction-following behaviour and a significant boost in
+downstream performance. Finally, we conduct multifaceted
+analyses to demonstrate the versatility of our method.
+2. Motivation
+Correctly executing multi-step instructions is a crucial abil-
+ity for large language models. It can help models handle
+complicated scenarios, such as: (i) cross-lingual and cross-
+modal tasks, where models must first translate a question or
+caption an image, then answer; (ii) tasks involving complexreasoning, where solving a chain of intermediate sub-tasks
+facilitates reaching the correct solution; (iii) long-horizon
+reinforcement learning tasks where an agent follows a high-
+level instruction by completing a series of sub-goals. More
+broadly, multi-step instructions allow for incorporating prior
+knowledge about the structure of a task into foundation mod-
+els through an appropriate prompt.
+Nonetheless, instruction-tuned LLMs appear ill-suited for
+this purpose, as many of them are specialised for direct,
+single-task questions (Mishra et al., 2022). Even in the
+case of conversation-style multi-turn tuning, such as Llama-
+2-Chat (Touvron et al., 2023b), ChatGPT (Ouyang et al.,
+2022), and Vicuna (Chiang et al., 2023), a model is still
+geared towards responding to separate queries in multiple
+rounds, rather than completing a sequence of tasks as in-
+structed by a single query. This can be traced back to the in-
+herent simplicity of the instructions in datasets used for fine-
+tuning, such as P3, Alpaca, and Dolly, which are dominated
+by straightforward input–output pairs from traditional NLP
+tasks and open-ended dialogues (Sanh et al., 2022; Taori
+et al., 2023; Conover et al., 2023, inter alia). For instance,
+scrutinising a representative instruction dataset, Alpaca, we
+notice a conspicuous absence of sequential instructions in
+the 175 seed tasks used in the self-instruct process (Wang
+et al., 2023) to create the entire dataset; consequently, it is
+reasonable to infer that this kind of instructions is likely to
+be missing from the Alpaca dataset as a whole.
+As a consequence, we speculate that current LLMs lack
+sequential instruction-following capabilities. To verify this
+hypothesis, we conduct a preliminary experiment based on
+2Fine-tuning Large Language Models with Sequential Instructions
+100 instances randomly sampled from CommonsenseQA,
+an English common sense question-answering benchmark.
+We prompt models with the following instruction: “ Please
+repeat the input and then answer the question in the input. ”
+We compare a wide array of model scales and training stages
+(with and without instruction tuning). To give a comprehen-
+sive context, we also list models with sequential instruction
+tuning (SIT), the method we propose in this paper (cf. Sec-
+tion 3.2). In Table 1, we report ROUGE-L (Lin, 2004) and
+BERTScore (Zhang et al., 2020) for input repetition. In
+addition, we manually inspect whether a model executes the
+repetition (R), answering (A), and both (R+A) tasks. We
+find that even when prompted with this simple pivot task,
+open-source LLMs (instruction-tuned or otherwise) struggle
+to reach satisfying performance. This is in clear contrast
+with our SIT models.
+Method ModelR-L B-S Following
+R R R A R+A
+promptBLOOM-7B 41 85 84 38 5
+Mistral-7B 50 88 94 11 6
+Mixtral-8 ×7B 38 87 85 30 16
+LLaMA-7B 37 86 96 26 2
+LLaMA-13B 6 79 12 14 2
+LLaMA-65B 24 84 79 16 8
+LLaMA-2-70B 35 87 54 44 21
+ITBLOOM-7B-Alpaca 32 86 97 34 33
+Mistral-7B-Alpaca 48 88 64 56 45
+LLaMA-7B-Alpaca 25 86 60 56 18
+LLaMA-13B-Alpaca 19 85 32 76 19
+LLaMA-2-70B-Chat 29 85 97 34 33
+SIT
+(ours)Mistral-7B-Alpaca 55 92 99 85 84
+LLaMA-7B-Alpaca 54 92 89 91 85
+LLaMA-13B-Alpaca 39 90 99 93 93
+Table 1: ROUGE-L (R-L, %), BERTScore (B-S, %), and fol-
+lowing rate (%) of prompted pre-trained models, instruction-
+tuned (IT) models, and sequential instruction-tuned (SIT)
+models evaluated on a subsample of CommonsenseQA, for
+the tasks of repeating (R), answering (A), and both (R+A).
+3. Methodology
+3.1. Sequential prompting
+Prompting and instruction tuning are two established ways
+to help elicit a response from an LLM. Given a task input
+x,prompting consists in affixing a query prompt p, often
+manually crafted, to the input. The output is then sampled
+from the conditional probability distribution under the LLM:
+ˆy∼p(y|p,x;θLLM)(Radford et al., 2019; Raffel et al.,
+2020). Often prompting is based on “in-context learning”
+(ICL), which includes a few example input-output pairs
+(demonstrations) in the query (Brown et al., 2020).We refer to cases where a single prompt comprises a se-
+quence of queries to guide the LLM to answer intricate ques-
+tions step-by-step as sequential prompting . In this work,
+we mainly consider two-step instructions. Let p1denote the
+prompt for the first step of the task and p2denote the prompt
+for the second step. Then ˆy∼p(y|p1⊕p2,x;θLLM). The
+output itself can be split into the outputs corresponding to
+the individual prompts ˆy=ˆy1⊕ˆy2. Nonetheless, as ev-
+idenced in Table 1, even instruction-tuned LLMs exhibit
+limited proficiency in this setting.
+We remark that our setting is different from chain-of-
+thought prompting, where the second prompt p2is man-
+ually annotated for fine-tuning (or ICL) whereas it is gen-
+erated together with the output conditioned only on the
+first prompt and the input during inference: p2⊕ˆy∼
+p(·|p1,x;θLLM). Moreover, sequential prompting is a sep-
+arate ability from multi-turn conversations where the out-
+put is obtained as ˆy2∼p(y2|p2,y1,p1,x;θLLM),ˆy1∼
+p(y1|p1,x;θLLM).
+3.2. Sequential instruction tuning
+In order to enable sequential prompting in LLMs, this work
+proposes sequential instruction tuning (SIT), where LLMs
+are explicitly fine-tuned on instructions that require solving
+sub-tasks sequentially. The training procedure is the same as
+conventional instruction tuning, where an LLM is fed with
+an input prefixed with a task instruction as a prompt and is
+then expected to generate the correct output. The difference
+lies in how the prompt and the output are constructed into
+a sequential instruction data format. Given tasks AandB,
+we join the respective prompts pAandpBusing a simple
+template “ FirstpAthenpB”. We concatenate the desired
+task outputs in the same order yA⊕yBdelimited by a new
+line as a reference for training. In our work, we consider
+experimenting with both genuine and dummy intermediate
+tasksAand associate Bwith a series of downstream tasks.
+3.3. Evaluation metrics
+Considering our two-fold motivations of aligning LLMs
+with human instruction-following behaviour and improving
+performance, we measure both their “following rate” and
+downstream task performance. Specifically, these are classi-
+fication tasks, so we adopt accuracy as an evaluation metric.
+Given a sequential instruction input prompt pA⊕pB, the
+gold-truth outputs y⋆
+Aandy⋆
+B, and the LLM predicted out-
+putˆy=ˆyA⊕ˆyB, the two evaluation metrics are defined
+as follows.
+Accuracy Since we delimit the two task outputs using a
+newline during training, it is fairly easy to parse ˆyBfrom
+the LLM output. Accuracy is computed as the proportion of
+ˆyBthat matches the respective y⋆
+Bexactly.
+3Fine-tuning Large Language Models with Sequential Instructions
+Table 2: CommonsenseQA results (accuracy, %) from
+prompting, instruction tuning, and our sequential instruction
+tuning with dummy tasks.
+ModelIT SIT SIT
+Alpaca +Repeat +Paraphrase
+Commonsense QA
+LLaMA-7B 35 39 41
+LLaMA-13B 47 48 49
+Mistral-7B 61 64 63
+LLaMA-7B 7-shot prompting (Touvron et al., 2023b): 33
+Following rate This is the proportion of examples where
+a model can successfully generate output answers for all
+(sub-)tasks in the sequential instruction, regardless of the
+content correctness. In practice, we randomly sample test
+instances and manually inspect the outputs.
+4. Experiments and Results
+We experiment with sequential instruction tuning on three
+distinct combinations of intermediate and downstream tasks.
+First, we test dummy intermediate tasks (repetition and para-
+phrasing) on a natural language reasoning downstream task.
+Then we consider meaningful middle steps for composite
+tasks: these include translation before multilingual ques-
+tion answering as well as image description before visual
+question answering.
+4.1. Model training details
+For text-only experiments, we fine-tuned several LLMs with
+Low-Rank Adapters (LoRA; Hu et al., 2022) for parameter
+and memory efficiency. Based on the code implementation
+of Alpaca-LoRA,1we patched LoRA modules to key, query,
+and value matrices, with a rank of 8, a scaling factor of 16,
+and a dropout of 0.05. We used a learning rate of 3 ×10-4
+and a global batch size of 128. All models are fine-tuned
+for 5 epochs and validated every 200 update steps. We kept
+the checkpoint with the best cross-entropy on a held-out
+development set.
+For cross-modal experiments involving both texts and im-
+ages, we use the LA VIS library for training and evaluation
+(Li et al., 2023a). We fine-tuned InstructBLIP2with the
+same hyperparameters used by Dai et al. (2023) and we set
+a budget of 3 epochs with an initial learning rate of 1 ×10-5.
+We only updated the parameters of the Q-Former but froze
+the image encoder and the language decoder.
+1https://github.com/tloen/alpaca-lora
+2https://huggingface.co/Salesforce/
+instructblip-vicuna-7b4.2. Repeating or Paraphrasing for Reasoning
+Our models for textual experiments are fine-tuned on the
+cleaned version of the Alpaca data with 52K instances as
+a seed instruction dataset (Taori et al., 2023).3The data
+was constructed using a self-instruct procedure (Wang et al.,
+2023). Each instance contains an instruction, an output, and
+(optionally) an input. Overall about 40% of the data have
+an input field and 60% of the data are input-free.4
+To explore the effect of sequential instructions, we edit
+the Alpaca dataset to suit our needs. Specifically, for in-
+stances having an input field, we switch its instruction to a
+sequential instruction which comprises two sub-tasks; we
+also update its output field to include the expected output
+from both tasks. The other training instances without an
+input field remain unchanged. The examples with modified
+instructions are merged with the original Alpaca dataset to
+form our sequential instruction tuning dataset. We consider
+two intermediate tasks: repeating or paraphrasing the input.
+Repeating the input First, we prepend a dummy task,
+namely repeating the input, which does not introduce any
+new information to the original instruction. Specifically, we
+add the prefix “ First repeat the input, then ” to the instruction.
+Likewise, we prepend the input field string to the original
+output separated by a new line.
+Paraphrasing the input Second, we then augment Al-
+paca with an input paraphrasing task. Specifically, we use
+gpt-3.5-turbo5to paraphrase the Alpaca input field
+texts. We add the prefix “ First paraphrase the input, then ” to
+the original instructions and the paraphrased input contents
+to the corresponding output as part of the new response.
+Evaluation We test the fine-tuned LLMs in a zero-shot
+fashion on the CommonsenseQA dataset (Talmor et al.,
+2019), which contains English common-sense questions.
+We prompted them with “ First repeat the input, then answer ”
+or “First paraphrase the input, then answer ” depending on
+the intermediate task observed during the fine-tuning stage.
+Results We compare LLMs fine-tuned trained on the orig-
+inal Alpaca data (instruction tuning, IT) with sequential
+instruction tuning (SIT) on our enriched Alpaca. Results
+are reported in Table 2, showing that for all base LLMs
+considered—Mistral-7B, LLaMA-7B, and LLaMA-13B—
+sequential instruction-tuned models attain higher perfor-
+mance on the CommonsenseQA test set compared to vanilla
+instruction tuning. Paraphrasing appears slightly better on
+average than repeating. These results demonstrate that even
+dummy tasks exhibit the potential to equip LLMs with se-
+3https://github.com/gururise/
+AlpacaDataCleaned
+4https://github.com/tatsu-lab/stanford_
+alpaca#data-release
+5https://platform.openai.com/docs/models/
+4Fine-tuning Large Language Models with Sequential Instructions
+Model MethodSeen Unseen
+DE ZH RU ES AR EL VI HI TR TH
+LLaMA-7B-Alpaca multilingual IT 61.6 11.3 29.3 60.3 14.5 11.7 27.4 11.4 22.7 6.0
+LLaMA-7B-Alpaca multilingual SIT 65.7 28.3 61.6 64.5 21.3 29.4 30.1 15.7 30.1 7.4
+Mistral-7B-Alpaca multilingual IT 50.2 39.5 33.7 49.1 12.4 22.4 38.8 12.3 35.1 13.0
+Mistral-7B-Alpaca multilingual SIT 54.1 40.3 52.2 56.1 34.7 42.6 50.5 36.6 42.2 29.4
+Table 3: XQuAD results (accuracy, %) for multilingual Alpaca and its SIT counterpart.
+quential instruction following.
+4.3. Translation in multilingual question answering
+Moving on from dummy tasks, we experiment with trans-
+lation as an intermediate task for multilingual question an-
+swering. The idea of language pivoting takes inspiration
+from “translate-test” cross-lingual transfer (Conneau et al.,
+2018), where two separate models, a machine translation
+system and a classifier, are responsible for the two sub-tasks.
+Recently it has been shown that a single LLM off-the-shelf
+can be sequentially prompted to translate and then predict
+(Qin et al., 2023; Huang et al., 2023). In this section, we
+show that LLMs can be fine-tuned to perform language
+pivoting more effectively.
+As a baseline, we instruct-tune LLMs with a multilingual
+version of Alpaca. We first use an open-source translator to
+translate the seed English Alpaca dataset into four languages:
+Chinese ( ZH), German ( DE), Russian ( RU), and Spanish ( ES)
+and add them to the English examples. We keep the English
+instructions regardless of the input and output language.
+Translating the input For SIT, we propose a sequential
+instruction version of “translate-test” by adjusting multilin-
+gual Alpaca, where we instruct a model to always perform
+a translation of the input into English before answering a
+question. Specifically, we add the prefix “ First translate
+the input into English, then ” to the original instructions of
+each data instance. For non-English entries, we prepend
+the English version of the input to the corresponding output
+field. The sequential instruction-augmented data is merged
+with the original multilingual Alpaca dataset we built earlier.
+See the right side of Figure 1 for an example.
+Evaluation For evaluating models on multilingual questions
+answering, we rely on the XQuAD test set (Artetxe et al.,
+2020). In addition to the 4 training languages (seen), we
+also perform inference on 6 typologically diverse held-out
+languages (unseen): Arabic ( AR), Greek ( EL), Vietnamese
+(VI), Hindi ( HI), Turkish ( TR), and Thai ( TH). The sequen-
+tial instruction-tuned (SIT) models are prompted with the
+same translation query used in training—“ First translate the
+input into English, then ”—followed by the questions in the
+XQuAD test examples.Results Results are detailed in Table 3 for LLaMA-7B and
+Mistral-7B as base LLMs. We observe that sequential in-
+struction tuning with a translation task can significantly
+boost the model accuracy on XQuAD for both seen and
+unseen languages. A remarkable pattern emerging from
+Table 3 is that the gain is usually larger for languages that
+are distant from English. We speculate this is because the
+performance of LLMs instruct-tuned on multilingual Alpaca
+without translations is already high in languages closer to
+English, such as German and Spanish.
+4.4.Image captioning in multimodal question answering
+Finally, sequential instruction tuning can extend beyond
+text-only scenarios, to multimodal tasks. To demonstrate
+it, we re-purpose a conventional (visual) instruction tuning
+dataset with sequential instructions and evaluate the SIT
+models on visual question answering (VQA) downstream
+tasks. Following Dai et al. (2023), we take a subset of
+the training split of VQAv2 (Goyal et al., 2017)—a dataset
+of open-ended questions grounded on images—as a seed
+dataset for instruction tuning. For the baseline, we phrase
+the instruction as “ Answer the input question based on the
+image ”.
+Describing the input image
+Image captioning is a reasonable intermediate task to per-
+form before answering a question based on the information
+in the image. In fact, a caption extracts salient entities
+and events contained therein and bridges the gap between
+the modality of the question (text) and the context (im-
+age). Hence, we expect this sequence of sub-tasks to fa-
+cilitate cross-modal reasoning. To create sequential visual
+instruction data, we augment the output of the training set of
+VQAv2 with a description for each image from MS COCO
+(Lin et al., 2014), from which VQAv2 originated. During
+SIT, we prompt the model with “ First describe the image,
+then answer the input question based on the image ”. See
+Figure 1 (right) for an example.
+Evaluation We benchmark multimodal IT and SIT on the
+VQAv2 test split as an in-domain evaluation as well as on the
+GQA test–dev split (Hudson & Manning, 2019) as an out-
+of-domain evaluation. We use an open-source multimodal
+5Fine-tuning Large Language Models with Sequential Instructions
+Model MethodVQAv2
+(in D)GQA
+(out D)
+InstructBLIP-Vicuna-7B prompt 60.7 46.8
+InstructBLIP-Vicuna-7B IT 61.3 47.0
+InstructBLIP-Vicuna-7B SIT 63.4 48.9
+InstructBLIP-Vicuna-7B SIT (neg.) 57.1 43.6
+Table 4: VQAv2 andGQA results (accuracy, %) for
+InstructBLIP-Vicuna-7B prompting and instruction tuning.
+LLM, InstructBLIP-Vicuna-7B (Dai et al., 2023), as the
+base model.
+Results We display the results from prompting off-the-shelf
+LLMs and the two instruction tuning methods in Table 4.
+This clearly shows that the instruction-tuned model is better
+than base model prompting, and that our sequential instruc-
+tion tuning in turn can achieve even stronger results in both
+in-domain and out-of-domain settings.
+Supplementary to these, we conduct an adversarial analysis
+to reveal the importance of the intermediate task output. For
+each test image, we sample a random negative description
+from the training set, add it as a suffix of the instruction, and
+forcefully encode it as the LLM’s intermediate description
+output. The accuracy of the answers obtained in this setting
+is included in Table 4 as SIT (neg.). From these results, it
+emerges that incorrect intermediate task outputs severely
+undermine a model’s performance in the downstream task.
+Evaluation
+instruction ↓Training method
+IT SIT (+Repeat) SIT (+Paraphrase)
+Non-sequential 61 / - 56 / - 58 / -
+Repeat 20 / 30 64/ 99 45 / 96
+Paraphrase 21 / 35 64/ 96 63 / 100
+Table 5: CommonsenseQA results (accuracy and following
+rate, %) for Mistral-7B IT and SIT tested with zero-shot
+intermediate task instructions.
+5. In-Depth Analysis
+5.1. Generalisation to other (sequential) instructions
+In our main experiments in Section 4, we used the same
+sequential tasks for training and for inference during evalu-
+ation. While the downstream tasks being tested were zero-
+shot in terms of data, the model had been already exposed
+to the sequential instruction. We now study if a sequential
+instruction-tuned LLM is able to follow unseen intermediate
+tasks. Particularly, we build on Section 4.2, where the two
+dummy tasks of repetition and paraphrasing were proposed
+for CommonsenseQA. We examine if a model exposed to
+repetition as an intermediate task during training can main-tain a similar performance when the prompt switches to
+paraphrasing during evaluation, and vice versa.
+In Table 5, we report both the accuracy and following rate
+of tuned Mistral-7B models on 100 samples from the Com-
+monsenseQA test set. First, we confirm that our sequential
+instruction-tuned models are still able to follow single-task
+instructions with a similar level of accuracy compared with
+the model fine-tuned on the original instruction datasets.
+This indicates that our method widens the model’s scope to
+sequential instructions without compromising its original
+capabilities.
+Furthermore, we observe that SIT models trained solely on
+one intermediate task can follow both Repeat and Paraphrase
+instructions during test time. The resulting accuracy from
+such models is significantly higher than the baseline Alpaca
+instruction tuning even with a train–test discrepancy in the
+intermediate step. This indicates that sequential instruction
+tuning on a specific task can generalise to similar sequential
+tasks and attain comparable performance.
+5.2. Generalisation to other prompt templates
+We then use a diverse set of prompts to test the robustness
+of our sequentially instruction-tuned LLaMA-7B model.
+While the model has been fine-tuned with merely a single
+prompt template to learn to repeat the input before predicting
+an answer, we test it with three manually curated sequential
+task templates that are not present in the training set.
+We manually inspect 50 samples from the CommonsenseQA
+outputs, and report the accuracy and following rate of vari-
+ous sequentially instruction-tuned models when prompted
+with unseen templates in Table 2. This shows that IT can
+repeat the input given in the first two templates and answer
+questions with the last prompt; however, it could not follow
+both instructions in any scenario. In most cases, SIT can
+perform both tasks successfully instead, with minimal varia-
+tions across different templates. These results suggest that
+sequential instruction tuning with a single prompt template
+does not prevent the model from transferring its newly ac-
+quired abilities to other templates. On the other hand, mod-
+els instruction-tuned on the original Alpaca dataset seem
+to be sensitive to different templates, which often results in
+subpar behaviours.
+5.3. Generalisation to a variable number of tasks
+We also investigate the models’ behaviours in extrapolating
+the number of intermediate tasks for sequential prompting
+during test time. In addition to baseline instruction tuning
+and sequential instruction tuning with a single task (repe-
+tition), denoted as SIT-1, we perform an extra sequential
+instruction tuning that contains two intermediate tasks: rep-
+etition followed by paraphrase, denoted as SIT-2.
+6Fine-tuning Large Language Models with Sequential Instructions
+IT (Alpaca) SIT (+Repeat)
+Repeat Answer R+A0255075100
+(a) Prompt: Please do two tasks: 1. Re-
+peat the input question. 2. Answer the
+input question.Repeat Answer R+A0255075100
+(b) Prompt: Please repeat the input ques-
+tion and answer it.Repeat Answer R+A0255075100
+(c) Prompt: Repeat and answer the input
+question.
+Figure 2: CommonsenseQA results (following rate, %) for LLaMA-7B IT and SIT tested with zero-shot prompts.
+During the evaluation, we test these models on chains of rep-
+etition and paraphrasing tasks ranging from two to four. The
+instruction-following capability is reflected by ROUGE-L
+and BERTScore F1 scores between each interim generation
+and the corresponding expected intermediate output. Ac-
+cording to the results shown in Table 6, we find that SIT-1
+and SIT-2 have stronger overall sequential instruction fol-
+lowing abilities than IT even when the number of tasks at
+test time exceeds that during LLM fine-tuning. Hence, SIT
+allows for generalising to longer task chains to a significant
+degree. Moreover, SIT-2 is more robust than SIT-1, imply-
+ing that fine-tuning with even longer chains of tasks may
+help deal with complex sequential instructions at inference
+time.
+Evaluation
+instruction ↓Training method
+IT SIT-1 (+R) SIT-2 (+R+P)
+R+A 24.7 / 86.1 54.0 /91.8 53.9 / 91.2
+R+P+A 38.2 / 85.9 31.5 / 87.3 40.9 /87.6
+P+R+P+A 36.0 / 86.4 36.2 / 87.3 39.3 / 87.0
+Table 6: Instruction-following measurements (Rouge-L
+and BERTScore F1 scores, %) on CommonsenseQA for
+LLaMA-7B IT and SIT tested with a variable combination
+of repetition and paraphrase tasks.
+5.4. Input and generation length
+Finally, we analyse the influence of the input length—
+and correspondingly the intermediate output length—on
+a model’s performance and sequential instruction follow-
+ing ability. We conduct this study on our SIT model with
+translation as an intermediate task and XQuAD as the final
+downstream task. An implicit assumption here is that the
+translation output length is correlated with the input length.
+100 outputs from the Spanish test set are sampled and or-
+dered by length. We report the accuracy for each length
+(smoothed with a window of 10) in Figure 3. The pattern
+indicates that as the input length increases, the model’s in-
+struction following capability and task performance both
+drop. This implies that the improved performance of SITcannot be solely attributed to an increase in LLM computa-
+tional capacity due to longer outputs.
+100 200 300 400
+Sequence Length0.20.40.60.81.0Following Rate
+Accuracy
+Figure 3: Rolling average (window size of 10) of SIT results
+onXQuAD (following rate, %) sorted by input length.
+6. Related Work and Discussions
+Instruction Tuning Instruction tuning is a procedure to fine-
+tune a foundation model on specially formatted input–output
+data to make it understand and execute input instructions
+(Mishra et al., 2022; Sanh et al., 2022; Wei et al., 2022a),
+with the aim of generalising to new, unseen tasks.
+Yet, we have shown that neither foundation nor instruction-
+tuned models are adept at processing a single query requir-
+ing to complete multiple tasks sequentially. We might glean
+insights into this phenomenon from the procedure used to
+construct instruction datasets. Such efforts have often gath-
+ered materials from supervised NLP tasks and open-ended
+dialogues wherein instruction–response pairs exhibit a di-
+rect relationship (Sanh et al., 2022; Longpre et al., 2023;
+Wang et al., 2023; Taori et al., 2023; Conover et al., 2023).
+The machine-translated multilingual counterparts of these
+models inevitably inherit the same flaws (Muennighoff et al.,
+2023; Li et al., 2023b; Chen et al., 2023). While useful in
+teaching LLMs to address straightforward problems, ex-
+isting datasets typically lack multi-task examples. Conse-
+quently, models fine-tuned on such datasets become less
+robust to instructions spanning multiple tasks. We posit that
+naturally arising sequential demonstrations are not common
+7Fine-tuning Large Language Models with Sequential Instructions
+in the LLM pre-training data either, which accounts for the
+failure of sequential prompting in base models.
+On the other hand, several works have used multi-turn
+conversational datasets to fine-tune LLMs (Touvron et al.,
+2023b; Chiang et al., 2023), which allows users to inter-
+act with the model to complete multiple tasks iteratively.
+Nonetheless, conversational models rely on continuous user
+interaction and therefore are equally unsuitable to complete
+a series of tasks from a single query.
+Knowledge Pivoting Explicitly guiding an LLM to perform
+certain tasks before arriving at a final answer allows for
+human intervention and external knowledge incorporation.
+Most previous research centred around language pivoting,
+which has become an established method to tackle cross-
+lingual or multilingual tasks. This involves translating the
+input into a source language (usually English) to harness its
+abundance of high-resource data and models. This method
+has proven effective in a wide array of applications (Con-
+neau et al., 2018; Ponti et al., 2019; 2021; Ansell et al., 2023;
+Artetxe et al., 2023). With LLMs, it has been demonstrated
+that translating the input into English for reasoning—via
+either an external translator or the LLM itself—often sur-
+passes reasoning in the original language (Shi et al., 2023;
+Qin et al., 2023; Huang et al., 2023; Etxaniz et al., 2023).
+Very recently, Zhang et al. (2023) introduced the concept
+of cross-lingual instruction tuning, emphasising the effi-
+cacy of pivoting via high-resource languages, particularly
+English. In this paper, we explore a similar multi-step ap-
+proach beyond cross-lingual tasks—e.g., dummy tasks and
+cross-modal tasks—to widen its scope to sequential prompt-
+ing and tuning. More broadly, whilst there are ample works
+on multilingual and multi-task instruction tuning aiming for
+better generalisation, we are the first (to our knowledge) to
+systematically tackle the challenge of responding to sequen-
+tial instructions to solve composite problems.
+Chain-of-thought Prompting an LLM to generate a multi-
+step reasoning process before answering a question yields
+better outcomes, which is known as Chain-of-Thought (CoT,
+Wei et al., 2022b; Kojima et al., 2022). CoT only consid-
+ers the intermediate task of “step-by-step reasoning” before
+answering the final question in reasoning tasks. However,
+we have demonstrated the possibility of augmenting exam-
+ples with new intermediate tasks, which we demonstrated
+to be highly beneficial for a wide array of downstream tasks.
+Our work thereby points to the existence of a much broader
+search space for intermediate tasks, which has only been
+partially explored.
+Sequential instruction following can be tackled via modular
+methods that route sub-tasks to (possibly different) LLM
+experts (Pfeiffer et al., 2023). Wu et al. (2022) proposed to
+chain LLM calls so that the output of the previous query is
+added to the input of the next query, which makes prompt-ing controllable and interactive. Least-to-most prompting
+(Zhou et al., 2023) breaks a complex problem into multi-
+turn prompting and reasoning. In terms of the technique,
+our contribution lies in the instruction tuning stage; in terms
+of the sub-task routing, they solve a single task through mul-
+tiple steps while we focus on composite instructions whose
+sub-tasks are distinct in nature.
+Increased Computation Prolonged generation inevitably
+incurs higher inference costs but also higher computational
+capacity (Lanham et al., 2023). For instance, Goyal et al.
+(2023) explicitly trained an LLM to automatically gener-
+ate pause tokens when necessary. The effectiveness of our
+proposed method might be partially attributed to increased
+computation due to the presence of intermediate tasks; how-
+ever, our analysis of the intermediate output lengths has also
+proven that increased computation alone is not a critical fac-
+tor. Unlike approaches that add dummy tokens, sequential
+instruction tuning allows for injecting external knowledge
+concerning the structure of the problem as well as producing
+informative additional tokens.
+7. Conclusion and Future Work
+In this work, we unveiled a major drawback in LLMs: even
+the state-of-the-art open-source models, such as LLaMA-
+70B and Mixtral-8 ×7B, struggle to follow multiple task
+instructions within a single query. Accordingly, we pro-
+posed a new method named sequential instruction tuning
+to equip LLMs with this ability. We augmented existing
+instruction tuning datasets, such as Alpaca, automatically
+by interleaving the original instructions with intermediate
+tasks. We explored both dummy tasks like input repetition
+or paraphrasing as well as informative tasks like translation
+and image description. Fine-tuning foundation models on
+these enriched data unlocked their capability to process se-
+quential instructions. As a result, not only they followed
+multiple instructions more faithfully but also recorded a
+better performance in several downstream tasks spanning
+common sense reasoning, multilingual, and multimodal
+question answering. Moreover, we observed that sequen-
+tial instruction-tuned models exhibit robustness to unseen
+intermediate tasks and various prompt templates. Notably,
+these models also showed potential in dealing with instruc-
+tions containing a variable amount of steps even without
+any exposure during training.
+Despite its effectiveness, a potential limitation of our se-
+quential instruction tuning (SIT) paradigm is that it requires
+pre-defining intermediate tasks. Whilst we have shown that
+SIT leads to generalisation to unseen tasks, future work may
+explore the automatic construction of an even more diverse
+set of sequential instructions. This might be achieved via a
+self-instruct process similar to that used in Alpaca (Wang
+et al., 2023; Taori et al., 2023).
+8Fine-tuning Large Language Models with Sequential Instructions
+Broader Impact
+This paper presents work aiming to advance the understand-
+ing of instruction tuning and large language models. While
+there is no definitive way for us to prevent models trained us-
+ing our technique from generating inappropriate or harmful
+content, our technique certainly does not contribute to this.
+From an environmental perspective, prolonged sequential
+instructions are usually associated with lengthier input and
+output, which requires more GPU computations thus more
+heat emissions and potentially CO2 emissions. Finally, prac-
+titioners interested in adopting our method need to consider
+the trade-off between task performance and inference cost.
+Acknowledgements
+This work has made use of the resources provided
+by the Edinburgh Compute and Data Facility (ECDF)
+(http://www.ecdf.ed.ac.uk/) and the Baskerville Tier 2 HPC
+service (https://www.baskerville.ac.uk/). Baskerville was
+funded by the EPSRC and UKRI through the World Class
+Labs scheme (EP/T022221/1) and the Digital Research In-
+frastructure programme (EP/W032244/1) and is operated by
+Advanced Research Computing at the University of Birm-
+ingham.
+References
+Ansell, A., Parovi ´c, M., Vuli ´c, I., Korhonen, A., and Ponti,
+E. Unifying cross-lingual transfer across scenarios of
+resource scarcity. In Proceedings of the 2023 Conference
+on Empirical Methods in Natural Language Processing ,
+2023.
+Artetxe, M., Ruder, S., and Yogatama, D. On the cross-
+lingual transferability of monolingual representations. In
+Proceedings of the 58th Annual Meeting of the Associa-
+tion for Computational Linguistics , 2020.
+Artetxe, M., Goswami, V ., Bhosale, S., Fan, A., and Zettle-
+moyer, L. Revisiting machine translation for cross-lingual
+classification. In Proceedings of the 2023 Conference
+on Empirical Methods in Natural Language Processing ,
+2023.
+Brown, T., Mann, B., Ryder, N., Subbiah, M., Kaplan, J. D.,
+Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G.,
+Askell, A., et al. Language models are few-shot learners.
+Advances in neural information processing systems , 2020.
+Chen, P., Ji, S., Bogoychev, N., Kutuzov, A., Haddow, B.,
+and Heafield, K. Monolingual or multilingual instruction
+tuning: Which makes a better Alpaca. arXiv preprint
+arXiv:2309.08958 , 2023.
+Chiang, W.-L., Li, Z., Lin, Z., Sheng, Y ., Wu, Z., Zhang, H.,
+Zheng, L., Zhuang, S., Zhuang, Y ., Gonzalez, J. E., et al.Vicuna: An open-source chatbot impressing GPT-4 with
+90%* ChatGPT quality. Online blog, 2023.
+Conneau, A., Rinott, R., Lample, G., Williams, A., Bowman,
+S., Schwenk, H., and Stoyanov, V . XNLI: Evaluating
+cross-lingual sentence representations. In Proceedings of
+the 2018 Conference on Empirical Methods in Natural
+Language Processing , 2018.
+Conover, M., Hayes, M., Mathur, A., Xie, J., Wan, J., Shah,
+S., Ghodsi, A., Wendell, P., Zaharia, M., and Xin, R. Free
+Dolly: Introducing the world’s first truly open instruction-
+tuned LLM. Online blog, 2023.
+Dai, W., Li, J., Li, D., Tiong, A. M. H., Zhao, J., Wang,
+W., Li, B., Fung, P., and Hoi, S. InstructBLIP: Towards
+general-purpose vision-language models with instruction
+tuning. arXiv preprint arXiv:2305.06500 , 2023.
+Etxaniz, J., Azkune, G., Soroa, A., de Lacalle, O. L., and
+Artetxe, M. Do multilingual language models think better
+in English? arXiv preprint arXiv:2308.01223 , 2023.
+Goyal, S., Ji, Z., Rawat, A. S., Menon, A. K., Kumar,
+S., and Nagarajan, V . Think before you speak: Train-
+ing language models with pause tokens. arXiv preprint
+arXiv:2310.02226 , 2023.
+Goyal, Y ., Khot, T., Summers-Stay, D., Batra, D., and
+Parikh, D. Making the V in VQA matter: Elevating
+the role of image understanding in visual question an-
+swering. In Conference on Computer Vision and Pattern
+Recognition , 2017.
+Hu, E. J., Shen, Y ., Wallis, P., Allen-Zhu, Z., Li, Y ., Wang,
+S., Wang, L., and Chen, W. LoRA: Low-rank adaptation
+of large language models. In International Conference
+on Learning Representations , 2022.
+Huang, H., Tang, T., Zhang, D., Zhao, X., Song, T., Xia,
+Y ., and Wei, F. Not all languages are created equal
+in LLMs: Improving multilingual capability by cross-
+lingual-thought prompting. In Findings of the Association
+for Computational Linguistics: EMNLP 2023 , 2023.
+Hudson, D. A. and Manning, C. D. GQA: A new dataset for
+real-world visual reasoning and compositional question
+answering. In Proceedings of the IEEE/CVF conference
+on computer vision and pattern recognition , 2019.
+Jiang, A. Q., Sablayrolles, A., Mensch, A., Bamford, C.,
+Chaplot, D. S., Casas, D. d. l., Bressand, F., Lengyel, G.,
+Lample, G., Saulnier, L., et al. Mistral 7B. arXiv preprint
+arXiv:2310.06825 , 2023.
+Kojima, T., Gu, S. S., Reid, M., Matsuo, Y ., and Iwasawa,
+Y . Large language models are zero-shot reasoners. In Ad-
+vances in Neural Information Processing Systems , 2022.
+9Fine-tuning Large Language Models with Sequential Instructions
+Lanham, T., Chen, A., Radhakrishnan, A., Steiner, B., Deni-
+son, C., Hernandez, D., Li, D., Durmus, E., Hubinger,
+E., Kernion, J., et al. Measuring faithfulness in chain-
+of-thought reasoning. arXiv preprint arXiv:2307.13702 ,
+2023.
+Li, D., Li, J., Le, H., Wang, G., Savarese, S., and Hoi,
+S. C. LA VIS: A one-stop library for language-vision
+intelligence. In Proceedings of the 61st Annual Meeting
+of the Association for Computational Linguistics , 2023a.
+Li, H., Koto, F., Wu, M., Aji, A. F., and Baldwin,
+T. Bactrian-X: A multilingual replicable instruction-
+following model with low-rank adaptation. arXiv preprint
+arXiv:2305.15011 , 2023b.
+Lin, C.-Y . ROUGE: A package for automatic evaluation of
+summaries. In Text Summarization Branches Out , 2004.
+Lin, T.-Y ., Maire, M., Belongie, S., Hays, J., Perona, P., Ra-
+manan, D., Doll ´ar, P., and Zitnick, C. L. Microsoft coco:
+Common objects in context. In European Conference on
+Computer Vision , 2014.
+Longpre, S., Hou, L., Vu, T., Webson, A., Chung, H. W., Tay,
+Y ., Zhou, D., Le, Q. V ., Zoph, B., Wei, J., and Roberts,
+A. The Flan collection: designing data and methods for
+effective instruction tuning. In Proceedings of the 40th
+International Conference on Machine Learning , 2023.
+Mishra, S., Khashabi, D., Baral, C., and Hajishirzi, H. Cross-
+task generalization via natural language crowdsourcing
+instructions. In Proceedings of the 60th Annual Meeting
+of the Association for Computational Linguistics , 2022.
+Muennighoff, N., Wang, T., Sutawika, L., Roberts, A., Bi-
+derman, S., Scao, T. L., Bari, M. S., Shen, S., Yong, Z.-X.,
+Schoelkopf, H., et al. Crosslingual generalization through
+multitask finetuning. In Proceedings of the 61st Annual
+Meeting of the Association for Computational Linguistics ,
+2023.
+Ouyang, L., Wu, J., Jiang, X., Almeida, D., Wainwright, C.,
+Mishkin, P., Zhang, C., Agarwal, S., Slama, K., Ray, A.,
+et al. Training language models to follow instructions
+with human feedback. In Advances in Neural Information
+Processing Systems , 2022.
+Pfeiffer, J., Ruder, S., Vuli ´c, I., and Ponti, E. Modular deep
+learning. Transactions on Machine Learning Research ,
+2023.
+Ponti, E., Kreutzer, J., Vulic, I., and Reddy, S. Modelling la-
+tent translations for cross-lingual transfer. arXiv preprint
+arXiv:2107.11353 , 2021.Ponti, E. M., O’Horan, H., Berzak, Y ., Vuli ´c, I., Reichart,
+R., Poibeau, T., Shutova, E., and Korhonen, A. Mod-
+eling Language Variation and Universals: A Survey on
+Typological Linguistics for Natural Language Processing.
+Computational Linguistics , 2019.
+Qin, L., Chen, Q., Wei, F., Huang, S., and Che, W. Cross-
+lingual prompting: Improving zero-shot chain-of-thought
+reasoning across languages. In Proceedings of the 2023
+Conference on Empirical Methods in Natural Language
+Processing , 2023.
+Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., and
+Sutskever, I. Language models are unsupervised multitask
+learners. Online blog, 2019.
+Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S.,
+Matena, M., Zhou, Y ., Li, W., and Liu, P. J. Exploring
+the limits of transfer learning with a unified text-to-text
+transformer. Journal of Machine Learning Research ,
+2020.
+Sanh, V ., Webson, A., Raffel, C., Bach, S. H., Sutawika,
+L., Alyafeai, Z., Chaffin, A., Stiegler, A., Scao, T. L.,
+Raja, A., et al. Multitask prompted training enables zero-
+shot task generalization. In International Conference on
+Learning Representations , 2022.
+Shi, F., Suzgun, M., Freitag, M., Wang, X., Srivats, S.,
+V osoughi, S., Chung, H. W., Tay, Y ., Ruder, S., Zhou, D.,
+Das, D., and Wei, J. Language models are multilingual
+chain-of-thought reasoners. In The Eleventh International
+Conference on Learning Representations , 2023.
+Talmor, A., Herzig, J., Lourie, N., and Berant, J. Com-
+monsenseQA: A question answering challenge targeting
+commonsense knowledge. In Proceedings of the 2019
+Conference of the North American Chapter of the Associ-
+ation for Computational Linguistics: Human Language
+Technologies , 2019.
+Taori, R., Gulrajani, I., Zhang, T., Dubois, Y ., Li, X.,
+Guestrin, C., Liang, P., and Hashimoto, T. B. Stanford
+Alpaca: An instruction-following LLaMA model. Github
+repository, 2023.
+Touvron, H., Lavril, T., Izacard, G., Martinet, X., Lachaux,
+M.-A., Lacroix, T., Rozi `ere, B., Goyal, N., Hambro, E.,
+Azhar, F., et al. LLaMA: Open and efficient founda-
+tion language models. arXiv preprint arXiv:2302.13971 ,
+2023a.
+Touvron, H., Martin, L., Stone, K., Albert, P., Almahairi, A.,
+Babaei, Y ., Bashlykov, N., Batra, S., Bhargava, P., Bhos-
+ale, S., et al. Llama 2: Open foundation and fine-tuned
+chat models, 2023. arXiv preprint arXiv:2307.09288 ,
+2023b.
+10Fine-tuning Large Language Models with Sequential Instructions
+Wang, Y ., Kordi, Y ., Mishra, S., Liu, A., Smith, N. A.,
+Khashabi, D., and Hajishirzi, H. Self-instruct: Aligning
+language models with self-generated instructions. In Pro-
+ceedings of the 61st Annual Meeting of the Association
+for Computational Linguistics , 2023.
+Wei, J., Bosma, M., Zhao, V ., Guu, K., Yu, A. W., Lester,
+B., Du, N., Dai, A. M., and Le, Q. V . Finetuned lan-
+guage models are zero-shot learners. In International
+Conference on Learning Representations , 2022a.
+Wei, J., Wang, X., Schuurmans, D., Bosma, M., Ichter, B.,
+Xia, F., Chi, E. H., Le, Q. V ., and Zhou, D. Chain of
+thought prompting elicits reasoning in large language
+models. In Advances in Neural Information Processing
+Systems , 2022b.
+Wu, T., Terry, M., and Cai, C. J. AI Chains: Transparent
+and controllable human-AI interaction by chaining large
+language model prompts. In Proceedings of the 2022 CHI
+Conference on Human Factors in Computing Systems ,
+2022.
+Zhang, T., Kishore, V ., Wu, F., Weinberger, K. Q., and Artzi,
+Y . BERTScore: Evaluating text generation with BERT. In
+International Conference on Learning Representations ,
+2020.
+Zhang, Z., Lee, D.-H., Fang, Y ., Yu, W., Jia, M., Jiang,
+M., and Barbieri, F. PLUG: Leveraging pivot lan-
+guage in cross-lingual instruction tuning. arXiv preprint
+arXiv:2311.08711 , 2023.
+Zhou, D., Sch ¨arli, N., Hou, L., Wei, J., Scales, N., Wang,
+X., Schuurmans, D., Cui, C., Bousquet, O., Le, Q. V .,
+and Chi, E. H. Least-to-most prompting enables complex
+reasoning in large language models. In The Eleventh
+International Conference on Learning Representations ,
+2023.
+11

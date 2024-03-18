@@ -1,0 +1,973 @@
+arXiv:hep-th/9110037v1  15 Oct 1991SU-ITP-900
+February 1, 2008
+HARD ART OF THE UNIVERSE CREATION
+(Stochastic approach to tunneling and baby universe format ion)
+Andrei Linde1
+Department of Physics, Stanford University, Stanford CA 94 305-4060, USA2
+ABSTRACT
+We develop a stochastic approach to the theory of tunneling w ith
+the baby universe formation. This method is applied also to t he
+theory of creation of the universe in a laboratory.
+1On leave of absence from: Lebedev Physical Institute, Mosco w 117924, USSR
+2Bitnet address LINDE@SLACVM
+11 Introduction
+Few years ago many people believed that the universe is topol ogically con-
+nected. Of course, it was possible to speculate about the uni verse consisting
+of many disconnected pieces, but such speculations did not s eem to have any
+practical consequences since it was assumed that topologic ally disconnected
+pieces of the universe cannot inﬂuence each other. However, recently it was
+understood that topologically disconnected universes may have a non-local
+interaction with each other, which may help us to solve the co smological
+constant problem [1]-[9]. The most popular approach to the c osmological
+constant problem is based on the possibility that even if one starts with one
+(topologically connected) universe, later on many new univ erses (so-called
+baby universes) are created from the original one due to quan tum tunneling
+[10]-[13]. This idea is very interesting and it may prove to b e very productive.
+However, the standard lore of the theory of tunneling with th e universe pro-
+duction is based on the Euclidean approach to quantum cosmol ogy [11]-[13].
+In some cases this approach gives correct answers and can be j ustiﬁed with
+the help of more rigorous methods. In some other cases this ap proach also
+gives correct answers, but not to the questions which were as ked originally.
+Being applied to the baby universe theory, this method conta ins many ambi-
+guities which still remain unresolved [14]. One of the most d iﬃcult problems
+is related to the choice of sign of the Euclidean action in the expression for the
+wave function of the universe Ψ: Whether Ψ ∼exp(−SE), like the Hartle-
+Hawking wave function [15] (or Ψ ∼exp(exp( −SE)), with an account taken
+of baby universes [2]), or Ψ ∼exp(SE), like the tunneling wave function [16]
+? Or maybe (as we suspect) the true answer is much more complic ated ?
+The cosmological constant problem is not the only possible a pplication
+of the theory of many topologically disconnected universes . It is not incon-
+ceivable that only in this context one can really understand the origin of our
+own universe. Indeed, the standard idea that our universe ap peared from
+“nothing” (or singularity) is not much better (and conceptu ally is much less
+clear) than the idea that it appeared from another universe a s a result of the
+baby universe creation. This brings us to another issue whic h was discussed
+recently: Is it possible to create the universe in a laborato ry ?
+In the context of the standard hot universe theory this quest ion is not
+2very interesting . In order to create a large universe which w ould be as long-
+living as ours, one would need to have at least as many particl es as their
+total number in the observable part of our universe... In the inﬂationary
+universe scenario one can do the same job by producing a scala r ﬁeld φwith
+the potential energy density V(φ) in a domain of space of a radius rbigger
+than the horizon, r > H−1(φ) =/radicalbigg
+3M2p
+8πV(φ). Such a domain of the inﬂationary
+universe expands by its own laws, as a separate universe inde pendent of
+what occurs outside it (“no-hair” theorem for de Sitter spac e). The total
+energy of the ﬁeld φin a bubble of a radius r∼H−1isE∼M3
+p√
+V(φ). This
+amounts to about a hundred kilograms of matter for the new inﬂ ationary
+universe scenario in grand uniﬁed theories and to just a few P lanck masses
+Mp∼10−5g for chaotic inﬂation, which may start at extremely large V(φ),
+up to V(φ)∼M4
+p[14].
+This does not mean that it is easy to create an inﬂationary uni verse in a
+laboratory, even with the help of chaotic inﬂation. An inves tigation of this
+problem shows that at the classical level this process is for bidden; one can
+only form small sub-critical bubbles with r < H−1, which never expand up
+to the over-critical size r > H−1[19]. However, the over-critical domains can
+appear due to quantum eﬀects.
+In particular, one may consider a small (sub-critical) bubb le ﬁlled with a
+scalar ﬁeld with large V(φ) and investigate a possibility that such a bubble
+will transform into a large expanding bubble due to quantum t unneling. This
+possibility was considered in a series of very interesting p apers [20, 21] by
+two diﬀerent methods. The results of these two methods agree with each
+other and the authors conclude that one can actually create t he universe in a
+laboratory in this way. However, there exist two problems wi th the methods
+used in [20, 21].
+Investigation of quantum tunneling with an account taken of gravitational
+eﬀects is extremely complicated. To simplify the problem, t he authors of [20,
+21] assumed that the bubble contains vacuum in a state φ= 0, corresponding
+to a local minimum of the eﬀective potential V(φ), and that the bubble wall
+is very thin. The thin wall approximation is valid in the old i nﬂationary
+universe scenario, but old inﬂation does not lead to a good co smology. This
+approximation is valid also in some inﬂationary models invo lving several
+3diﬀerent scalar ﬁelds [22, 23], but the bubble formation in t hese models is
+much more complicated, and it was not studied in [20, 21]. Unf ortunately,
+we are not aware of any situation where the thin wall approxim ation would
+work in the standard versions of new or chaotic inﬂation.
+Another problem is related to the possibility to create the i nitial sub-
+critical bubble surrounded by the ordinary Minkowski vacuu m. In [20, 21]
+it was assumed that this is just a technical problem, which mu st have some
+solution. However, it is not quite clear whether such soluti on exists at all.
+Indeed, the only way of producing such bubbles which we know a t present
+is to heat some part of the universe up to the critical tempera tureTc, af-
+ter which the phase transition to the false vacuum occurs in t his domain.
+However, in all realistic models studied so far the thermal e nergy density
+E∼T4at the time of the phase transition is much bigger than the vac uum
+energy density, T4
+c≫V(0) [14]. Bubbles ﬁlled (and surrounded) by the gas
+of ultrarelativistic particles behave quite diﬀerently fr om the empty bubbles
+studied in [20, 21].
+The problems discussed above are so complicated that it woul d be very
+desirable to ﬁnd some simple intuitive approach which would help us to get
+at least partial understanding of what is going on. Few years ago, even before
+the notion of the baby universes was introduced, we suggeste d a stochastic
+approach to the inﬂationary universe formation due to quant um ﬂuctuations
+in Minkowski space and estimated the probability of this pro cess for a large
+class of models of the scalar ﬁeld φminimally coupled to gravity [10]. Later
+we used a simple generalization of this approach to describe the probabil-
+ity of the universe formation in a laboratory (at high temper ature) [17, 18].
+Stochastic approach to the universe formation has its own pr oblems, to be
+discussed below. However, it is very simple, its results hav e a clear phys-
+ical interpretation and, as we will show, it works very well b eing applied
+to the theory of tunneling in ﬁeld theory and quantum statist ics, both in
+Minkowski space and in de Sitter space. Therefore, this meth od may serve
+as a useful intermediate step towards a more complete and rig orous inves-
+tigation of the baby universe formation. In this paper we wil l describe the
+stochastic approach to tunneling and apply it to the theory o f the baby uni-
+verse production, both in the empty Minkowski space and in a l aboratory.
+In order to do it we must ﬁrst say few words about Euclidean app roach to
+4tunneling and to quantum cosmology.
+2 Euclidean Methods in the Theory of Tun-
+neling
+One of the simplest and most elegant approaches to tunneling in the scalar
+ﬁeld theory [24] is the Euclidean one [25]. The main idea of th is approach
+is that tunneling is a motion with imaginary energy, which is equivalent
+to motion in imaginary time, i.e. in Euclidean space. The pro bability of
+tunneling is proportional to exp( −SE), where SEis the Euclidean action
+corresponding to the tunneling trajectory. In other words, SEis the instanton
+action, where the instanton is the solution of the Euclidean ﬁeld equations
+describing tunneling.
+A most instructive example is tunneling in a theory with the e ﬀective
+potential
+V=1
+2m2φ2−1
+4λφ4+V(0). (1)
+The tunneling trajectories (instantons) with the minimal a ction possess
+the O(4) symmetry of Euclidean space [25]. The Euclidean equ ation for O(4)
+symmetric tunneling is
+d2φ/dr2+ (3/r)dφ/dr =V′(φ), (2)
+with the boundary conditions φ(r=∞) =φoanddφ/dr|r=0= 0. Here
+r=/radicalBig
+x2
+i; thexiare the Euclidean coordinates, i = 1,2,3,4.
+In the theory (1) with m= 0 equation (2) has a class of solutions which
+are called Fubini instantons [26]:
+φ(r) = 2/radicalBigg
+2
+λ/parenleftBiggρ
+r2+ρ2/parenrightBigg
+, (3)
+where ρis arbitrary. The corresponding Euclidean action does not d epend
+onρ,
+SE= 2π2/integraldisplay
+r3/parenleftbigg1
+2(dφ/dr )2+V(φ)/parenrightbigg
+dr=8π2
+3λ. (4)
+5The bubbles which appear after tunneling are also described by eq. (3) if one
+understands by r2its Minkowski counterpart r2−t2. The probability of the
+bubble formation per unit four-volume can be estimated by th e expression
+P∼ρ−4exp/parenleftBigg
+−8π2
+3λ/parenrightBigg
+(5)
+form= 0.
+A somewhat surprising fact is that for any nonvanishing mthere are no
+instanton solutions in the theory (1). This does not mean, ho wever, that
+there is no tunneling in this theory. The point is that for any nonvanishing
+mthe minimum of tunneling action corresponds to the ρ→0 limit of the
+ﬁeld conﬁgurations (3). But one can easily check that the act ion of these
+conﬁgurations diﬀers from its limiting value (4) by ∆ SE≪1 forρ≪√
+λ
+m,
+i.e. for φ≫m/λin the center of the instanton. This means that the Fubini
+instantons (3) with ρ≪√
+λ
+mmay play the role of instantons in the theory (1)
+with nonvanishing mas well.
+A similar approach can be used to study tunneling at a ﬁnite te mperature.
+Quantum statistics at ﬁnite Tis equivalent to quantum ﬁeld theory in the
+Euclidean space periodic in the time direction with the peri od 1/T. In the
+limiting case T≫mone should look for O(3) symmetric instantons with the
+time-independent ﬁeld φand then multiply the three-dimensional action by
+1/T[27]. The resulting four-dimensional action for the theory (1) isS∼19m
+λT
+[28] and the probability of tunneling is given by
+P∼exp/parenleftbigg
+−19m
+λT/parenrightbigg
+. (6)
+To describe tunneling in the inﬂationary universe by Euclid ean meth-
+ods one should take into account that the Euclidean version o f de Sitter
+space with the vacuum energy density V(φ) is the sphere S4with the radius
+H−1(φ) =/radicalbigg
+3M2p
+8πV(φ). An instanton solution in this case is a sphere S4contain-
+ing a constant scalar ﬁeld φcorresponding to an extremum of the eﬀective
+potential V(φ). The corresponding action is negative and is given by
+S=−3M4
+p
+8V(φ). (7)
+6Let us assume that the eﬀective potential has a complicated f orm with a
+local minimum at φ= 0, a local maximum at φ=φ1, next local minimum at
+φ=φ2, next local maximum at φ=φ3, next local minimum at φ=φ4, etc.
+Then, according to [29], the probability of tunneling from φ= 0 to φ=φ2is
+given by
+P= exp ( −S(φ1) +S(0)) = exp/parenleftBigg3M4
+p
+8/parenleftBig
+V−1(φ1)−V−1(0)/parenrightBig/parenrightBigg
+.(8)
+In particular, for the theory (1) with m≪√
+V /M p
+P= exp/parenleftBigg
+−3M4
+pm4
+32λV2(0)/parenrightBigg
+. (9)
+Euclidean approach to tunneling in Minkowski space at T= 0 can be jus-
+tiﬁed by the standard Hamiltonian methods. Euclidean metho ds at T/negationslash= 0
+give a correct expression for the exponential suppression o f the probabil-
+ity of tunneling, but some care should be taken when one calcu lates sub-
+exponential terms. The situation with tunneling in de Sitte r space is much
+more confusing:
+i) From the derivation of eq. (8) given in [29] and from all sub sequent
+“proofs” of this equation with the help of Euclidean methods by other authors
+it was not clear why one should write S(φ1) in eq. (8) rather than, say, S(φ2)
+orS(φ3). Indeed, the instantons discussed in [29] describe de Sitt er space
+ﬁlled by a homogeneous scalar ﬁeld which may correspond to anyextremum
+ofV(φ).
+ii) According to its derivation, eq. (8) should work equally well for H > m
+and for H < m since the instantons used for its derivation exist independ ently
+of the value of m. However, stochastic methods to be used in the next section
+show that eq. (8) is valid only if V′′(φ)≫H2all the way from φ0toφ1.
+iii) The instanton solution obtained in [29] describes a hom ogeneous ﬁeld
+φrather than a bubble. Therefore eq. (8) was interpreted orig inally as an ex-
+pression for the probability of tunneling which occurred si multaneously in the
+whole universe. This interpretation proved to be incorrect [30]. Another in-
+terpretation [31] was that eq. (8) described appearance of l arge bubbles with
+7an interior which looked homogeneous on a scale l > H−1. Unfortunately,
+it remained unclear how solutions with a constant ﬁeld φcould describe the
+process of an inhomogeneous tunneling with bubble formatio n.
+It took few years to prove that eq. (8) and its interpretation in [31] were
+actually correct, but only under some conditions which did n ot follow from
+its Euclidean derivation. The proof was given within the sto chastic approach
+to tunneling [32, 30], which we will discuss now.
+3 Stochastic Approach to Tunneling
+The main idea of the stochastic approach can be illustrated o n an example
+of tunneling in the theory (1) with m= 0 in Minkowski space. Equation of
+motion for the bubble in Minkowski space is
+¨φ=d2φ/dr2+ (2/r)dφ/dr−V′(φ). (10)
+At the moment of its formation, the bubble wall does not move. Then it
+starts growing if ¨φ >0, which requires that
+|d2φ/dr2+ (2/r)dφ/dr|<−V′(φ). (11)
+A bubble of a classical ﬁeld is formed only if it contains a suﬃ ciently big ﬁeld
+φ(it should be over the barrier, so that dV/dφ < 0) and if the bubble itself
+is suﬃciently large. If the size of the bubble is too small, th e gradient terms
+are bigger than the term |V′(φ)|, and the ﬁeld φinside the bubble does not
+grow. Typically, the second term in (11) somewhat compensat es the ﬁrst
+one. To make a very rough estimate, one may write the conditio n (11) in the
+form
+1
+2r−2∼1
+2k2<1
+2k2
+max∼φ−1|V′|=λφ2=1
+3m2(φ)≡1
+3V′′(φ). (12)
+Let us estimate the probability of an event when vacuum ﬂuctu ations occa-
+sionally build up a conﬁguration of the ﬁeld satisfying this condition. In order
+to do it one should remember that the dispersion of quantum ﬂu ctuations of
+the ﬁeld φwithk < k maxis given by
+< φ2>k<k max=1
+4π2/integraldisplaykmax
+0k2dk√
+k2+m2. (13)
+8For the massless ﬁeld k2
+max= 2C2λφ2, where the factor C2=O(1) reﬂects
+some uncertainty in our estimate of the value of k2
+max. This gives
+< φ2>k<k max=1
+4π2/integraldisplaykmax
+0kdk=k2
+max
+8π2=C2λφ2
+8π2. (14)
+This is an estimate of the dispersion of perturbations which may sum
+up to produce a ﬁeld φwhich satisﬁes the condition (12). Of course, this
+estimate is rather crude. But let us nevertheless use eq. (14 ) to evaluate the
+probability that these ﬂuctuations build up a bubble of the ﬁ eldφof a radius
+r > k−1
+max. This can be done with the help of the Gaussian distribution:
+P(φ)∼exp(−φ2
+2< φ2>k<k max) = exp( −2π2
+C2λ). (15)
+Note that the factor in the exponent in (15) to within a factor ofC2= 3/4
+coincides with the Euclidean action SEin eq. (4). Taking into account the
+very rough method we used to calculate the dispersion of the p erturbations
+responsible for tunneling, the coincidence is rather impre ssive.
+This method also helps to study tunneling in the theory (1) wi thm/negationslash= 0,
+in which the instanton solutions do not exist. Indeed, a gene ralization of the
+previous calculation for this case gives the following resu lt for the tunneling
+probability:
+P(φ)∼= exp/parenleftBigg
+−2π2
+C2λ/parenleftBigg
+1 +O(m2
+λφ2)/parenrightBigg/parenrightBigg
+. (16)
+This means that tunneling is possible for m/negationslash= 0. There is an additional
+exponential suppression of the probability of tunneling in this theory as com-
+pared with (15). However, this additional suppression disa ppears if tunneling
+occurs by formation of bubbles with φ > m/λ . This is in an agreement with
+our arguments given in the previous section. For a discussio n of other aspects
+of tunneling in the theory (1) within the stochastic approac h see also [33, 34].
+The agreement between the results of the method discussed ab ove and
+a more complicated Euclidean approach becomes even more imp ressive if
+one remembers that most of the results obtained in the tunnel ing theory by
+Euclidean methods [14] can easily be reproduced (with an acc uracy of the
+coeﬃcients of O(1) in the exponent) by this simple method.
+9For example, let us consider the theory (1) at a temperature T≫m. In
+this case
+< φ2>k<k max=1
+2π2/integraldisplaykmax
+0k2dk
+√
+k2+m2/parenleftbigg
+exp√
+k2+m2(φ)
+T−1/parenrightbigg∼T
+2π2/integraldisplaykmax
+0k2dk
+k2+m2.
+(17)
+Note that the ﬁeld inside the bubble should be somewhat bigge r than 2 m/√
+λ
+since otherwise V(φ)> V(0) and the phase transition is energetically impos-
+sible. At φ >2m/√
+λthe main contribution to V′is given by −λφ3and the
+expression for kmaxis the same as in the previous example, k2
+max= 2C2λφ2>
+m2. This gives
+P(φ)∼exp/parenleftBigg
+−π2φ
+CT√
+2λ/parenrightBigg
+. (18)
+The probability increases with a decrease of φ, butφshould remain bigger
+than 2 m/√
+λ. To make a ﬁnal estimate, let us take φ∼3m/√
+λ. The result
+is
+P(φ)∼exp/parenleftBigg
+−3π2m
+CT√
+2λ/parenrightBigg
+. (19)
+This coincides with the result of the Euclidean approach (6) forC=3π2
+19√
+2∼
+1.1.
+Similar methods can be applied to tunneling in the inﬂationa ry universe.
+There are some diﬀerences though. First of all, the total ene rgy of the bubble
+grows exponentially during inﬂation. In other words, the to tal energy of the
+scalar ﬁeld inside the bubble is not conserved and there is no restriction
+V(φ)> V(0) mentioned above. Moreover, there is no need for the new ph ase
+to be energetically favorable for the exponentially large b ubbles of the new
+phase to appear. It is suﬃcient for the radius of the bubble to be bigger
+thanH−1and for the homogeneous ﬁeldφinside it to be stable with respect
+to rolling back to φ= 0. In other words, one should not worry about the
+bubble walls moving towards the center of the bubble until it disappears.
+Indeed, if the bubble walls originally are displaced at a dis tance r > H−1
+from the center of the bubble, this distance later grows with a speed greater
+than the speed of light due to the exponential expansion of th e universe.
+Therefore, the local motion of the walls towards the center c annot lead to
+a disappearance of the bubble with an initial size r > H−1. This means
+10that for tunneling to occur it is suﬃcient if the bubble of a ra diusr > H−1
+is formed containing any ﬁeld φ > φ 1, where φ1corresponds to the nearby
+maximum of V(φ).
+Calculation of < φ2>k<Hduring inﬂation is rather complicated. Fortu-
+nately, for the theory with the eﬀective potential V(φ) =m2
+2φ2+V(0) the
+result is well known [35, 36],
+< φ2>k<H=3H4
+8π2m2, (20)
+where H2=8πV(0)
+3M2p. According to (15), this gives the following estimate of
+the probability of formation of a bubble of a ﬁeld φ≥φ1=m/√
+λof a radius
+r > H−1(i.e. of the probability of tunneling):
+P= exp/parenleftBigg
+−3M4
+pm4
+16λV2(0)/parenrightBigg
+. (21)
+This agrees, up to the coeﬃcient 2 in the exponent, with the Eu clidean
+result (9). The agreement becomes complete if one investiga tes the probabil-
+ity distribution in a more detailed way, without approximat ingV(φ) by its
+quadratic part.
+The wave-lengths of all vacuum ﬂuctuations of the scalar ﬁel dφgrow
+exponentially in the expanding universe. When the waveleng th of any par-
+ticular ﬂuctuation becomes greater than H−1, this ﬂuctuation stops prop-
+agating, and its amplitude freezes at some nonzero value δφ(x) because of
+the large friction term 3 H˙φin the equation of motion of the ﬁeld φ. The
+amplitude of this ﬂuctuation then remains almost unchanged for a very long
+time, whereas its wavelength grows exponentially. Therefo re, the appearance
+of such a frozen ﬂuctuation is equivalent to the appearance o f a classical ﬁeld
+δφ(x) that does not vanish after averaging over macroscopic inte rvals of space
+and time. The average amplitude of the frozen ﬁeld generated during a typ-
+ical time H−1is given by δφ(x) =H/2π[36]. This ﬁeld looks constant on a
+scaleH−1, but on a bigger scale it is inhomogeneous. If one is interest ed in
+the value of this ﬁeld in each particular point, one should ta ke into account
+that each new wave is frozen with a diﬀerent phase. As a result , the ﬁeld φ
+in each particular point moves as a Brownian particle. This m akes it possible
+11to write a diﬀusion equation for the probability distributi on to ﬁnd a ﬁeld φ
+with the wavelength bigger than H−1in a given point at a given time [32]:
+∂P
+∂t=∂
+∂φ/parenleftBigg∂(DP)
+∂φ+P
+3H∂V
+∂φ/parenrightBigg
+. (22)
+Here the coeﬃcient of diﬀusion Dis given by H3/8π2. If the probability of
+tunneling is suﬃciently small, then the distribution Pwith a good accuracy
+is given by the stationary solution of eq. (22),
+P∼exp/parenleftBigg3M4
+p
+8V(φ)/parenrightBigg
+, (23)
+To describe tunneling from the point φ= 0 over the barrier at φ1one should
+consider the probability of formation of a bubble of a ﬁeld φ≥φ1of a radius
+r > H−1,
+P∼exp/parenleftBigg3M4
+p
+8/parenleftBig
+V−1(φ1)−V−1(0)/parenrightBig/parenrightBigg
+, (24)
+where the last term is necessary for normalization of the pro bability dis-
+tribution. This coincides with the Euclidean result (8). Ho wever, now we
+have a clear interpretation of this result. (For a more detai led discussion see
+[32, 30, 14].) We can also understand the limits of its validi ty. Namely, eq.
+(22) is valid only during inﬂation and only if V′′≪H2in the interval from
+φ= 0 to φ=φ1. This condition does not follow at all from the derivation of
+eq. (8) in the Euclidean approach.
+This comment proves to be very important in the context of qua ntum cos-
+mology. Indeed, the stationary solution (23) looks as a squa re of the Hartle-
+Hawking wave function of the ground state of the universe [15 ] obtained by
+Euclidean methods. Therefore one could consider eq. (23) as a conﬁrmation
+of the validity of the Hartle-Hawking wave function, which w as criticized in
+[16]. However, in all realistic theories the condition V′′≪H2of validity of
+eqs. (22), (23) is not satisﬁed near the absolute minimum of V(φ). As a
+result, all solutions of eq. (22) in realistic theories are n on-stationary. The
+probability distribution (23) can be used at intermediate s tages of inﬂation
+for an approximate description of tunneling, when the proba bility distribu-
+tion is quasi-stationary, but it does not have any fundament al signiﬁcance
+and cannot be used to describe the universe as a whole.
+12An important physical consequence of the Brownian motion of the ﬁeld
+φduring inﬂation is the self-reproduction of the inﬂationar y universe. This
+process is especially interesting in the context of chaotic inﬂation [37, 14].
+It proves that at large φthe Brownian motion is much more rapid than the
+classical rolling of the ﬁeld to the minimum of its potential energy density. As
+a result, many inﬂationary domains are formed which contain growing ﬁeld
+φ. These domains expand much faster than the domains with smal lφ. This
+leads to a paradoxical situation where the main part of the ph ysical volume
+of the universe (in the synchronous coordinate system) beco mes occupied
+not by the ﬁeld corresponding to the minimum of V(φ), but by the ﬁeld
+ﬂuctuating at a density close to the Planck energy density M4
+p[37, 14]. It is
+quite clear that if the process of the baby universe formatio n can occur at
+all, inﬂationary domains with V(φ)∼M4
+pare the best place for it. We will
+return to this question in the end of the paper.
+4 Stochastic Approach to the Baby Universe
+Formation
+Now that we demonstrated usefulness and reliability of the s tochastic ap-
+proach in many diﬀerent situations where it can be conﬁrmed b y other meth-
+ods, we will take a deep breath and try to apply it to the invest igation of
+the possibility of creating an inﬂationary universe from Mi nkowski space
+[10, 17, 18]. The issue here is that quantum ﬂuctuations in Mi nkowski space
+can bring into being an inﬂationary domain of a radius r > H−1(φ), where
+φis a scalar ﬁeld produced by quantum ﬂuctuations in this doma in. The
+“no-hair” theorem for de Sitter space implies that such a dom ain inﬂates in
+an entirely self-contained manner, independent of what occ urs in the sur-
+rounding space. We could then conceive of a ceaseless proces s of creation
+of inﬂationary mini-universes that could take place even at the very latest
+stages of development of the part of the universe that surrou nds us.
+Without pretending to provide a complete description of suc h a process,
+let us attempt to estimate its probability in theories with V(φ) =λφn
+nMpn−4
+using the methods elaborated in the previous section. A doma in formed
+with a large ﬁeld φcan behave as a part of inﬂationary universe only if
+13φ>∼Mpand the gradient and kinetic energy of this ﬁeld 1 /over2(∂µφ)2is
+smaller than V(φ) in its interior. The last condition implies that the size of
+the domain must exceed r∼φV−1/2(φ). Such a domain could arise through
+the build-up of quantum ﬂuctuations δφwith a wavelength
+r∼k−1≥k−1
+max∼φV−1/2(φ)∼m−1(φ). (25)
+(Note that m−1(φ)> H−1(φ) during inﬂation.) One can estimate the dis-
+persion < φ2>k<mof such ﬂuctuations using the simple formula
+< φ2>k<m∼1
+4π2/integraldisplaykmax
+0kdk∼m2
+π2∼V(φ)
+8π2φ2, (26)
+and for a Gaussian distribution P(φ) for the appearance of a ﬁeld φwhich is
+suﬃciently homogeneous on a scale r > m−1(φ), one has [10]
+P(φ)∼exp(−φ2
+2< φ2>k<m)∼exp(−Cπ2φ4
+V(φ)), (27)
+where C = O(1). In particular, for a theory with V(φ) =λ
+4φ4,
+P(φ)∼exp(−C4π2
+λ). (28)
+Note, that eq. (28) does not show any suppression of the proba bility of the
+baby universe formation due to smallness of gravitational e ﬀects; P(φ) may
+be quite large in the theory with a large coupling constant λ.3Some suppres-
+sion may appear at the sub-exponential level, since the “pha se space” of all
+possible inﬂationary universes in this theory is constrain ed by the condition
+φ > M p.
+The probability of the baby universe formation in the theory of a massive
+scalar ﬁeld can be estimated by
+P(φ)∼exp(−C8π2φ2
+m2). (29)
+3One should remember that in a theory of several scalar ﬁelds w ith diﬀerent coupling
+constants the probability of creation of an inﬂationary uni verse is given by the largest
+coupling constant, whereas the density perturbations δρ/ρis determined by the smallest
+coupling constant λ[14].
+14The leading contribution is given by the universes with the s mallest φcom-
+patible with inﬂation in this model, φ∼Mp:
+P(φ)∼exp(−C8π2M2
+p
+m2). (30)
+This means that the baby universe formation should be very eﬃ cient in the
+theories in which the heaviest scalar particles have masses comparable with
+Mp.
+The main objection to the possibility of quantum creation of an inﬂation-
+ary universe in Minkowski space is that the energy conservat ion forbids the
+production of an object with positive energy out of vacuum wi th vanishing
+energy density.4Within the scope of the classical ﬁeld theory, in which the
+energy density is everywhere positive, such a process would therefore be im-
+possible. But at the quantum level, the energy density of the vacuum is zero
+by virtue of the cancellation between the positive energy de nsity of classical
+scalar ﬁelds, along with their quantum ﬂuctuations, and the negative energy
+density associated with quantum ﬂuctuations of fermions, o r the bare nega-
+tive energy of the vacuum. The creation of a positive energy- density domain
+through the build-up of long-wave ﬂuctuations of the ﬁeld φis inevitably
+accompanied by formation of a region surrounding that domai n in which
+the long-wave ﬂuctuations of the ﬁeld φare suppressed, and the vacuum en-
+ergy density is consequently negative. Here we are dealing w ith the familiar
+quantum ﬂuctuations of the vacuum energy density about its z ero point.
+It is important that from the point of view of an external obse rver, the
+total energy of the inﬂationary region of the universe (and i ndeed the to-
+tal energy of the closed inﬂationary universe) does not grow exponentially;
+the region that emerges forms a universe distinct from ours, to which it is
+joined only by a connecting throat (wormhole). The shortfal l of long-wave
+ﬂuctuations of the ﬁeld φsurrounding the inﬂationary domain is quickly re-
+plenished by ﬂuctuations arriving from neighboring region s, so the negative
+energy of the region near the throat can be be rapidly spread o ver a large
+volume around the inﬂationary domain. In such a scenario the total energy of
+the inﬂationary domain plus the energy of vacuum surroundin g it will remain
+4This problem will not appear when we will study the process of the universe formation
+at large temperature.
+15zero, but after the negative energy of vacuum surrounding th e inﬂationary do-
+main will be distributed all over the rest of the universe an o bserver near the
+inﬂationary domain would see it as an evaporating black hole . To show that
+this is a viable possibility one can make a naive estimate of t he Schwarzschild
+radius of the inﬂationary domain from the point of view of an e xternal ob-
+server. The total energy of matter inside this domain is E∼V(φ)m−3(φ).
+If one neglects the gravitational defect of mass (this is the place where the
+estimate is naive), then the Schwarzschild mass of this doma in is equal to E
+and the Schwarzschild radius is E/M2
+p∼m−1·H2/m2≫m−1. Thus, the
+Schwarzschild radius of the inﬂationary domain is much bigg er than the size
+of the domain r∼m−1, so it really looks like a black hole. One can show also
+that the time of evaporation of such a black hole is microscop ically small,
+but it is much bigger than m−1(φ). For example, it can be shown that in the
+theoryλ
+4φ4the time of the black hole evaporation is of the order
+t∼φ3
+λ3/2M4p>(λm(φ))−1. (31)
+This means that for a very distant observer all what happens w ill look as
+a kind of an unusual long-living quantum ﬂuctuation, an obse rver at a not
+too big distance from the inﬂationary domain will see it as an evaporating
+black hole surrounded by space with negative vacuum energy, whereas an
+observer inside the inﬂationary domain would believe that h e lives inside an
+inﬂationary universe.
+Since the universes created in the empty space do not carry an y momen-
+tum, the process of their formation cannot be localized at an y particular
+point. Their main role in the theory is the same as the role of t he baby
+universes considered in [2] – [8]: They modify the propertie s of the vacuum
+state. However, the methods discussed in this section can be easily extended
+for the investigation of the process of formation of inﬂatio nary universes in
+a laboratory, where this process can be localized. For examp le, one can
+consider the process of production of inﬂationary bubbles i nside a domain
+containing matter heated up to a temperature T. To this end on e should
+just replace expression (26) for < φ2>k<k maxin eq. (27) by its counterpart
+calculated at a temperature T≫m(φ)∼V1/2/φ:
+< φ2>k<k max∼TV1/2(φ)
+2π2φ. (32)
+16Note, that this expression for T≫V1/2/φis much larger than its empty
+space predecessor (26). This means (not unexpectedly) that heating leads
+to a more eﬃcient creation of universes with a given φ, and this process
+is localized in the part of the universe with a large temperat ure (i.e. in a
+laboratory). The corresponding probability is given by
+PT(φ)∼exp/parenleftBigg
+−φ2
+2< φ2>k<m/parenrightBigg
+∼exp/parenleftBigg
+−Cπ2φ3
+TV1/2(φ)/parenrightBigg
+. (33)
+For the theoryλ
+4φ4the maximum contribution is given by φ∼Mp,
+PT∼exp/parenleftBigg
+−Cπ2Mp
+T√
+λ/parenrightBigg
+, (34)
+whereas for the theorym2φ2
+2the result is
+PT∼exp/parenleftBigg
+−Cπ2M2
+p
+Tm/parenrightBigg
+. (35)
+These expressions remain exponentially small at T≪Mp, for all values of
+λandm. Moreover, even if one could rise the temperature up to Mp, one
+would not produce inﬂationary universes that way. Eqs. (33) -(35) are valid
+only if T4<∼V(φ), since otherwise the energy density of hot matter inside
+the bubble is bigger than the eﬀective potential, and inﬂati onary regime
+cannot be realized. (This is the same problem as the one discu ssed in the
+Introduction in relation to papers [20, 21].) Therefore, th e probability of
+creation of inﬂationary universe due to high-temperature e ﬀects in the theory
+λ
+4φ4is bounded from above by
+Pmax(φ)∼exp/parenleftBigg
+−Cπ2φ3
+V3/4(φ)/parenrightBigg
+∼exp/parenleftBigg
+−Cπ2
+λ3/4/parenrightBigg
+. (36)
+This maximum is reached at T∼λ1/4Mp. The corresponding expression in
+the theorym2φ2
+2is
+Pmax(φ)∼exp/parenleftBigg
+−Cπ2/parenleftbiggMp
+m/parenrightbigg3/2/parenrightBigg
+, (37)
+17This maximum is achieved at T∼/radicalBig
+mM p.
+One could hope that it might be easier to create the universe i n the new
+inﬂationary scenario, since inﬂation occurs there on a much smaller energy
+scale. Unfortunately, the result is quite opposite: The sma ller is the energy
+density, the larger is H−1, the larger is the size of the domain to be produced,
+the smaller is the probability of such event. As an example, w e will consider
+here the theory with the eﬀective potential often used in the new inﬂationary
+universe scenario,
+V(φ) =λφ4/parenleftBigg
+logφ
+φ0−1
+4/parenrightBigg
++V(0). (38)
+HereV(0) = λφ4
+0/4,φ0is the position of the minimum of V(φ), the mass of
+the ﬁeld in this minimum is equal to m= 2√
+λφ0. Inﬂationary domain should
+contain the ﬁeld φ≪φ0. This means that the deviation from the minimum
+due to quantum ﬂuctuations is given by φ0. The size of the domain should
+exceed H−1=Mp
+φ2
+0/radicalBig
+3
+2πλ. It should be even larger for tunneling to small φ,
+withV′′≪H2, but here we will consider the simplest case when V′′is just
+few times smaller than H2. Note, that m≫Hforφo≪Mp. In this case
+< φ2>k<H∼1
+4π2/integraldisplayH
+0k2dk√
+k2+m2∼H3
+12π2m. (39)
+This gives the following estimate of the probability of the b aby universe
+creation in this theory:
+P∼exp(−φ2
+0
+2< φ2>k<H)∼exp
+−C4π2
+λ·/parenleftBiggMp
+φ0/parenrightBigg3
+. (40)
+This is much smaller than the corresponding probability in t he chaotic inﬂa-
+tion scenario (28).
+By a similar method one can get the following estimate of the p robability
+to create the universe in a laboratory at T≫m:
+PT∼exp
+−C2π2φ0
+T√
+λ·/parenleftBiggMp
+φ0/parenrightBigg3
+. (41)
+18From the condition T4< V(0) = λφ4
+0it follows that
+PT<exp
+−Cπ2
+λ3/4·/parenleftBiggMp
+φ0/parenrightBigg3
+. (42)
+Again, for φ0≪Mpthis probability is much smaller than that in the chaotic
+inﬂation scenario, see eq. (36).
+Thus, we see that the stochastic methods, which proved to be v ery eﬃcient
+in the theory of tunneling, may help us to understand such iss ues as the baby
+universe formation in the vacuum and at a ﬁnite temperature. However,
+several problems are to be resolved before one gets too excit ed.
+First of all, our estimates give us the probability of format ion of a large
+domain with the energy density dominated by the potential en ergy density
+of the slowly changing ﬁeld φ. Such a domain should behave as a part of de
+Sitter space. However, if it can be considered as a part of a closed de Sitter
+space, then in the beginning it may be rapidly contracting. C ontraction may
+lead to appearance of large gradients of the ﬁeld φand to the collapse of the
+domain, instead of its exponential expansion.
+Even though this problem is very complicated, we believe tha t it does
+not cause any diﬃculties in the case when the size of the bubbl e is much
+bigger than H−1. Indeed, the acceleration of test particles in de Sitter spa ce
+is always large and positive , ¨r/r=H2. One may expect that the bubble walls
+at the moment of its formation, being formed by overlapping o f long-wave
+quantum ﬂuctuations in Minkowski space, cannot move toward s the center of
+the bubble with the speed bigger than the speed of light.5If this is true, then
+the bubble of de Sitter space of a size exceeding H−1becomes exponentially
+expanding within a fraction of the Hubble time H−1due to the acceleration
+¨r/r=H2mentioned above.
+The second problem can be explained as follows. When we studi ed for-
+mation of an inﬂationary bubble, we did not take into account the backre-
+action of the changing metric inside the bubble on the spectr um of vacuum
+5In the standard tunneling theory in Minkowski space the init ial speed of the bubble
+walls is equal to zero, whereas the bubbles formed in the inﬂa tionary universe may expand
+(but not contract) from the very beginning.
+19ﬂuctuations during the process of the bubble formation. Thi s is a good ap-
+proximation for small bubbles with a radius r < H−1, but for large bubbles
+the situation is not that simple. Let us try to visualize the p rocess of growth
+of the ﬁeld φin Minkowski space due to overlapping of many long-wave
+ﬂuctuations. The wavelength of each such wave should exceed O(m−1(φ)).
+Therefore one may expect that the total time necessary for th e maxima of
+these waves to overlap should be also of the order of m−1(φ)≫H−1. If the
+bubble will start expanding exponentially at any stage of th is process, then
+its expansion during the time O(m−1)≫H−1may push away all new in-
+coming long-wave ﬂuctuations of the scalar ﬁeld which could lead to further
+growth of the ﬁeld inside the bubble. This may make the proces s of direct
+formation of inﬂationary baby universes with m−1(φ)≫H−1by the mecha-
+nism suggested above either strongly suppressed or even ent irely forbidden.
+In the last case, the estimates we made could be only used to ca lculate the
+probability of formation of small, sub-critical bubbles wi th the energy den-
+sity dominated by V(φ). (As we emphasized in the Introduction, this is an
+important problem by itself.) Then it will be necessary to co nsider further
+tunneling of a sub-critical bubble to a large exponentially expanding bubble
+along the lines of [20, 21], but without the use of the thin-wa ll approxima-
+tion. One may expect that the probability of such a double tun neling will be
+even smaller than the probability of each of such events sepa rately. In such
+case one may use our estimates as an upper bound on the probabi lity of the
+baby universe formation.
+However, this problem should not be exagerrated. First of al l, this prob-
+lem may not appear at all for the bubbles containing the ﬁeld φ∼Mpwith
+m−1(φ) being just few times larger than H−1. This is quite suﬃcient for a
+production of the universe of our type with a size l >1028cm [14]. Moreover,
+inﬂation of the interior of the bubble can push away incoming long-wave per-
+turbations only if inﬂation there already started . But in this case inﬂation
+itself produces long-wave perturbations by stretching the short-wave ones,
+which always exist in the interior of the bubble. This is the s ame mechanism
+which leads to appearance of extremely large long-wave pert urbations in the
+inﬂationary universe, eq. (20). Indeed, it is known that the total contribu-
+tion to < φ2>in de Sitter space from perturbations with the wavelength
+smaller than H−1is the same as in Minkowski space, and the contribution of
+long-wave perturbations with the wavelength larger than H−1is even greater
+20than in Minkowski space, due to the process of stretching of t he wavelengths
+mentioned above. This suggests that our estimate for the pro bability of bub-
+ble formation with φ∼Mp,m−1(φ)∼H−1has a good chance to be correct,
+whereas the probability of the universe formation with m−1(φ)∼H−1may
+be even somewhat higher than we expected.
+5 Discussion
+It is quite clear that the estimates which were obtained by th e stochastic
+approach to tunneling cannot serve as a substitute of a compl ete investigation
+by more regular methods; a much more detailed investigation is needed to
+prove that the process of the baby universe formation can act ually occur
+either in the empty Minkowski space or in a laboratory. Howev er, the use
+of Euclidean methods in quantum cosmology never have been ju stiﬁed and
+often give ambiguous results, whereas the Hamiltonian appr oach usually is
+extremely complicated and may have its own conceptual limit ations being
+applied to a system of many universes with diﬀerent “times”. Therefore, it
+would be very useful in the beginning to get at least partial u nderstanding
+of the processes we are going to study. This was the main goal o f the present
+investigation.
+Our estimates indicate that the process of the baby universe formation
+in Minkowski space is actually possible. Moreover, in the th eories with large
+coupling constants or with scalar particles with masses of t he order of Mp
+this process may be even quite probable. This process by itse lf does not
+lead to any spectacular events like formation of a large hole in the ground.
+However, as it was argued in [2] – [8], baby universe formatio n may lead to
+important modiﬁcations of the properties of our vacuum stat e.
+One should note also, that in the eternally existing self-re producing in-
+ﬂationary universe this process may occur even at the presen t time in those
+domains of the universe which are now in the inﬂationary phas e at a density
+close to the Planck density [37, 14]. Quantum jumps of the sca lar ﬁeld to
+the Planck density space-time foam, which regularly occur i n this scenario,
+and subsequent jumps of the ﬁeld back from the space-time foa m may be in-
+terpreted as a process of creation of new inﬂationary univer ses which are not
+21attached to our universe by any regions of classical space-t ime. Of course,
+one may argue that the distance from us to the inﬂationary dom ains with
+the Planck density is exponentially large. Moreover, these regions may form
+huge black holes and become eﬀectively disconnected from ou r part of the
+universe [38]. One should remember, however, that in the end we are going
+to investigate a non-local interaction of baby universes with our universe. It
+is important that the main part of the physical volume of a self-reproducing
+inﬂationary universe (in the synchronous coordinate syste m) is always oc-
+cupied by the ﬂuctuating scalar ﬁeld with V(φ)∼M4
+p[37, 14]. Moreover,
+it is clear that if the process of the baby universe formation may occur at
+all, it should be most eﬃcient at the density close to the Plan ck density.
+This suggests (see also [39, 40]) that an investigation of th e baby universe
+formation during inﬂation may be very important for the unde rstanding of
+the properties of the gravitational vacuum.
+The possibility that our own universe could appear as a resul t of decou-
+pling from another universe may have other interesting impl ications, some
+of which may be experimentally testable. For example, if our universe was
+created “from nothing”, then it typically appears in a state with a very large
+vacuum energy density, V(φ)∼M4
+p[16], and later it enters an inﬁnite pro-
+cess of self-reproduction [37]. In such case it does not seem possible to avoid
+the standard prediction of inﬂationary cosmology, Ω = 1. How ever, if our
+universe is created due to decoupling from another universe , then from our
+estimates of P(φ) it follows that in some theories the universe should be
+typically created in a state with a small value of V(φ), which only leads to
+a very short stage of inﬂation, if any.6In such case our universe may be
+relatively small, and it may have Ω /negationslash= 1. We do not think that this model is
+natural, but it is better to know that such a possibility may e xist. We men-
+tioned it here, since it illustrates a novel way to solve the h omogeneity and
+isotropy problem without much help of inﬂation: It is well kn own that only
+spherically symmetric bubbles are formed if the probabilit y of their creation
+is strongly suppressed.
+6This issue is not very trivial, since the expectation value o f thevolume of the inﬂa-
+tionary universe in the theories with V(φ)∼φn(without an account taken of its self-
+reproduction at very large φ) is proportional to P(φ)exp/parenleftBig
+12πφ2
+nM2
+p/parenrightBig
+[14], which may grow
+at large φeven if P(φ) decreases.
+22As for the possibility to create the universe in a laboratory , our estimates
+indicate that one would need a very good laboratory indeed. T he probability
+to create the universe in a laboratory is not totally negligi ble only in the
+chaotic inﬂation scenario, only in the theories with large c oupling constants
+or with scalar particles with masses of the order of Mp, and only if one can
+heat the system up to the temperature approaching Mp. However, the most
+ironical part of it is the question whether the new universe c an be useful for
+us in any way. Of course, one may just consider the problem of t he universe
+creation as an interesting theoretical problem to think abo ut in a spare time,
+but if the universe creation is entirely useless, one may ﬁnd other interesting
+problems to solve. Leaving aside the possibility to use the u niverse as a
+universal trash compactor, we were hardly able to ﬁnd any goo d reason to
+spend our time and energy for its creation.
+Indeed, one cannot “pump” energy from the new universe to our s, since
+this would contradict the energy conservation law. One cann ot jump into
+the new universe, since at the moment of its creation it is mic roscopically
+small and extremely dense, and later it decouples from our un iverse. One
+even cannot send any information about himself to those peop le who will
+live in the new universe. If one tries, so to say, to write down something “on
+the surface of the universe”, then, for the billions of billi ons years to come,
+the inhabitants of the new universe will live in a corner of on e letter. This
+is a consequence of a general rule: All local properties of th e universe after
+inﬂation do not depend on initial conditions at the moment of its formation.
+Very soon it becomes absolutely ﬂat, homogeneous and isotro pic, and any
+original message “imprinted” on the universe becomes unrea dable.
+We were able to ﬁnd only one exception to this rule. As we alrea dy
+mentioned, if chaotic inﬂation starts at a suﬃciently large energy density,
+then it goes forever, creating new and new inﬂationary domai ns. These
+domains contain matter in all possible “phase states” (or va cuum states),
+corresponding to all possible minima of the eﬀective potent ial and all types
+of compactiﬁcation compatible with inﬂation [37, 14]. Howe ver, if inﬂation
+starts at a suﬃciently low energy density, as is often the cas e with the uni-
+verses produced in a laboratory, then no such diversiﬁcatio n occurs; inﬂation
+at a relatively small energy density does not change the symm etry breaking
+pattern of the theory and the way of compactiﬁcation of space -time. There-
+23fore it seems that the only way to send a message to those who wi ll live in
+the universe we are planning to create is to encrypt it into th e properties
+of the vacuum state of the new universe, i.e. to the laws of the low-energy
+physics. Hopefully, one may achieve it by choosing a proper c ombination of
+temperature, pressure and external ﬁelds, which would lead to creation of
+the universe in a desirable phase state.
+The corresponding message can be long and informative enoug h only if
+there are extremely many ways of symmetry breaking and/or pa tterns of
+compactiﬁcation in the underlying theory. This is exactly t he case, e.g.,
+in the superstring theory, which was considered for a long ti me as one of
+the main problems of this theory. Another requirement to the informative
+message is that it should not be too simple. If, for example, m asses of all
+particles would be equal to each other, all coupling constan ts would be given
+by 1, etc., the corresponding message would be too short. Per haps, one may
+say quite a lot by creating a universe in a strange vacuum stat e with mp∼
+2000me,mW∼100mp,mX∼1013mW,Mp∼104mX. The stronger is the
+symmetry breaking, the more “unnatural” are relations betw een parameters
+of the theory after it, the more information the message may c ontain. Is
+it the reason why we must work so hard to understand strange fe atures of
+our beautiful and imperfect world? Does this mean that our un iverse was
+created not by a divine design but by a physicist hacker? If it is true, then
+our results indicate that he did a very diﬃcult job. Hopefull y, he did not
+make too many mistakes...
+6 Acknowledgements
+It is a pleasure to thank T. Banks, S. Coleman, A. Guth, J. Elli s, S. Hawking,
+M. Miji´ c, M. Sher and L. Susskind for valuable discussions a t diﬀerent stages
+of this investigation. This work was supported in part by NSF grant PHY-
+8612280.
+24References
+[1] A.D. Linde, Phys. Lett. B200 (1988) 272.
+[2] S. Coleman, Nucl. Phys. B307 (1988) 867.
+[3] T. Banks, Nucl. Phys. B309 (1988) 493.
+[4] S. Giddings and A. Strominger, Nucl. Phys. B307 (1988) 854.
+[5] S. Coleman, Nucl. Phys. B310 (1989) 643.
+[6] S. Giddings and A. Strominger, Nucl. Phys. B321 (1989) 481.
+[7] G.V. Lavrelashvili, V.A. Rubakov and P.G. Tinyakov, Mod . Phys. Lett.
+A3(1988) 1231;
+V.A. Rubakov and P.G. Tinyakov, Phys. Lett. 214B (1988) 334.
+[8] I. Klebanov, L. Susskind and T. Banks, Nucl. Phys. B317 (1989) 665.
+[9] A.D. Linde, Phys. Lett. B227 (1989) 352.
+[10] A.S. Goncharov, A.D. Linde and V.F. Mukhanov, Int. J. Mo d. Phys.
+A2(1987) 561.
+[11] S.W. Hawking, Phys. Lett. B195 (1987) 277; Phys. Rev. D37(1988)
+904.
+[12] G.V. Lavrelashvili, V.A. Rubakov and P.G. Tinyakov, JE TP Lett. 46
+(1987) 167; Nucl. Phys. B299 (1988) 757.
+[13] S.B. Giddings and A. Strominger, Nucl. Phys. B306 (1988) 890.
+[14] A.D. Linde, Particle Physics and Inﬂationary Cosmology (Har-
+wood, New York, 1990).
+[15] J.B. Hartle and S.W. Hawking, Phys. Rev. D28(1983) 2960.
+[16] A.D. Linde, JETP 60(1984) 211; Lett. Nuovo Cim. 39(1984) 401;
+Ya.B. Zeldovich and A.A. Starobinsky, Sov. Astron. Lett. 10(1984)
+135; V.A. Rubakov, Phys. Lett. 148B (1984) 280; A. Vilenkin, Phys.
+Rev.D30(1984) 549.
+25[17] A.D. Linde, in: Proceedings of the 1989 Summer School in High
+Energy Physics and Cosmology , eds. J. Pati, S. Randjbar-Daemi,
+E. Sezgin and Q. Shaﬁ (World Scientiﬁc, Singapore, 1989).
+[18] A.D. Linde, Physica Scripta T36(1991) 30.
+[19] E. Farhi and A. Guth, Phys. Lett. 183B (1987) 149.
+[20] W. Fischler, D. Morgan and J. Polchinski, Phys. Rev. D41(1990) 2638;
+Phys. Rev. D42(1990) 4042.
+[21] E. Farhi, A. Guth and J. Gueven, Nucl. Phys. B339 (1990) 417.
+[22] D. La and P.J. Steinhardt, Phys. Rev. Lett. 62(1989) 376.
+[23] A.D. Linde, Phys. Lett. B249 (1990) 18.
+[24] M.B. Voloshin, I.B. Kobzarev and L.B. Okun, Sov. J. Nucl . Phys. 20
+(1974) 644.
+[25] S. Coleman, Phys. Rev. D15(1977) 2929.
+[26] S. Fubini, Nuovo Cimento 34A(1976) 521.
+[27] A.D. Linde, Phys.Lett. B70(1977) 306; Phys. Lett. B100 (1981) 37;
+Nucl. Phys. B216 (1983) 421.
+[28] E. Witten, Nucl. Phys. B186 (1981) 412.
+[29] S. Hawking and I. Moss, Phys. Lett. B110 (1982) 35.
+[30] A.S. Goncharov and A.D. Linde, Sov. J. Part. Nucl. 17( 1986) 369.
+[31] S. Hawking and I. Moss, Nucl. Phys. B224 (1983) 180.
+[32] A.A. Starobinsky, in: Fundamental Interactions (MGPI Press,
+Moscow, 1984), p. 55; in: Current Topics in Field Theory, Quan-
+tum Gravity and Strings , Lecture Notes in Physics, eds. H.J. de
+Vega and N. Sanchez (Springer, Heidelberg 1986) 206, p. 107.
+[33] P. Arnold, Phys. Rev. D40(1989) 613.
+26[34] J. Ellis, A. Linde and M. Sher, Phys. Lett. B252 (1990) 203.
+[35] T.S. Bunch and P.C.W. Davies, Proc. R. Soc. A360 (1978) 117.
+[36] A. Vilenkin and L. Ford, Phys. Rev. D26(1982) 1231;
+A.D. Linde, Phys. Lett. 116B (1982) 335;
+A.A. Starobinsky, Phys. Lett. 117B (1982) 175.
+[37] A.D. Linde, Phys. Lett. 175B (1986) 395; Physica Scripta T15(1987)
+169; Physics Today 40(1987) 61.
+[38] A.D. Linde, Phys. Lett. B211 (1988) 29.
+[39] J.M. Cline, Nucl. Phys. B345 (1990) 281.
+[40] A. Mezhlumian, in preparation.
+27

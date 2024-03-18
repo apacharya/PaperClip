@@ -1,0 +1,439 @@
+arXiv:cs/9301115v1  [cs.DS]  1 Dec 1991Context-Free Multilanguages
+Donald E. Knuth
+Computer Science Department, Stanford University
+Inspired by ideas of Chomsky, Bar-Hillel, Ginsburg, and the ir coworkers, I spent the summer of
+1964 drafting Chapter 11 of a book I had been asked to write. Th e main purpose of that book,
+tentatively entitled The Art of Computer Programming , was to explain how to write compilers;
+compilation was to bethe subject of the twelfth and ﬁnal chap ter. Chapter 10 was called “Parsing,”
+and Chapter 11 was “The theory of languages.” I wrote the draf ts of these chapters in the order
+11, 10, 12, because Chapter 11 was the most fun to do.
+Terminology and notation for formal linguistics were in a gr eat state of ﬂux in the early 60s,
+so it was natural for me to experiment with new ways to deﬁne th e notion of what was then being
+called a “Chomsky type 2” or “ALGOL-like” or “deﬁnable” or “p hrase structure” or “context-free”
+language. As I wrote Chapter 11, I made two changes to the deﬁn itions that had been appearing
+in the literature. The ﬁrst of these was comparatively trivi al, although it simpliﬁed the statements
+and proofs of quite a few theorems: I replaced the “starting s ymbol”Sby a “starting set” of
+strings from which the language was derived. The second chan ge was more substantial: I decided
+to keep track of the multiplicity of strings in the language, so that a string would appear several
+times if there were several ways to parse it. This second chan ge was natural from a programmer’s
+viewpoint, because transformations on context-free gramm ars had proved to be most interesting in
+practice when they yielded isomorphisms between parse tree s.
+I never discussed these ideas in journal articles at the time , because I thought my book would
+soon be ready for publication. (I published an article about LR(k) grammars [4] only because
+it was an idea that occurred to me after ﬁnishing the draft of C hapter 10; the whole concept of
+LR(k) ws well beyond the scope of my book, as envisioned in 1964.) M y paper on parenthesis
+grammars [5] did make use of starting sets, but in my other rel evant papers [4, 6, 8] I stuck with
+the more conventional use of a starting symbol S. I hinted at the importance of multiplicity in the
+answer to exercise 4.6.3–19 of The Art of Computer Programming (written in 1967, published in
+1969 [7]): “The terminal strings of a noncircular context-f ree grammar form a multiset which is a
+set if and only if the grammar is unambiguous.” But as the year s went by and computer science
+continued its explosive growth, I found it more and more diﬃc ult to complete ﬁnal drafts of the
+early chapters, and the date for the publication of Chapter 1 1 kept advancing faster than the clock
+was ticking.
+Some of the early literature of context-free grammars refer red to “strong equivalence,” which
+meant that the multiplicities 0, 1, and ≥2 were preserved; if G1was strongly equivalent to G2, then
+G1was ambiguous iﬀ G2was ambiguous. But this concept did not become prominent eno ugh to
+deserve mention in the standard textbook on the subject [1].
+The occasion of Seymour Ginsburg’s 64th birthday has remind ed me that the simple ideas
+I played with in ‘64 ought to be aired before too many more year s go by. Therefore I would
+like to sketch here the basic principles I plan to expound in C hapter 11 of The Art of Computer
+Programming when it is ﬁnally completed and published—currently schedu led for the year 2008.
+My treatment will be largely informal, but I trust that inter ested readers will see easily how to
+make everything rigorous. If these ideas have any merit they may lead some readers to discover new
+results that will cause further delays in the publication of Chapter 11. That is a risk I’m willing to
+take.
+1. Multisets. Amultiset is like a set, but its elements can appear more than once. An el ement
+can in fact appear inﬁnitely often, in an inﬁnite multiset. T he multiset containing 3 a’s and 2 b’s
+can be written in various ways, such as {a,a,a,b,b },{a,a,b,a,b }, or{3·a,2·b}. IfAis a multiset
+1of objects and if xis an object, [ x]Adenotes the number of times xoccurs in A; this is either a
+nonnegative integer or ∞. We have A⊆Bwhen [x]A≤[x]Bfor allx; thusA=Bif and only
+A⊆BandB⊆A. A multiset is a setif no element occurs more than once, i.e., if [ x]A≤1 for
+allx. IfAandBare multisets, we deﬁne A∩,A∪B,A∩B,A⊎B, andA∩.Bby the rules
+[x]A∩= min(1,[x]);
+[x](A∪B) = max([ x]A,[x]B);
+[x](A∩B) = min([ x]A,[x]B);
+[x](A⊎B) = ([x]A)+([x]B);
+[x](A∩.B) = ([x]A)+([x]B).
+(We assume here that ∞plus anything is ∞and that 0 times anything is 0.) Two multisets A
+andBaresimilar, written A≍B, ifA∩=B∩; this means they would agree as sets, if multiplicities
+were ignored. Notice that A∪B≍A⊎BandA∩B≍A∩.B. All four binary operations are
+associative and commutative; several distributive laws al so hold, e.g.,
+(A∩B)∩.C= (A∩.C)∩(B∩.C).
+Multiplicities are taken into account when multisets appea r as index sets (or rather as “index
+multisets”). For example, if A={2,2,3,5,5,5}, we have
+{x−1|x∈A}={1,1,2,4,4,4};
+/summationdisplay
+x∈A(x−1) =/summationdisplay
+{x−1|x∈A}= 16;
+/unionmultidisplay
+x∈ABx=B2⊎B2⊎B3⊎B5⊎B5⊎B5.
+IfP(n) is the multiset of prime factors of n, we have/producttext{p|p∈P(n)}=nfor all positive
+integersn.
+IfAandBare multisets, we also write
+A+B={a+b|a∈A,b∈B},
+AB={ab|a∈A,b∈B};
+thereforeif Ahasmelements and Bhasnelements, bothmultisets A+BandABhavemnelements.
+Notice that
+[x](A+B) =/summationdisplay
+a∈A[x−a]B=/summationdisplay
+b∈B[x−b]A
+=/summationdisplay
+a∈A/summationdisplay
+b∈B[x=a+b]
+where [x=a+b] is 1 ifx=a+band 0 otherwise. Similar formulas hold for [ x](AB).
+It is convenient to let Abstand for the multiset
+Ab={ab|a∈A}=A{b};
+similarly, aBstands for {a}B. This means, for example, that 2 Ais not the same as A+A; a special
+notation, perhaps n∗A, is needed for the multiset
+ntimes/bracehtipdownleft/bracehtipupright/bracehtipupleft/bracehtipdownright
+A+···+A={a1+···+an|aj∈Afor 1≤j≤n}.
+2Similarly we need notations to distinguish the multiset
+AA={aa′|a,a′∈A}
+from the quite diﬀerent multiset
+{a2|a∈A}={aa|a∈A}.
+The product
+ntimes/bracehtipdownleft/bracehtipupright/bracehtipupleft/bracehtipdownright
+A ... A={a1... an|aj∈Afor 1≤j≤n}
+is traditionally written An, and I propose writing
+A↑n={an|a∈A}={a↑n|a∈A}
+on the rarer occasions when we need to deal with multisets of nth powers.
+Multilanguages. Amultilanguage is like a language, but its elements can appear more than once .
+Thus, if we regard a language as a set of strings, a multilangu age is a multiset of strings.
+Analphabet is a ﬁnite set of disinguishable characters. If Σis an alphabet, Σ∗denotes the
+set of all strings over Σ. Strings are generally represented by lowercase Greek lett ers; the empty
+string is called ǫ. IfAis any multilanguage, we write
+A0={ǫ},
+A∗=A0⊎A1⊎A2⊎ ···=/unionmultidisplay
+n≥0An;
+this will be a language (i.e., a set) if and only if the string e quationα1...αm=α′
+1...α′
+m′for
+α1,...,α m,α′
+1,...,α′
+m′∈Aimplies that m=m′and that αk=α′
+kfor 1≤k≤m. Ifǫ /∈A, every
+element of A∗has ﬁnite multiplicity; otherwise every element of A∗has inﬁnite multiplicity.
+Acontext-free grammar Ghasfourcomponentparts( T,N,S,P):Tisanalphabetof terminals ;
+Nis an alphabet of nonterminals , disjoint from T;Sis a ﬁnite multiset of starting strings over the
+alphabet V=T∪N; andPis a ﬁnite multiset of productions , where each production has the form
+A→θ,for some A∈Nandθ∈V∗.
+We usually use lowercase letters to represent elements of T, upper case letters to represent elements
+ofN. The starting strings and the righthand sides of all product ions are called the basic strings
+ofG. The multiset {θ|A→θ∈ P }is denoted by P(A); thus we can regard Pas a mapping
+fromNto multisets of strings over V.
+The productions are extended to relations between strings i n the usual way. Namely, if A→θ
+is inP, we say that αAωproduces αθωfor all strings αandωinV∗; in symbols, αAω→αθω. We
+also write σ→nτifσproduces τinnsteps; this means that there are strings σ0,σ1,...,σ ninV∗
+such that σ0=σ,σj−1→σjfor 1≤j≤n, andσn=τ. Furthermore we write σ→∗τifσ→nτ
+for some n≥0, andσ→+τifσ→nτfor some n≥1.
+AparseΠforGis an ordered forest in which each node is labeled with a symbo l ofV; each
+internal (non-leaf) node is also labeled with a production o fP. An internal node whose production
+label isA→v1...vlmust belabeled with the symbol A, and it must have exactly lchildren labeled
+v1,...,v l, respectively. If the labels of the root nodes form the strin gσand the labels of the leaf
+3nodes form the string τ, and if there are ninternal nodes, we say that Πparsesτasσinnsteps.
+There is an n-step parse of τasσif and only if σ→nτ.
+In many applications, we are interested in the number of pars es; so we let L(σ) be the multiset
+of all strings τ∈T∗such that σ→∗τ, with each τoccurring exactly as often as there are parses
+ofτasσ. This deﬁnes a multilanguage L(σ) for each σ∈V∗.
+Itis not diﬃcultto seethat themultilanguages L(σ) arecharacterized by thefollowing multiset
+equations:
+L(τ) ={τ},for allτ∈T∗;
+L(A) =/unionmultidisplay
+{L(θ)|θ∈ P(A)},for allA∈N;
+L(σσ′) =L(σ)L(σ′),for allσ,σ′∈V∗.
+According to the conventions outlined above, the stated for mula for L(A) takes account of mul-
+tiplicities, if any productions A→θare repeated in P. Parse trees that use diﬀerent copies of
+the same production are considered diﬀerent; we can, for exam ple, assign a unique number to each
+production, and use that number as the production label on in ternal nodes of the parse.
+Notice that the multiplicity of τinL(σ) is the number of parses of τasσ, not the number
+of derivations σ=σ0→ ··· → σn=τ. For example, if Pcontains just two productions {A→a,
+B→b}, thenL(AB) ={ab}corresponds to the unique parse
+A B
+| |
+a b
+although there are two derivation AB→Ab→abandAB→aB→ab.
+The multilanguages L(σ) depend only on the alphabets T∪Nand the productions P. The
+multilanguage deﬁned by G, denoted by L(G), is the multiset of strings parsable from the starting
+stringsS, counting multiplicity:
+L(G) =/unionmultidisplay
+{L(σ)|σ∈S}.
+Transformations. Programmers are especially interested in the way L(G) changes when Gis
+modiﬁed. For example, we often want to simplify grammars or p ut them into standard forms
+without changing the strings of L(G) or their multiplicities.
+A nonterminal symbol Aisuselessif it never occurs in any parses of strings in L(G). This
+happensiﬀ either L(A) =∅or thereare nostrings σ∈S,α∈V∗, andω∈V∗such that σ→∗αAω.
+We can remove all productions of Pand all strings of Sthat contain useless nonterminals, without
+changing L(G). A grammar is said to be reducedif every element of Nis useful.
+Several basic transformations can be applied to any grammar without aﬀecting the multi-
+language L(G). One of these transformations is called abbreviation : LetXbe a new symbol /∈V
+and letθbe any string of V∗. AddXtoNand add the production X→θtoP. Then we can
+replaceθbyXwherever θoccurs as a substring of a basic string, except in the product ionX→θ
+itself, without changing L(G); this follows from the fact that L(X) =L(θ). By repeated use of
+abbreviations we can obtain an equivalent grammar whose bas ic strings all have length 2 or less.
+The total length of all basic strings in the new grammar is les s than twice the total length of all
+basic strings in the original.
+Another simple transformation, sort of an inverse to abbrev iation, is called expansion . It
+replaces any basic string of the form αXωby the multiset of all strings αθωwhereX→θ. IfαXω
+is the right-hand side of some production A→αXω, this means that the production is replaced
+4inPby the multiset of productions {A→αθω|θ∈ P(X)}; we are essentially replacing the
+elementαXωofP(A) by the multiset {αθω|θ∈ P(X)}. Again, L(G) is not aﬀected.
+Expansion can cause some productions and/or starting strin gs to be repeated. If we had
+deﬁned context-free grammars diﬀerently, taking SandPto be sets instead of multisets, we would
+not be able to apply the expansion process in general without losing track of some parses.
+The third basic transformation, called elimination , deletes a given production A→θfromP
+and replaces every remaining basic string σbyD(σ), where D(σ) is a multiset deﬁned recursively
+as follows:
+D(A) ={A,θ};
+D(σ) ={σ},ifσdoes not include A;
+D(σσ′) =D(σ)D(σ′).
+Ifσhasnoccurrences of A, theseequations implythat D(σ) has2nelements. Elimination preserves
+L(G) because it simply removes all uses of the production A→θfrom parse trees.
+We can use elimination to make the grammar “ ǫ-free,” i.e., to remove all productions whose
+right-hand side is empty. Complications arise, however, wh en a grammar is also “circular”; this
+means that it contains a nonterminal Asuch that A→+A. The grammars of most practical
+interest are non-circular, but we need to deal with circular ity if we want to have a complete theory.
+It is easy to see that strings of inﬁnite multiplicity occur i n the multilanguage L(G) of a reduced
+grammar Gif and only if Gis circular.
+One way to deal with the problem of circularity is to modify th e grammar so that all the
+circularity is localized. Let N=Ni∪Nn, where the nonterminals of Ncare circular and those
+ofNnare not. We will construct a new grammar G′= (T,N′,S′∪S′′,P′) withL(G′) =L(G),
+for which all strings of the multilanguage L(S′) =/unionmultitext{L(σ)|σ∈S′}have inﬁnite multiplicity
+and all strings of L(S′′) =/unionmultitext{L(σ)|σ∈S′′}have ﬁnite multiplicity. The nonterminals of G′
+areN′=Nc∪Nn∪N′
+n∪N′′
+n, whereN′
+n={A′|A∈Nn}andN′′
+n={A′′|A∈Nn}are new
+nonterminal alphabets in one-to-one correspondence with Nn. The new grammar will be deﬁned
+in such a way that L(A) =L(A′)⊎L(A′′), where L(A′) contains only strings of inﬁnite multiplicity
+andL(A′′) contains only strings of ﬁnite multiplicity. For each σ∈Swe include the members of σ′
+inS′andσ′′inS′′, whereσ′andσ′′are multisets of strings deﬁned as follows: If σincludes a
+nonterminal in Nc, thenσ′={σ}andσ′′=∅. Otherwise suppose σ=α0A1α1...Anαn, where
+eachαk∈T∗and each Ak∈Nn; then
+σ′={α0A′′
+1α1...A′′
+k−1αk−1A′
+kαkAk+1...Anαn|1≤k≤n},
+σ′′={α1A′′
+1α1...A′′
+nαn}.
+(Intuitively, the leftmost use of a circular nonterminal in a derivation from σ′will occur in the de-
+scendants of A′
+k. No circular nonterminals will appear in derivations from σ′′.) The productions P′
+are obtained from Pby letting
+P′(A′) =/unionmultidisplay
+{σ′|σ∈ P(A)},
+P′(A′′) =/unionmultidisplay
+{σ′′|σ∈ P(A)}.
+This completes the construction of G′.
+We can also add a new nonterminal symbol Z, and two new productions
+Z→Z,
+Z→ǫ.
+5The resulting grammar G′′with starting strings ZS′⊎S′′again has L(G′′) =L(G), but now all
+strings with inﬁnite multiplicity are derived from ZS′. This implies that we can remove circularity
+from all nonterminals except Z, without changing any multiplicities; then Zwill be the only source
+of inﬁnite multiplicity.
+The details are slightly tricky but not really complicated. Let us remove accumulated primes
+from our notation, and work with a grammar G= (T,N,S,P) having the properties just assumed
+forG′′. We want Gto have only Zas a circular nonterminal. The ﬁrst step is to remove instanc es
+of co-circularity: If Gcontains two nonterminals AandBsuch that A→+BandB→+A, we
+can replace all occurrences of BbyAand delete BfromN. This leaves L(G) unaﬀected, because
+every string of L(G) that has at least one parse involving Bhas inﬁnitely many parses both before
+and after the change is made. Therefore we can assume that Gis a grammar in which the relations
+A→+BandB→+AimplyA=B.
+Now we can topologically sort the nonterminals into order A0,A1,...,A mso thatAi→+Aj
+only ifi≤j; letA0=Zbe the special, circular nonterminal introduced above. The grammar will
+be inChomsky normal form if all productions except those for Zhave one of the two forms
+A→BCorA→a,
+whereA,B,C∈Nanda∈T. Assumethat this condition holds for all productions whose left-hand
+side isAlfor some lstrictly greater than a given index k >0; we will show how to make it hold
+also forl=k, without changing L(G).
+Abbreviations will reduceany productions on the right-han d side to length 2 or less. Moreover,
+ifAk→v1v2forv1∈T, we can introduce a new abbreviation Ak→Xv2,X→v1; a similar
+abbreviation applies if v2∈T. Therefore systematic use of abbreviation will put all prod uctions
+withAkon the left into Chomsky normal form, except those of the form sAk→AlorAk→ǫ.
+By assumption, we can have Ak→Alonly ifl≥k. Ifl > k, the production Ak→Alcan be
+eliminated by expansion; it is replaced by Ak→θfor allθ∈ P(Al), and these productions all
+have the required form. If l=k, the production Ak→Akis redundant and can be dropped; this
+does not aﬀect L(G), since every string whose derivation uses Akhas inﬁnite multiplicity because
+it is derived from ZS′. Finally, a production of the form Ak→ǫcan be removed by elimination
+as explained above. This does not lengthen the right-hand si de of any production. But it might
+add new productions of the form Ak→Al(which are handled as before) or of the form Aj→ǫ.
+The latter can occur only if there was a production Aj→An
+kfor some n≥1; hence Aj→+Ak
+and we must have j≤k. Ifj=k, the new production Ak→ǫcan simply be dropped, because its
+presence merely gives additional parses to strings whose mu ltiplicity is already inﬁnite.
+Thisconstruction puts Ginto Chomsky normal form, except for thespecial production sZ→Z
+andZ→ǫ, without changing the multilanguage L(G). If we want to proceed further, we could
+deletetheproduction Z→Z; thisgivesagrammar G′withL(G′)≍L(G)andnocircularity. Andwe
+can then eliminate Z→ǫ, obtaining a grammar G′′in Chomsky normal form with L(G′′) =L(G′).
+IfGitself was originally noncircular, the special nontermina lZwas always useless so it need not
+have been introduced; our construction produces Chomsky no rmal form directly in such cases.
+The construction in the preceding paragraphs can be illustr ated by the following example
+grammar with terminal alphabet {a}nonterminal alphabet {A,B,C}, starting set {A}, and pro-
+ductions
+A→AAa, A →B, A→ǫ, B→CC, C→BB, C→ǫ.
+The nonterminals are Nn={A}andNc={B,C}; so we add nonterminals N′
+n={A′}and
+N′′
+n={A′′}, change the starting strings to
+S′={A′}, S′′={A′′},
+6and add the productions
+A′→A′Aa, A′→A′′A′a, A′→B;
+A′′→A′′A′′a, A′′→ǫ.
+Now we introduce Z, replace CbyB, and make the abbreviations X→AY,X′→A′y,X′′→A′′y,
+y→a. The current grammar has terminal alphabet {a}, nonterminal alphabet {Z,A,A′,A′′,B,
+X,X′,X′′,Y}in topological order, starting strings {ZA′,A′′}, and productions
+Z→ {Z,ǫ},
+A→ {AX,B,ǫ},
+A′→ {A′X,A′′X′,B},
+A′′→ {A′′X′′,ǫ},
+B→ {BB,BB,ǫ },
+plus those for X,X′,X′′,Yalready stated. Eliminating the production B→ǫyields new
+productions A→ǫ,A′→ǫ; eliminating A′′→ǫyields a new starting string ǫand new productions
+A′→X′,A′′→X′′,X′′→a. We eventually reach a near-Chomsky-normal grammar with st arting
+strings{Z,ZA′,ZA′′,A′′,ǫ}and productions
+Z→ {Z,ǫ},
+A→ {AX,AY,AY,BB,BB,a,a,a,a },
+A′→ {AY,A′X,A′Y,A′′X′,BB,BB,a,a,a },
+A′′→ {A′′X′′,A′′Y,a},
+B→ {BB,BB},
+X→ {AY,a,a},
+X′→ {A′Y,a},
+X′′→ {A′′Y,a},
+Y→ {a}.
+Once a grammar is in Chomsky normal form, we can go further and eliminate left-recursion.
+A nonterminal symbol Xis called left-recursive ifX→+Xωfor some ω∈V∗. The following
+transformation makes Xnon-left-recursive without introducing any additional le ft-recursive non-
+terminals: Introduce new nonterminals N′={A′|A∈N}, and new productions
+{B′→CA′|A→BC∈ P },
+{X→aA′|A→a∈ P},
+X′→ǫ,
+and delete all the original productions of P(X). It is not diﬃcult to prove that L(G′) =L(G) for
+the new grammar G′, because there is a one-to-one correspondence between pars e trees for the two
+grammars. The basic idea is to consider all “maximal left pat hs” of nodes labelled A1,...,A r,
+corresponding to the productions
+A1→A2B1→A3B2B1→ ··· → ArBr−1Br−2...B1→aBr−1Br−2...B1
+inG, whereA1labels either the root or the right subtree of A1’s parent in a parse for G. IfX
+occurs as at least one of the nonterminals {A1,...,A r}, sayAj=XbutAi/ne}ationslash=Xfori < j, the
+7corresponding productions of G′change the left path into a right path after branch j:
+A1→ ··· → AjBj−1...B1→aA′
+rBj−1...B1→aBr−1A′
+r−1Bj−1...B1
+→ ··· → aBr−1...BjA′
+jBj−1...B1
+→aBr−1...BjBj−1...B1.
+The subtrees for B1,...,B r−1undergo the same reversible transformation.
+Once left recursion is removed, it is a simple matter to put th e grammar into Greibach normal
+form[3], in which all productions can be written
+A→aA1...Ak, k≥0,
+fora∈TandA,A1,...,A k∈N. First we order the nonterminals X1,...,X nso thatXi→XjXk
+only when i < j; then we expand all such productions, for decreasing values ofi.
+Transduction. A general class of transformations that change one context- free language into
+another was discovered by Ginsburg and Rose [2], and the same ideas carry over to multilanguages.
+My notes from 1964 use the word “juxtamorphism” for a slightl y more general class of mappings;
+I don’t remember whether I coined that term at the time or foun d it in the literature. At any rate,
+I’ll try it here again and see if it proves to be acceptable.
+IfFis a mapping from strings over Tto multilanguages over T′, it is often convenient to write
+αFinstead of F(α) for the image of αunderF. A family of such mappings F1,...,F ris said to
+deﬁne ajuxtamorphism if, for all jand for all nonempty strings αandβ, the multilanguage ( αβ)Fj
+can be expressed as a ﬁnite multiset union of multilanguages having “bilinear form”
+αFkβFlorβFkαFl.
+The juxtamorphism family is called context-free if aFjandǫFjare context-free multilanguages for
+alla∈Tand allj.
+For example, many mappings satisfy this condition with r= 1. The reﬂection mapping,
+which takes every string α=a1...amintoαR=am...a1, obviously satisﬁes ( αβ)R=βRαR.
+The composition mapping, which takes α=a1...amintoαL=L(a1)...L(am) for any given
+multilanguages L(a) deﬁned for each a∈T, satisﬁes ( αβ)L=αLβL.
+The preﬁx mapping, which takes α=a1...amintoαP={ǫ,a1,a1a2,...,a 1...am}, is a
+member of a juxtamorphism family with r= 3: It satisﬁes
+(αβ)P=αPβE⊎αIβP,
+(αβ)I=αIβI,
+(αβ)E=αEβE,
+whereIis the identity and αE=ǫfor allα.
+Any ﬁnite-state transduction, which maps α=a1...aminto
+αT={f(q0,a1)f(q1,a2)...f(qm−1,am)f(qm,ǫ)|qj∈g(qj−1,aj)}
+is a special case of a juxtamorphism. Here q0,...,q mare members of a ﬁnite set of states Q, and
+gis a next-state function from Q×Tinto subsets of Q; the mapping ftakes each member of
+Q×(T∪ {ǫ}) into a context-free multilanguage. The juxtamorphism can be deﬁned as follows:
+8Givenq,q′∈Q, letαqq′be{f(q0,a1)...f(qm−1,am)|q0=qandqj∈g(qj−1,qj) andqm=q′}.
+Also letαqbeαTas described above, when q0=q. Then
+(αβ)qq′=/unionmultidisplay
+q′′∈Qαqq′′βq′′q′;
+(αβ)q=/unionmultidisplay
+q′∈Qαqq′βq′.
+The following extension of the construction by Ginsburg and Rose yields a context-free gram-
+marGjforL(G)Fj, given any juxtamorphism family F1,...,F r. The grammar Gcan be assumed in
+Chomsky normal form, except for a special nonterminal Zas mentioned above. The given context-
+free multilanguages aFjandǫFjhave terminal alphabet T′, disjoint nonterminal alphabets N(a,Fj)
+andN(ǫ,Fj), starting strings S(c,Fj)andS(ǫ,Fj), productions P(a,Fj)andP(ǫ,Fj). Each grammar Gj
+has all theseplusnonterminal symbols AFjfor alljand forall nonterminal AinG. Each production
+A→ainGleads to productions AFj→ {σ|σ∈S(a,Fj)}for allj. Each production A→BCinG
+leads to the productions for each AFjbased on its juxtamorphism representation. For example, in
+the case of preﬁx mapping above we would have the productions
+AP→BPCE, AP→BICP, AI→BICI, AE→BECE.
+The starting strings for Gjare obtained from those of Gin a similar way. Further details are left
+to the reader.
+In particular, one special case of ﬁnite-state transductio n mapsαinto{k·α}ifαis accepted
+in exactly kways by a ﬁnite-state automaton. (Let f(q,a) =a, and let f(q,ǫ) ={ǫ}or∅according
+asqis an accepting state or not.) The construction above shows t hat ifL1is a context-free
+multilanguage and L2is a regular multilanguage, the multilanguage L1∩.L2is context-free.
+Quantitative considerations. Since multisets carry more information than the underlying sets,
+we can expect that more computation will be needed in order to keep track of everything. From
+a worst-case standpoint, this is bad news. For example, cons ider the comparatively innocuous
+productions
+A0→ǫ, A 0→ǫ,
+A1→A0A0, A2→A1A1, ... , A n→An−1An−1,
+with starting string {An}. This grammar is almost in Chomsky normal form, except for th e
+elimination of ǫ. Butǫ-removal is rather horrible: There are 22kways to derive ǫfromAk. Hence
+we will have to replace the multiset of starting strings by {22n·ǫ}.
+Let us add furtherproductions Ak→akto the grammar above, for 0 ≤k≤n, and then reduce
+to Chomsky normal form by “simply” removing the two producti onsA0→ǫ. The normal-form
+productions will be
+Ak→/braceleftBig
+22k−2j+k−j·Aj−1Aj−1|1≤j≤k/bracerightBig/unionmultidisplay/braceleftBig
+22k−2j+k−j·aj|0≤j≤k/bracerightBig
+.
+Evidently if we wish to implement the algorithms for normal f orms, we should represent multisets
+of strings by counting multiplicities in binary rather than unary; even so, the results might blow
+up exponentially.
+Fortunately this is not a serious problem in practice, since most artiﬁcial languages have
+unambiguous or nearly unambiguous grammars; multipliciti es of reasonable grammars tend to be
+low. And we can at least prove that the general situation cann ot get much worse than the behavior
+9oftheexampleabove: Consideranoncirculargrammarwith nnonterminalsandwith mproductions
+having one of the four forms A→BC,A→B,A→a,A→ǫ. Then the process of conversion to
+Chomsky normal form does not increase the set of distinct rig ht-hand sides {BC}or{a}; hence
+the total number of distinct productions will be at most O(mn). The multiplicities of productions
+will be bounded by the number of ways to attach labels {1,...,m}to the nodes of the complete
+binary tree with 2n−1leaves, namely m2n−1.
+Conclusions. String coeﬃcients that correspond to the exact number of par ses are important
+in applications of context-free grammars, so it is desirabl e to keep track of such multiplicities as
+the theory is developed. This is nothing new when context-fr ee multilanguages are considered
+as algebraic power series in noncommuting variables, excep t in cases where the coeﬃcients are
+inﬁnite. But the intuition that comes from manipulations on trees, grammars, and automata nicely
+complements the purely algebraic approaches to this theory . It’s a beautiful theory that deserves
+to be remembered by computer scientists of the future, even t hough it is no longer a principal focus
+of contemporary research.
+Let me close by stating a small puzzle. Context-free multila nguages are obviously closed
+under⊎. But they are not closed under ∪, because for example the language
+{aibjcidk|i,j,k≥1}∪{aibjckdj|i,j,k≥1}
+is inherently ambiguous [9]. Is it true that L1∪L2is a context-free multilanguage whenever L1is
+context-free and L2is regular?
+References
+[1] Seymour Ginsburg, The Mathematical Theory of Context-Free Languages (New York: Mc-
+Graw-Hill, 1966).
+[2] Seymour Ginsburg and G. F. Rose, “Operations which prese rve deﬁnability in languages,”
+Journal of the ACM 10(1963), 175–195.
+[3] Sheila A. Greibach, “A new normal-form theorem for conte xt-free pharase structure gram-
+mars,”Journal of the ACM 12(1965), 42–52.
+[4] DonaldE. Knuth, “Onthetranslation oflanguages fromle fttoright,” InformationandControl
+8(1965), 607–639.
+[5] Donald E. Knuth, “A characterization of parenthesis lan guages,” Information and Control 11
+(1967), 269–289.
+[6] Donald E. Knuth, “Semantics of context-free languages, ”Mathematical Systems Theory 2
+(1968), 127–145. Errata, Mathematical Systems Theory 5(1971), 95–96.
+[7] Donald E. Knuth, The Art of Computer Programming , Vol. 2: Seminumerical Algorithms
+(Reading, Mass.: Addison-Wesley, 1969).
+[8] Donald E. Knuth, “Top-down syntax analysis,” Acta Informatica 1(1971), 79–110.
+[9] Rohit J. Parikh, “On context-free languages,” Journal of the ACM 13(1966), 570–581.
+10
